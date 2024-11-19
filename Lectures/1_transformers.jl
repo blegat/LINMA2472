@@ -34,7 +34,7 @@ Given a sequence of ``n_\text{ctx}`` past vectors ``x_{-1}, \ldots, x_{-n_\text{
 
 #### What about Language Models ?
 
-Given "past text", predict the "following text". Who to turn text into vectors of ``\mathbb{R}^n`` ?
+Given "past text", predict the "following text". How to turn text into vectors of ``\mathbb{R}^n`` ?
 """
 
 # ╔═╡ ccf2dc71-b883-497a-bc58-29ffaf9ea4ad
@@ -72,7 +72,7 @@ frametitle("Increasing length of \"past text\"")
 
 # ╔═╡ ed5b5702-4cca-4116-a70f-4a562178f490
 md"""
-> **Challenging tradeoff**: Encode text so to **increase** length of "past text" while keeping ``n_\text{ctx}`` and ``n`` **small** enough.
+> **Challenging tradeoff**: Encode text to **increase** length of "past text" while keeping ``n_\text{ctx}`` and ``n`` **small** enough.
 
 Length of "past text" increases with vocabulary size ``n_\text{voc}`` and context window ``n_\text{ctx}``.
 """
@@ -103,10 +103,10 @@ html"What difference do you expect with respect to the previous model ?",
 md"""
 The products ``W_1C`` and ``DW_d`` have the same dimension as the matrices ``W_1`` and ``W_d`` of the previous model. So the expressive power of the model was not improved while we increased the number of parameters and we potentially made the loss function "even more nonconvex".
 
-If the hidden dimension (i.e., the number of rows of ``C`` / columns of ``W_1`` or the number of rows of ``W_d`` / columns of ``D``) is much smaller than ``d_\text{emb}``, then it's faster to compute ``W_1(Cx)``. Moreover, we are forcing the matrix ``W_1C`` to have a low rank compared the model without ``C``. This means less expressivness but it might also prevent overfitting so the case isn't so clear.
+If the hidden dimension (i.e., the number of rows of ``C`` / columns of ``W_1`` or the number of rows of ``W_d`` / columns of ``D``) is much smaller than ``d_\text{emb}``, then it's faster to compute ``W_1C(x)``. Moreover, we are forcing the matrix ``W_1C`` to have a low rank compared the model without ``C``. This means less expressivness but it might also prevent overfitting so the case isn't so clear.
 
 The case become clearer when the input embedding ``C`` is shared between more than one character, i.e., ``n_\text{ctx} > 1``.
-Same for the output embedding ``D`` is useful when it is not preceded by a linear with which it can just be merged.
+Same for the output embedding, ``D`` is useful when it is not preceded by a linear with which it can just be merged.
 """)
 
 # ╔═╡ 6aa690e9-389f-4398-abae-b95060db4d90
