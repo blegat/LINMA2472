@@ -103,7 +103,7 @@ html"What difference do you expect with respect to the previous model ?",
 md"""
 The products ``W_1C`` and ``DW_d`` have the same dimension as the matrices ``W_1`` and ``W_d`` of the previous model. So the expressive power of the model was not improved while we increased the number of parameters and we potentially made the loss function "even more nonconvex".
 
-If the hidden dimension (i.e., the number of rows of ``C`` / columns of ``W_1`` or the number of rows of ``W_d`` / columns of ``D``) is much smaller than ``d_\text{emb}``, then it's faster to compute ``W_1(Cx)``. Moreover, we are forcing the matrix ``W_1C`` to have a low rank compared the model without ``C``. This means less expressivness but it might also prevent overfitting so the case isn't so clear.
+If the hidden dimension (i.e., the number of rows of ``C`` / columns of ``W_1`` or the number of rows of ``W_d`` / columns of ``D``) is much smaller than ``n_\text{voc}``, then it's faster to compute ``W_1(Cx)``. Moreover, we are forcing the matrix ``W_1C`` to have a low rank compared the model without ``C``. This means less expressivness but it might also prevent overfitting so the case isn't so clear.
 
 The case become clearer when the input embedding ``C`` is shared between more than one character, i.e., ``n_\text{ctx} > 1``.
 Same for the output embedding, ``D`` is useful when it is not preceded by a linear with which it can just be merged.
