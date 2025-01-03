@@ -262,7 +262,7 @@ frametitle("Self-Attention")
 
 # ╔═╡ 4b61363d-87c9-4755-8286-44df34e9dd6a
 qa(
-html"Is the order between the token taken into account by the model ?",
+html"Is the order between the tokens taken into account by the model ?",
 md"""
 No. Since the same matrices ``W_j^V``, ``W_j^K`` and ``W_j^Q`` multiply the different position. The **position** information is completely **lost**!
 """
@@ -281,7 +281,7 @@ frametitle("Layer normalization")
 frametitle("Feed-Forward network")
 
 # ╔═╡ af8194a1-a358-4cf7-b446-6b377cb76687
-md"The feed-forward network is implemented **independently** for the output of each query so each query can be processed independently through each **layer**. The next layer allows each queries to then look at the results of the result of the previous layer for **past** (because of the mask) queries."
+md"The feed-forward network is implemented **independently** for the output of each query so each query can be processed independently through each **layer**. The next layer allows each queries to then look at the results of the previous layer for **past** (because of the mask) queries."
 
 # ╔═╡ 79e6c4a8-cc1e-40cc-bb09-e9a7a9a8e475
 frametitle("Transformer variations")
@@ -516,7 +516,7 @@ end
 # ╔═╡ d1ba8da3-add8-4dbe-9ebf-9a32fa5cd5dd
 HAlign(
 md"""
-*Pre-activation* for residual neural networks introduced in $(cite("he2016Identity")) an used in GPT-2 $(cite("radford2019Language")). See figure on the right.
+*Pre-activation* for residual neural networks introduced in $(cite("he2016Identity")) and used in GPT-2 $(cite("radford2019Language")). See figure on the right.
 
 *Rotary Positional Encoding* $(cite("su2023RoFormer")) replaces
 ``W^K(Cx_i + p_i)`` and ``W^Q(Cx_i + p_i)``
@@ -659,7 +659,7 @@ end 300 400))
 HAlign(
 md"""
 *Cross-Attention* between
-* values and keys ``E(CX + P)`` where ``E`` is the encoder, and ``X`` is the matrix of input token
+* values and keys ``E(CX + P)`` where ``E`` is the encoder, and ``X`` is the matrix of input tokens
 * query ``Q`` depending on past output ``Y`` and number of layers already applied
 ```math
 \text{MultiHead}(E(CX + P), E(CX + P), Q)
