@@ -86,7 +86,7 @@ From Tweedie's formula, ``\epsilon`` is estimated to be
 ```math
 \begin{multline}
 y_{k+1} = y_k + \delta_k \nabla_y \log f_Y(y_k) + \sqrt{2\delta_k} w_k\\
-\text{where } \epsilon_k \sim \mathcal{N}(0, 1)
+\text{where } \delta_k \sim \mathcal{N}(0, 1)
 \end{multline}
 ```
 
