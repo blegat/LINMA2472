@@ -122,7 +122,7 @@ md"""
 If ``\sigma`` is too small then the support of ``X + \sigma \mathcal{E}`` may not cover the whole state space → inaccurate ``\epsilon_\theta(y)`` in these parts. More formally, the loss is the Fisher divergence:
 ```math
 \mathbb{E}[\|\epsilon_\theta(y) + \sigma \nabla_y \log f_Y(y)\|^2]
-= \int_y f_Y(y) \|s_\theta(y) + \sigma \nabla_y \log f_Y(y)\|^2 \,\text{d}y
+= \int_y f_Y(y) \|\epsilon_\theta(y) + \sigma \nabla_y \log f_Y(y)\|^2 \,\text{d}y
 ```
 so it is inaccurate for ``y`` such that ``f_Y(y)`` is too small. [Image source](https://yang-song.net/blog/2021/score/).
 """
