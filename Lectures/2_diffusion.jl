@@ -271,11 +271,11 @@ md"""
 
 The Maximum Likelyhood Estimator (MLE) maximizes the following sum over our datapoints ``x`` with its ELBO:
 ```math
-\sum_x \log(f_X(x)) \ge \sum_x -D((Y|X = x) \parallel Z) + \mathbb{E}[\log(f_{X|Z}(x|Y))]]
+\sum_x \log(f_X(x)) \ge \sum_x -D((Y|X = x) \parallel Z) + \mathbb{E}[\log(f_{X|Z}(x|Y))]
 ```
 So the MLE minimizes the loss
 ```math
--\mathbb{E}[\log(f_{X|Z}(x|Y))]]
+-\mathbb{E}[\log(f_{X|Z}(x|Y))]
 ```
 with the KL-regularizer
 ```math
@@ -401,7 +401,7 @@ md"""
 ```
 Evidence Lower-Bound with ``Y = X + \sigma \mathcal{E}`` and ``Z`` such that ``X = D(E(Z))`` $(cite("ho2020Denoising")):
 ```math
--\log(f_X(x)) \le \mathbb{E}[-\log(f_{X|Z}(x|Y))]] + D((Y|X = x) \parallel Z)
+-\log(f_X(x)) \le \mathbb{E}[-\log(f_{X|Z}(x|Y))] + D((Y|X = x) \parallel Z)
 ```
 """
 
