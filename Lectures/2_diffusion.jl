@@ -266,7 +266,7 @@ frametitle("Variational AutoEncoders (VAEs)")
 # ╔═╡ 23f3de75-0617-4232-bb71-bd9f3e355a1e
 md"""
 * We want to learn the distribution of our data represented by the random variable ``X``.
-* The encoder maps a data point ``x`` to a Gaussian distribution ``Y \sim \mathcal{N}(E_\mu(x), E_{\Sigma}(x)))`` over the latent space
+* The encoder maps a data point ``x`` to a Gaussian distribution ``Y \sim \mathcal{N}(E_\mu(x), E_{\Sigma}(x))`` over the latent space
 * The decoder maps a latent variable ``z \sim Z`` to a data point ``D(z)``
 
 The Maximum Likelyhood Estimator (MLE) maximizes the following sum over our datapoints ``x`` with its ELBO:
