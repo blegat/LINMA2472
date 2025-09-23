@@ -284,26 +284,26 @@ end
 end
 
 # ╔═╡ 8deca676-8a0b-41eb-b7a0-4d65e1158b0b
-qa(md"Apply this to ``f_3(s_1, s_2) = s_1 + s_2``, ``f_1(x) = x`` and ``f_2(x) = x^2``",
+qa(md"Apply this to ``f_3(s_1, s_2) = s_1 + s_2``, ``f_1(x) = x`` and ``f_2(x) = x^2`` at ``x = 3``",
 hbox([
 	md"""
 #### Forward
 
 * ``\partial x / \partial x = 1``
 * ``\partial s_1 / \partial x = 1 \cdot 1 = 1``
-* ``\partial s_2 / \partial x = 2 \cdot 1 = 2``
-* ``\partial s_3 / \partial x = 1 \cdot 1 \cdot 1 + 1 \cdot 2 = 3``
+* ``\partial s_2 / \partial x = 6 \cdot 1 = 6``
+* ``\partial s_3 / \partial x = 1 \cdot 1 + 1 \cdot 6 = 7``
 """,
 	Div(html" ", style = Dict("flex-grow" => "1")),
 md"""
 #### Reverse
 
-* Initialize ``\partial s_3 / \partial s_1 = \partial s_3 / \partial s_2 = \partial s_3 / \partial x = 1``
+* Initialize ``\partial s_3 / \partial s_1 = \partial s_3 / \partial s_2 = \partial s_3 / \partial x = 0``
 * First part: ``\partial s_3/\partial s_1 \mathrel{\raise{0.19ex}{\scriptstyle+}} = 1``
   - ``\partial s_3 / \partial x \mathrel{\raise{0.19ex}{\scriptstyle+}} = 1 \cdot 1``
-* Second part: ``\partial s_3/\partial s_1 \mathrel{\raise{0.19ex}{\scriptstyle+}} = 1``
-  - ``\partial s_3 / \partial x \mathrel{\raise{0.19ex}{\scriptstyle+}} = 1 \cdot 2``
-* The result is ``\partial s_3 / \partial x = 3``.
+* Second part: ``\partial s_3/\partial s_2 \mathrel{\raise{0.19ex}{\scriptstyle+}} = 1``
+  - ``\partial s_3 / \partial x \mathrel{\raise{0.19ex}{\scriptstyle+}} = 1 \cdot 6``
+* The result is ``\partial s_3 / \partial x = 7``.
 """]))
 
 # ╔═╡ 83ef86e0-bcfb-42ee-a574-16758606423a
@@ -362,7 +362,7 @@ Tables = "~1.12.1"
 PLUTO_MANIFEST_TOML_CONTENTS = """
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.11.6"
+julia_version = "1.11.7"
 manifest_format = "2.0"
 project_hash = "454bbdb433ccd04ea0ce0cfdbe47b2a75376c831"
 
