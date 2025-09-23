@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.20.18
+# v0.20.13
 
 using Markdown
 using InteractiveUtils
@@ -118,8 +118,11 @@ $$t_3 = \frac{\partial s_3}{\partial s_1} t_1 + \frac{\partial s_3}{\partial s_2
 * Given ``r_3 = \partial s_K / \partial s_3``
   - **Add** ``r_3 \cdot (\partial s_3 / \partial s_1) `` to  ``r_1``
   - **Add** ``r_3 \cdot (\partial s_3 / \partial s_2) `` to  ``r_2``
-""",
+"""
 ])
+
+# ╔═╡ 69c08fab-c317-462c-817c-3f841a8a0941
+md"""When using automatic differentiation, don't forget that we must always evaluate the derivatives. For the following example we choose to evaluate it in ``x=3``"""
 
 # ╔═╡ 885bc5c9-aefc-4d8a-a4da-6062c64eaa41
 md"## Forward tangents"
@@ -276,26 +279,26 @@ end
 end
 
 # ╔═╡ 8deca676-8a0b-41eb-b7a0-4d65e1158b0b
-qa(md"Apply this to ``f_3(s_1, s_2) = s_1 + s_2``, ``f_1(x) = x`` and ``f_2(x) = x^2``",
+qa(md"Apply the automatic differentiation to ``s_3=f_3(s_1, s_2) = s_1 + s_2``, with ``s_1=f_1(x) = x`` and ``s_2=f_2(x) = x^2``",
 hbox([
 	md"""
 #### Forward
 
 * ``\partial x / \partial x = 1``
-* ``\partial s_1 / \partial x = 1 \cdot 1 = 1``
-* ``\partial s_2 / \partial x = 2 \cdot 1 = 2``
-* ``\partial s_3 / \partial x = 1 \cdot 1 \cdot 1 + 1 \cdot 2 = 3``
+* ``\partial s_1 / \partial x = 1 \vert_{x=3} \cdot 1 = 1``
+* ``\partial s_2 / \partial x = 2x \vert_{x=3} \cdot 1 = 6``
+* ``\partial s_3 / \partial x = 1 \vert_{x=3} \cdot 1 + 1 \vert_{x=3} \cdot 6 = 7``
 """,
 	Div(html" ", style = Dict("flex-grow" => "1")),
 md"""
 #### Reverse
 
-* Initialize ``\partial s_3 / \partial s_1 = \partial s_3 / \partial s_2 = \partial s_3 / \partial x = 1``
+* Initialize ``\partial s_3 / \partial s_1 = \partial s_3 / \partial s_2 = \partial s_3 / \partial x = 0``
 * First part: ``\partial s_3/\partial s_1 \mathrel{\raise{0.19ex}{\scriptstyle+}} = 1``
-  - ``\partial s_3 / \partial x \mathrel{\raise{0.19ex}{\scriptstyle+}} = 1 \cdot 1``
+  - ``\partial s_3 / \partial x \mathrel{\raise{0.19ex}{\scriptstyle+}} = 1 \cdot 1 \vert_{x=3}``
 * Second part: ``\partial s_3/\partial s_1 \mathrel{\raise{0.19ex}{\scriptstyle+}} = 1``
-  - ``\partial s_3 / \partial x \mathrel{\raise{0.19ex}{\scriptstyle+}} = 1 \cdot 2``
-* The result is ``\partial s_3 / \partial x = 3``.
+  - ``\partial s_3 / \partial x \mathrel{\raise{0.19ex}{\scriptstyle+}} = 1 \cdot 2x \vert_{x=3}``
+* The result is ``\partial s_3 / \partial x = 7``.
 """]))
 
 # ╔═╡ 83ef86e0-bcfb-42ee-a574-16758606423a
@@ -365,7 +368,7 @@ Tables = "~1.12.1"
 PLUTO_MANIFEST_TOML_CONTENTS = """
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.11.7"
+julia_version = "1.11.3"
 manifest_format = "2.0"
 project_hash = "454bbdb433ccd04ea0ce0cfdbe47b2a75376c831"
 
@@ -1316,7 +1319,7 @@ version = "0.3.27+1"
 [[deps.OpenLibm_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "05823500-19ac-5b8b-9628-191a04bc5112"
-version = "0.8.5+0"
+version = "0.8.1+2"
 
 [[deps.OpenSSL]]
 deps = ["BitFlags", "Dates", "MozillaCACerts_jll", "OpenSSL_jll", "Sockets"]
@@ -2181,6 +2184,7 @@ version = "1.9.2+0"
 # ╟─cc2a09a1-c949-4b09-816b-b49ba7ca8983
 # ╟─277bd2ce-fa7f-4288-be8a-0ddd8f23635c
 # ╟─fa5dba01-a3f7-452c-877e-352d578ecf51
+# ╟─69c08fab-c317-462c-817c-3f841a8a0941
 # ╟─8deca676-8a0b-41eb-b7a0-4d65e1158b0b
 # ╟─885bc5c9-aefc-4d8a-a4da-6062c64eaa41
 # ╟─d2b8fa5c-c604-4093-a2dd-5c95f2eaa676
