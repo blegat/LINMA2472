@@ -4,7 +4,7 @@ Two tasks are currently available on INGInious (https://inginious.info.ucl.ac.be
 
 - [FirstOrder](https://inginious.info.ucl.ac.be/course/LINMA2472/FirstOrder) → corresponding to the first part of the project
 
-- SecondOrder → corresponding to the second part of the project
+- [SecondOrder](https://inginious.info.ucl.ac.be/course/LINMA2472/SecondOrder) → corresponding to the second part of the project
 
 You are required to submit only your file reverse_vectorized.jl.
 
