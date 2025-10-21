@@ -1,0 +1,12 @@
+#!/bin/bash
+getinput "SecondOrder" > reverse_vectorized.jl
+julia runtests.jl &> error.txt
+code=$?
+if [ $code -eq 0 ]; then
+	feedback-result success
+    feedback-msg -m "Accepted :)"
+    feedback-custom score $(julia bench.jl)
+else
+    feedback-result failed
+    cat error.txt | rst-code | feedback-msg
+fi
