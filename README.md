@@ -24,8 +24,8 @@ See the README in each subfolder for more details and troubleshooting:
 |       | 27/10/2025 | 🎃            |          |                        |
 | S7    | 03/11/2025 | Kernel        | Calbert  |                        |
 | S8    | 10/11/2025 | Kernel        | Calbert  |                        |
-| S9    | 17/11/2025 | Kernel        | Calbert  | 🏁 HW1                 |
-| S10   | 24/11/2025 | Diffusion     | Legat    | 🚀 HW2                 |
-| S11   | 01/12/2025 | Diffusion     | Legat    |                        |
-| S12   | 08/12/2025 | Diff Opt      | Legat    |                        |
-| S13   | 15/12/2025 | Sparse AD     |          | 🏁 HW2                 |
+| S9    | 17/11/2025 | Kernel        | Calbert  |                        |
+| S10   | 24/11/2025 | Diffusion     | Legat    | 🏁 HW1                 |
+| S11   | 01/12/2025 | Diffusion     | Legat    | 💬 Oral HW1            |
+| S12   | 08/12/2025 | Diff Opt      | Legat    | 💬 Oral HW1            |
+| S13   | 15/12/2025 | Sparse AD     |          | 💬 Oral HW1            |
