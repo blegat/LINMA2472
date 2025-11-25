@@ -1,11 +1,17 @@
 #!/bin/bash
 getinput "reverse_vectorized" > reverse_vectorized.jl
 julia runtests.jl &> error.txt
-code=$?
-if [ $code -eq 0 ]; then
-	feedback-result success
+if [ $? -eq 0 ]; then
+    feedback-result success
     feedback-msg -m "Accepted :)"
-    feedback-custom score $(julia bench.jl)
+    julia bench.jl &> bench.txt
+    if [ $? -eq 0 ]; then
+        feedback-msg -m "Tests passed :)"
+        feedback-custom score $(cat bench.txt)
+    else
+        echo "Test passed but benchmark failed with above error" >> bench.txt
+        cat bench.txt | rst-code | feedback-msg
+    fi
 else
     feedback-result failed
     cat error.txt | rst-code | feedback-msg
