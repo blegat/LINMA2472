@@ -70,6 +70,5 @@ function relu_softmax(W, X)
 end
 
 function cross_entropy(Y_est, Y)
-    @assert size(Y_est) == size(Y)
     return -sum(log.(Y_est) .* Y) / size(Y, 1)
 end
