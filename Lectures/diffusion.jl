@@ -215,15 +215,20 @@ Given a matrix of data ``X``, consider the SVD ``X = U\Sigma V``:
 \begin{align}
 \|X - DEX\|_F^2
 & =
-\|U \Sigma V - DEU \Sigma V\|_F^2\\
+\|U \Sigma V^\top - DEU \Sigma V^\top\|_F^2\\
 & =
-\|U \Sigma - DEU \Sigma\|_F^2\\
+\|\Sigma - U^\top DEU \Sigma\|_F^2\\
 \end{align}
 ```
 The matrix ``DE`` can be any matrix of rank equal to the dimension of the latent space.
 So the optimal solution is ``DE = U\text{Diag}(\mathbf{1}_r, \mathbf{0}_{n-r})U^\top``
 where ``r`` is the dimension of the latent space.
-This is similar to the PCA ``DE = U\text{Diag}(\sigma_1, \ldots, \sigma_r, \mathbf{0}_{n-r})V^\top`` which is the minimizer of ``\|X - DE\|_F^2`` so Auto-Encoder can be thought of as a nonlinear generalization of PCA.
+
+This is similar to the PCA ``D\hat{E} = U\text{Diag}(\sigma_1, \ldots, \sigma_r, \mathbf{0}_{n-r})V^\top`` which is the minimizer of ``\|X - D\hat{E}\|_F^2``.
+More precisely, given the optimal rank-``r`` solution ``D = U_{:,1:r}, \hat{E} = \text{Diag}(\sigma_1, \ldots, \sigma_r)U_{:,1:r}^\top``,
+an optimal solution of the linear auto-encoder can be obtained with ``E = \hat{E}X^\dagger`` when ``X^\dagger = V\Sigma^{-1}U^\top``.
+
+In view of this, an Auto-Encoder can be thought of as a nonlinear generalization of PCA.
 """
 )
 
@@ -245,7 +250,7 @@ md"""
   \mathbb{E}[\log(f_{Y|X}(Y|x)) - \log(f_{X|Z}(x|Y)) - \log(f_{Z}(Y))]\\
   & \qquad + \log(f_{X}(x))\\
   & =
-  D((Y|X = x) \parallel Z) - \mathbb{E}[\log(f_{X|Z}(x|Y))]\\
+  D_\text{KL}((Y|X = x) \parallel Z) - \mathbb{E}[\log(f_{X|Z}(x|Y))]\\
   & \qquad + \log(f_{X}(x))
 \end{align}
 ```
@@ -253,10 +258,32 @@ md"""
 )
 
 # ╔═╡ d821d85c-74ae-44d0-909b-02d3099d8201
-md"``\mathcal{L}(x)`` is a **lower bound** to ``\log(f_X(x))`` as the Kullback-Leibler divergence ``D_\text{KL}((Y|X = x) \parallel (Z | X = x))`` is always nonnegative."
+md"""
+``\mathcal{L}(x)`` is a **lower bound** to ``\log(f_X(x))`` as the Kullback-Leibler divergence ``D_\text{KL}((Y|X = x) \parallel (Z | X = x))`` is always nonnegative.
+
+In the context of VAEs, ``Z`` represents the actual latent variable and ``Y`` represents the estimated random variables so ``D_\text{KL}((Y|X = x) \parallel (Z | X = x))`` is a measure of the error made by our estimator.
+"""
 
 # ╔═╡ 0788ac02-dab8-4ddd-9130-2a632d8d3685
 frametitle("Gaussian ELBO")
+
+# ╔═╡ 76eaa13b-e76a-4e31-b702-78fd9694a059
+frametitle("Monte-Carlo sampling")
+
+# ╔═╡ 228d70f8-dd36-48a6-9c95-b2744c5b20b6
+md"""
+This can be approximated using Monte-Carlo given ``L`` samples ``\epsilon_1, \ldots \epsilon_L`` from the distribution ``\mathcal{N}(0, I)`` as
+```math
+\mathbb{E}[\log(f_{X|Z}(x|Y))]] \approx \frac{1}{L} \sum_{i=1}^L \log(f_{X|Z}(x|E_\mu(x) + \epsilon_i \odot E_\sigma(x))).
+```
+In the simpler case where ``D_\sigma(z) = \mathbf{1}``, we recognize the classical L2 norm:
+```math
+\begin{align}
+\mathbb{E}[\log(f_{X|Z}(x|Y))]]
+& \approx -\frac{\log(2\pi)}{2}+\frac{1}{L}\sum_{i=1}^L\|x - D_\mu(E_\mu(x) + \epsilon_i \odot E_\sigma(x))\|_2^2.
+\end{align}
+```
+"""
 
 # ╔═╡ 8f51a619-d0ad-42d2-bac9-acb9eab7cccb
 frametitle("Variational AutoEncoders (VAEs)")
@@ -269,15 +296,15 @@ md"""
 
 The Maximum Likelyhood Estimator (MLE) maximizes the following sum over our datapoints ``x`` with its ELBO:
 ```math
-\sum_x \log(f_X(x)) \ge \sum_x -D((Y|X = x) \parallel Z) + \mathbb{E}[\log(f_{X|Z}(x|Y))]
+\sum_x \log(f_X(x)) \ge \sum_x -D_\text{KL}((Y|X = x) \parallel Z) + \mathbb{E}[\log(f_{X|Z}(x|Y))]
 ```
 So the MLE minimizes the loss
 ```math
--\mathbb{E}[\log(f_{X|Z}(x|Y))]
+-\mathbb{E}[\log(f_{X|Z}(x|Y))].
 ```
 with the KL-regularizer
 ```math
-D((Y|X = x) \parallel Z)
+D_\text{KL}((Y|X = x) \parallel Z)
 ```
 """
 
@@ -366,25 +393,26 @@ For any random variables ``X``, ``Y`` and ``Z``, we have
 ```
 where the *evidence lower bound* $(cite("kingma2013AutoEncoding"))
 ```math
-\mathcal{L}(x) = -D((Y|X = x) \parallel Z) + \mathbb{E}[\log(f_{X|Z}(x|Y))]]
+\mathcal{L}(x) = -D_\text{KL}((Y|X = x) \parallel Z) + \mathbb{E}[\log(f_{X|Z}(x|Y))]]
 ```
 """
 
 # ╔═╡ 76643525-2649-48b9-9d09-6d7dcef6e355
 md"""
-Consider two deterministic functions ``E_\mu, E_\sigma : \mathbb{R}^n \to \mathbb{R}^n``.
-Suppose ``Z, \mathcal{E} \sim \mathcal{N}(0, I)`` and ``Y = E_\mu(X) + \mathcal{E} \odot E_\sigma(X)``.
+Consider two deterministic functions ``E_\mu, E_\sigma : \mathbb{R}^n \to \mathbb{R}^r`` and ``D_\mu, D_\sigma : \mathbb{R}^r \to \mathbb{R}^n``.
+Suppose ``X = D_\mu(Z) + \mathcal{E}_1 \odot D_\sigma(Z)`` and ``Y = E_\mu(X) + \mathcal{E}_2 \odot E_\sigma(X)`` with ``\mathcal{E}_1, \mathcal{E}_2 \sim \mathcal{N}(0, I)``.
 We have (see $(cite("kingma2013AutoEncoding", "Appendix B")) for a proof):
 ```math
-2D((Y|X = x) \parallel Z) = \|E_\mu(X)\|_2^2 + \|E_\sigma(X)\|_2^2 - n - \sum_{i=1}^n \log(E_\sigma(X))_i^2)
+2D_\text{KL}((Y|X = x) \parallel Z) = \|E_\mu(X)\|_2^2 + \|E_\sigma(X)\|_2^2 - r - \sum_{i=1}^r \log((E_\sigma(X))_i^2)
 ```
 For the second part of the ELBO, we have
 ```math
-\mathbb{E}[\log(f_{X|Z}(x|Y))]] = \mathbb{E}[\log(f_{X|Z}(x|E_\mu(x) + \mathcal{E} \odot E_\sigma(x)))]].
-```
-This can be approximated using Monte-Carlo given ``L`` samples ``\epsilon_1, \ldots \epsilon_L`` from the distribution ``\mathcal{N}(0, I)`` as
-```math
-\mathbb{E}[\log(f_{X|Z}(x|Y))]] \approx \frac{1}{L} \sum_{i=1}^L \mathbb{E}[\log(f_{X|Z}(x|E_\mu(x) + \epsilon_i \odot E_\sigma(x)))]].
+\begin{align}
+& \mathbb{E}[\log(f_{X|Z}(x|Y))]]\\
+& = \mathbb{E}[\log(f_{X|Z}(x|E_\mu(x) + \mathcal{E}_2 \odot E_\sigma(x)))]]\\
+& = \mathbb{E}[\log(f_{\mathcal{E}_1}(\text{Diag}(D_\sigma(E_\mu(x) + \mathcal{E}_2 \odot E_\sigma(x)))^{-1} (x - D_\mu(E_\mu(x) + \mathcal{E}_2 \odot E_\sigma(x)))))]]\\
+& = -\frac{\log(2\pi)}{2}+\mathbb{E}[\|\text{Diag}(D_\sigma(E_\mu(x) + \mathcal{E}_2 \odot E_\sigma(x)))^{-1} (x - D_\mu(E_\mu(x) + \mathcal{E}_2 \odot E_\sigma(x)))\|_2^2]].
+\end{align}
 ```
 """
 
@@ -1601,6 +1629,8 @@ version = "4.1.0+0"
 # ╟─0788ac02-dab8-4ddd-9130-2a632d8d3685
 # ╟─76643525-2649-48b9-9d09-6d7dcef6e355
 # ╟─0708fa36-bf99-44e3-a69e-991ad521d34b
+# ╟─76eaa13b-e76a-4e31-b702-78fd9694a059
+# ╟─228d70f8-dd36-48a6-9c95-b2744c5b20b6
 # ╟─8f51a619-d0ad-42d2-bac9-acb9eab7cccb
 # ╟─23f3de75-0617-4232-bb71-bd9f3e355a1e
 # ╟─ca8b4f75-f8c7-4384-80ae-fbbdba85bd46
