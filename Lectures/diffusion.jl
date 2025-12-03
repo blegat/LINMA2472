@@ -210,7 +210,7 @@ The *code* (aka *latent variable*) ``z = E(x)`` typically has smaller size compa
 # ╔═╡ 40f21927-1d88-41f4-b55d-6b81ca2ec211
 qa(md"What is the solution if ``E`` and ``D`` were linear (i.e. matrices) ?",
 md"""
-Given a matrix of data ``X``, consider the SVD ``X = U\Sigma V``:
+Given a matrix of data ``X``, consider the SVD ``X = U\Sigma V^\top``:
 ```math
 \begin{align}
 \|X - DEX\|_F^2
@@ -238,6 +238,8 @@ frametitle("Evidence Lower BOund (ELBO)")
 # ╔═╡ 8e39960f-ab0a-4103-bd6b-00e779333b01
 qa(md"Proof",
 md"""
+> Reminder: ``D_\text{KL}(A \parallel B) = \sum_{a \in \text{Dom}(A)} f_A(a) \log \frac{f_A(a)}{f_B(a)} = \mathbb{E}[\log f_A(A) - \log f_B(A)]``
+
 ```math
 \begin{align}
   D_\text{KL}((Y|X = x) \parallel (Z | X = x))
@@ -280,7 +282,7 @@ In the simpler case where ``D_\sigma(z) = \mathbf{1}``, we recognize the classic
 ```math
 \begin{align}
 \mathbb{E}[\log(f_{X|Z}(x|Y))]]
-& \approx -\frac{\log(2\pi)}{2}+\frac{1}{L}\sum_{i=1}^L\|x - D_\mu(E_\mu(x) + \epsilon_i \odot E_\sigma(x))\|_2^2.
+& \approx -\frac{\log(2\pi)}{2}+\frac{1}{L}\sum_{i=1}^L\|x - D_\mu(E_\mu(x) + \epsilon_i\|_2^2.
 \end{align}
 ```
 """
