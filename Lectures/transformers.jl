@@ -285,7 +285,7 @@ md"## Multi-Head Attention"
 qa(md"Is ``W^O`` needed if ``h = 1`` ?", md"No, if ``h = 1``, we can merge ``W^OW_1^V`` into a new ``W_1^V``.")
 
 # ╔═╡ d05e6f0f-0081-4fb6-91e9-ac2f58beda4a
-md"# Encoder-only transformer"
+md"# Decoder-only transformer"
 
 # ╔═╡ a3efd921-eb14-4901-9d6c-800cc812fe02
 md"## Self-Attention"
