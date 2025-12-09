@@ -4,18 +4,6 @@
 using Markdown
 using InteractiveUtils
 
-# This Pluto notebook uses @bind for interactivity. When running this notebook outside of Pluto, the following 'mock version' of @bind gives bound variables a default value (instead of an error).
-macro bind(def, element)
-    #! format: off
-    return quote
-        local iv = try Base.loaded_modules[Base.PkgId(Base.UUID("6e696c72-6542-2067-7265-42206c756150"), "AbstractPlutoDingetjes")].Bonds.initial_value catch; b -> missing; end
-        local el = $(esc(element))
-        global $(esc(def)) = Core.applicable(Base.get, el) ? Base.get(el) : iv(el)
-        el
-    end
-    #! format: on
-end
-
 # ╔═╡ f1ba3d3c-d0a5-4290-ab73-9ce34bd5e5f6
 using PlutoUI, PlutoUI.ExperimentalLayout, HypertextLiteral, PlutoTeachingTools
 
@@ -25,6 +13,13 @@ using PlutoUI, PlutoUI.ExperimentalLayout, HypertextLiteral, PlutoTeachingTools
 $(PlutoTeachingTools.ChooseDisplayMode())
 $(PlutoUI.TableOfContents(depth=1))
 """)
+
+# ╔═╡ c9603b16-113b-4e05-8517-d814b0879ab8
+md"""
+# Implicit function theorem
+
+> *In a sense, the implicit function theorem can be thought as the mother theorem, as it can be used to prove envelope theorems, the adjoint state method and the inverse function theorem.* Section 11.6 of [The Elements of Differentiable Programming book](https://diffprog.github.io/)
+"""
 
 # ╔═╡ b23a4c1d-cf35-42e6-b286-7fbcdddfd424
 md"""
@@ -39,20 +34,43 @@ Then
 * For ``\omega`` in a neighborhood of ``f(w_0)``, ``f^{-1}`` is ``C^2`` and ``\partial f^{-1}(\omega) = (\partial f(f^{-1}(w)))^{-1}``
 """
 
-# ╔═╡ cdb7ce06-af9f-4f29-8949-af63a46cc528
-md"Multivariate ? $(@bind multivariate PlutoUI.CheckBox())"
+# ╔═╡ 114b2603-81da-4a5c-baa1-4d95f456aeb3
+function ift(case, F_def, ift_inv, ift_eq)
+	return md"""
+## Implicit function theorem ($case case)
 
-# ╔═╡ ede6ae0b-2ee1-4d76-94e6-689a4dc27303
-F_def = ifelse(multivariate,
-	md"``F: \mathcal{W} \times \Lambda \to \mathcal{W}``",
+Assume
+* $F_def
+* ``(w_0, \lambda_0)`` such that ``F(w_0, \lambda_0) = 0`` and $(ift_inv.content[].content)
+* ``F(w, \lambda)`` is ``C^2`` in a neighborhood ``\mathcal{U}`` of ``(w_0, \lambda_0)``
+
+Then there exists a neighborhood ``\mathcal{V} \subseteq \mathcal{U}`` there exists ``w^\star(\lambda)`` such that
+$ift_eq
+"""
+end;
+
+# ╔═╡ 2b30ae9e-e537-4ad1-a25e-570709c7d517
+ift(
+	"univariate",
 	md"``F: \mathbb{R} \times \mathbb{R} \to \mathbb{R}``",
-);
+	md"``\partial_1 F(w_0, \lambda_0) \neq 0``",
+	md"""
+```math
+\begin{align}
+w^\star(\lambda_0) & = w_0\\
+F(w^\star(\lambda), \lambda) & = 0,
+\qquad\qquad\qquad \forall(w^\star(\lambda),\lambda)\in \mathcal{V}\\
+\partial w^\star(\lambda) & = -\frac{\partial_2 F(w^\star(\lambda), \lambda)}{\partial_1 F(w^\star(\lambda), \lambda)}
+\end{align}
+```
+""",
+)
 
-# ╔═╡ 4ba9b74b-86be-4c6b-b561-87557803b3ba
-ift_inv = ifelse(multivariate, md"``\partial_1 F(w_0, \lambda_0)`` is invertible", md"``\partial_1 F(w_0, \lambda_0) \neq 0``");
-
-# ╔═╡ 92aa7c33-2748-4c76-9729-67e5d92761ab
-ift_eq = ifelse(multivariate,
+# ╔═╡ c1efb93f-efd8-487a-94d2-aa7ecedb61b8
+ift(
+	"multivariate",
+	md"``F: \mathcal{W} \times \Lambda \to \mathcal{W}``",
+	md"``\partial_1 F(w_0, \lambda_0)`` is invertible",
 	md"""
 ```math
 \begin{align}
@@ -63,50 +81,7 @@ F(w^\star(\lambda), \lambda) & = 0,
 \end{align}
 ```
 """,
-	md"""
-```math
-\begin{align}
-w^\star(\lambda_0) & = w_0\\
-F(w^\star(\lambda), \lambda) & = 0,
-\qquad\qquad\qquad \forall(w^\star(\lambda),\lambda)\in \mathcal{V}\\
-\partial w^\star(\lambda) & = -\frac{\partial_2 F(w^\star(\lambda), \lambda)}{\partial_1 F(w^\star(\lambda), \lambda)}
-\end{align}
-```
-""",
-);
-
-# ╔═╡ 84e2b753-5c15-450d-b07d-a537c8d8d3d5
-md"""
-## Implicit function theorem
-
-Assume
-* $F_def
-* ``(w_0, \lambda_0)`` such that ``F(w_0, \lambda_0) = 0`` and $(ift_inv.content[].content)
-* ``F(w, \lambda)`` is ``C^2`` in a neighborhood ``\mathcal{U}`` of ``(w_0, \lambda_0)``
-
-Then there exists a neighborhood ``\mathcal{V} \subseteq \mathcal{U}`` there exists ``w^\star(\lambda)`` such that
-$ift_eq
-"""
-
-# ╔═╡ b242e133-6145-44e0-ab35-4dba6daa36b6
-md"""
-## Implicit function theorem
-
-Assume
-* ``F: \mathbb{R} \times \mathbb{R} \to \mathbb{R}``
-* ``(w_0, \lambda_0)`` such that ``F(w_0, \lambda_0) = 0`` and ``\partial_1 F(w_0, \lambda_0) \neq 0``
-* ``F(w, \lambda)`` is ``C^2`` in a neighborhood of ``(w_0, \lambda_0)``
-* ``F`` is ``C^2`` in a neighborhood ``\mathcal{U}`` of ``(w_0, \lambda_0)``
-
-Then there exists a neighborhood ``\mathcal{V} \subseteq \mathcal{U}`` there exists ``w^\star(\lambda)`` such that
-```math
-\begin{align}
-w^\star(\lambda_0) & = w_0\\
-\forall(w^\star(\lambda),\lambda)\in V, \quad F(w^\star(\lambda), \lambda) & = 0\\
-\partial w^\star(\lambda) & = -\frac{\partial_2 F(w^\star(\lambda), \lambda)}{\partial_1 F(w^\star(\lambda), \lambda)}
-\end{align}
-```
-"""
+)
 
 # ╔═╡ b16f6225-1949-4b6d-a4b0-c5c230eb4c7f
 md"## Utils"
@@ -211,7 +186,29 @@ The Jacobian ``\partial w^\star(\lambda)`` is the derivative of the second compo
 By the inverse function theorem
 ```math
 \partial f^{-1}(\lambda, 0)
-=
+= (\partial f(\lambda, w))^{-1}
+= \begin{bmatrix}
+   I & 0\\
+   \partial_2 F(w, \lambda) & \partial_1 F(w, \lambda)
+\end{bmatrix}^{-1}
+```
+We can then use the following result:
+   
+> [**Schur complement**](https://en.wikipedia.org/wiki/Schur_complement): If ``A`` is an invertible matrix then for any matrices ``B, C, D`` of compatible dimension:
+> ```math
+> \begin{bmatrix}
+> A & B\\
+> C & D
+> \end{bmatrix}^{-1} = \begin{bmatrix}
+> \sim & \sim\\
+> -(M/A)^{-1}CA^{-1} & \sim
+> \end{bmatrix}
+> ```
+> where the *Schur complement* of the block ``A`` is ``M/A = D - CA^{-1}B``.
+
+In our case the Schur complement of the block ``I`` is ``\partial f(\lambda, w)/I = \partial_2 F(w, \lambda)``, this means that
+```math
+\partial w^\star(\lambda) = \partial_1 F(w, \lambda)^{-1}\partial_2 F(w, \lambda).
 ```
 """)
 
@@ -608,15 +605,13 @@ version = "17.7.0+0"
 
 # ╔═╡ Cell order:
 # ╟─40baa108-eb68-433f-9917-ac334334f198
+# ╟─c9603b16-113b-4e05-8517-d814b0879ab8
 # ╟─b23a4c1d-cf35-42e6-b286-7fbcdddfd424
 # ╟─f1f1a354-cecc-4fb2-8d1e-096f51e4cf88
-# ╟─84e2b753-5c15-450d-b07d-a537c8d8d3d5
-# ╟─cdb7ce06-af9f-4f29-8949-af63a46cc528
+# ╟─2b30ae9e-e537-4ad1-a25e-570709c7d517
+# ╟─c1efb93f-efd8-487a-94d2-aa7ecedb61b8
 # ╟─f22bfdc8-c25d-4844-98e3-08d05533ba56
-# ╟─ede6ae0b-2ee1-4d76-94e6-689a4dc27303
-# ╟─4ba9b74b-86be-4c6b-b561-87557803b3ba
-# ╟─92aa7c33-2748-4c76-9729-67e5d92761ab
-# ╟─b242e133-6145-44e0-ab35-4dba6daa36b6
+# ╟─114b2603-81da-4a5c-baa1-4d95f456aeb3
 # ╟─9d883700-0959-4ccd-be50-9ee316a6077e
 # ╟─b16f6225-1949-4b6d-a4b0-c5c230eb4c7f
 # ╠═f1ba3d3c-d0a5-4290-ab73-9ce34bd5e5f6
