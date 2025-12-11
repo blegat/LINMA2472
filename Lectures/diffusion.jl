@@ -232,6 +232,21 @@ In view of this, an Auto-Encoder can be thought of as a nonlinear generalization
 """
 )
 
+# ╔═╡ f50e757b-2f0d-458c-a577-3de499d9ba14
+md"""
+## Variational Auto-Encoder
+
+We add artificial noise to improve learning:
+```math
+\mathbb{E}[\|X - D(E_\mu(X) + \mathcal{E} \odot E_\sigma(X))\|_2^2]
+```
+An insightful way to model this is as follows.
+* Assume our dataset come from a distribution ``X`` that is obtained from a latent space ``Z`` using a decoder ``X = D(Z)``.
+* If we knew the latent variable ``z``, we would search for a decoder ``D`` that maximizes ``\mathbb{E}[\log(f_{X|Z}(x|z))]``.
+* Since we do not know ``z``, we make an estimate of ``y`` using an encoder ``Y = E(X)``.
+* The validity of these encoder and decoder models can now be measure with a Maximum Likelihood Estimator that search for the encoder and decoder models that maximizes ``\mathbb{E}[\log(f_X(X))]``.
+"""
+
 # ╔═╡ 6d63c708-6f10-4a21-b57b-a9bd138b5c8c
 frametitle("Evidence Lower BOund (ELBO)")
 
@@ -294,7 +309,7 @@ frametitle("Variational AutoEncoders (VAEs)")
 md"""
 * We want to learn the distribution of our data represented by the random variable ``X``.
 * The encoder maps a data point ``x`` to a Gaussian distribution ``Y \sim \mathcal{N}(E_\mu(x), E_{\Sigma}(x))`` over the latent space
-* The decoder maps a latent variable ``z \sim Z`` to a data point ``D(z)``
+* The decoder maps a latent variable ``z \sim Z`` to a the Gaussian distribution ``\mathcal{N}(D_\mu(z), D_\sigma(Z))``
 
 The Maximum Likelyhood Estimator (MLE) maximizes the following sum over our datapoints ``x`` with its ELBO:
 ```math
@@ -427,7 +442,11 @@ md"""
 \text{Denoising Auto-Encoder} & & D(E(X + \sigma \mathcal{E}))\\
 \end{align}
 ```
-Evidence Lower-Bound with ``Y = X + \sigma \mathcal{E}`` and ``Z`` such that ``X = D(E(Z))`` $(cite("ho2020Denoising")):
+The goal of the diffusion model is, given a noisy image ``Y = X + \sigma \mathcal{E}`` and ``\sigma``, to find the noise ``\mathcal{E}``.
+The denoising Auto-Encoder instead attempts to find the original image ``X``.
+At the limit ``\sigma \to 0``, the denoising Auto-Encoder ``D(E(X + \sigma \mathcal{E}))`` is a classical Auto-Encoder, hence the name.
+
+To train the denoising Auto-Encoder, we can use the Evidence Lower-Bound with ``Y = X + \sigma \mathcal{E}`` and ``Z`` such that ``X = D(E(Z))`` $(cite("ho2020Denoising")):
 ```math
 -\log(f_X(x)) \le \mathbb{E}[-\log(f_{X|Z}(x|Y))] + D((Y|X = x) \parallel Z)
 ```
@@ -1623,6 +1642,7 @@ version = "4.1.0+0"
 # ╟─d3792580-6a04-4934-ad5a-cd054a5b4421
 # ╟─de5ddee9-7a4c-4ae7-b6e2-ccdf1a406919
 # ╟─40f21927-1d88-41f4-b55d-6b81ca2ec211
+# ╟─f50e757b-2f0d-458c-a577-3de499d9ba14
 # ╟─6d63c708-6f10-4a21-b57b-a9bd138b5c8c
 # ╟─0e01c57f-65b1-480c-a258-9a76513ac8d6
 # ╟─8e39960f-ab0a-4103-bd6b-00e779333b01

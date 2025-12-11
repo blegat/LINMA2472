@@ -7,6 +7,9 @@ using InteractiveUtils
 # ╔═╡ f1ba3d3c-d0a5-4290-ab73-9ce34bd5e5f6
 using PlutoUI, PlutoUI.ExperimentalLayout, HypertextLiteral, PlutoTeachingTools
 
+# ╔═╡ 64250438-9ba6-44f7-b4a0-fcd5d72f05e5
+using LinearAlgebra, RowEchelon
+
 # ╔═╡ 40baa108-eb68-433f-9917-ac334334f198
 @htl("""
 <p align=center style=\"font-size: 40px;\">Implicit Differentiation</p><p align=right><i>Benoît Legat</i></p>
@@ -158,6 +161,43 @@ A^{-1} B t_{k-1}
 ```
 """
 
+# ╔═╡ e9fd46e4-78ce-4cba-b20f-1c997c80e842
+md"""
+## Interlude: Repeated linear system solve
+
+We need to solve the system ``At_k = Bt_{k-1}`` once by forward tangent, so once by entry of ``s_0`` in case of forward-mode AD.
+We may also pre-compute ``A^{-1}B`` by solving one linear system by column of ``B``.
+In both case, we need to solve several linear system with the **same** ``A`` matrix.
+"""
+
+# ╔═╡ fa019742-c473-4f1d-86ce-a795edbd1f92
+A = [1 2; 3 4]
+
+# ╔═╡ d0c4b33b-63e2-49dd-aff2-d9bd1bbb4661
+b = [5, 6]
+
+# ╔═╡ 1de5d608-dc91-4f4a-995b-3dcfad38b81c
+md"Classical Gaussian elimination finds the solution for one vector only, even though the same row operations would be applied for different vectors."
+
+# ╔═╡ c3b59d62-144e-4541-9007-19187f2fea1c
+rref([A b])
+
+# ╔═╡ 64c4e42c-e444-44f1-8318-befed7d11bb5
+md"""
+## Solution: precompute the LU decomposition
+
+LU decomposition remember the row operations to make ``U`` triangular in the ``L`` matrix.
+"""
+
+# ╔═╡ 17f3594f-b568-416f-9a19-38bfd4d99dd0
+F = lu(A)
+
+# ╔═╡ 6f8714a1-1372-42f4-9b51-da93ef2ed4c9
+md"""As ``L`` and ``U`` are triangular, solving the linear systems ``LUx = b`` can now be done by solving two simple linear systems (and permutation in case of pivoting)
+1. ``Lc = b``
+2. ``Ux = c``
+"""
+
 # ╔═╡ b19451b4-2a9e-4c25-888e-d72a13eb7589
 md"## Interlude: Adjoint of inverse"
 
@@ -230,6 +270,8 @@ We have
 \end{bmatrix}
 \end{align}
 ```
+
+See [OptNet: Differentiable optimization as a layer in neural networks](https://dl.acm.org/doi/abs/10.5555/3305381.3305396) for a generalization to quadratic objective.
 """
 
 # ╔═╡ b16f6225-1949-4b6d-a4b0-c5c230eb4c7f
@@ -299,6 +341,7 @@ md"""## Acknowledgements and further readings
 
 * Example from $(img("https://upload.wikimedia.org/wikipedia/commons/8/86/Google_JAX_logo.svg", :height => 16)) : [Implicit function differentiation of iterative implementations](https://docs.jax.dev/en/latest/advanced-autodiff.html#example-implicit-function-differentiation-of-iterative-implementations)
 * Chapter 11 of [The Elements of Differentiable Programming book](https://diffprog.github.io/)
+* See [DiffOpt.jl](https://github.com/jump-dev/DiffOpt.jl) for implicit differentiation of $(img("https://jump.dev/assets/jump-logo-with-text.svg", :height => 20)) optimization problems.
 """
 
 # ╔═╡ 81deb227-a822-4857-a584-a51cc8ff51f4
@@ -421,7 +464,7 @@ In our case the Schur complement of the block ``I`` is ``\partial f(\lambda, w)/
 """)
 
 # ╔═╡ 528326dd-1344-4baa-9edd-5b09f63669dd
-qa(md"How can we solve the linear system with only access to the matrix-vector product of the linear map ``\partial_1 F(w^\star(\lambda), \lambda)`` ? (aka matrix-free inversion)", md"""
+qa(md"Can we also solve the linear system with only access to the matrix-vector product of the linear map ``\partial_1 F(w^\star(\lambda), \lambda)`` ? (aka matrix-free inversion)", md"""
 If the matrix is positive semidefinite, we can use the [Conjugate Gradient method](https://en.wikipedia.org/wiki/Conjugate_gradient_method). Otherwise, [GMRES](https://en.wikipedia.org/wiki/Generalized_minimal_residual_method) or [BiCGSTAB](https://en.wikipedia.org/wiki/Biconjugate_gradient_stabilized_method) are options.
 """)
 
@@ -462,9 +505,11 @@ DifferentiationInterface = "a0c0ee7d-e4b9-4e03-894e-1c5f64a51d63"
 FiniteDifferences = "26cc04aa-876d-5657-8c51-4c34ba976000"
 ForwardDiff = "f6369f11-7733-5829-9624-2563aa707210"
 HypertextLiteral = "ac1192a8-f4b3-4bfe-ba22-af5b92cd3ab2"
+LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 Mooncake = "da2b9cff-9c12-43a0-ae48-6db2b0edb7d6"
 PlutoTeachingTools = "661c6b06-c737-4d37-b85c-46df65de6f69"
 PlutoUI = "7f904dfe-b85e-4ff6-b463-dae2292396a8"
+RowEchelon = "af85af4c-bcd5-5d23-b03a-a909639aa875"
 
 [compat]
 DifferentiationInterface = "~0.7.12"
@@ -474,6 +519,7 @@ HypertextLiteral = "~0.9.5"
 Mooncake = "~0.4.182"
 PlutoTeachingTools = "~0.4.6"
 PlutoUI = "~0.7.75"
+RowEchelon = "~0.2.1"
 """
 
 # ╔═╡ 00000000-0000-0000-0000-000000000002
@@ -482,7 +528,7 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.12.2"
 manifest_format = "2.0"
-project_hash = "1a1c4bdcb66b1a0e8d08fe7bf6892712df85696c"
+project_hash = "6770a17a88126d8ad47eab013341e29ee9fa3688"
 
 [[deps.ADTypes]]
 git-tree-sha1 = "8b2b045b22740e4be20654175cc38291d48539db"
@@ -1080,6 +1126,12 @@ git-tree-sha1 = "48f038bfd83344065434089c2a79417f38715c41"
 uuid = "708f8203-808e-40c0-ba2d-98a6953ed40d"
 version = "1.4.2"
 
+[[deps.RowEchelon]]
+deps = ["LinearAlgebra"]
+git-tree-sha1 = "f479526c4f6efcbf01e7a8f4223d62cfe801c974"
+uuid = "af85af4c-bcd5-5d23-b03a-a909639aa875"
+version = "0.2.1"
+
 [[deps.SHA]]
 uuid = "ea8e919c-243c-51af-8825-aaa63cd721ce"
 version = "0.7.0"
@@ -1286,6 +1338,14 @@ version = "17.7.0+0"
 # ╟─bb4e1c20-1d24-494a-82ae-433e8ba56110
 # ╟─b6f76d2d-3389-4dec-9aef-b7feeb7e0793
 # ╟─0fc437e3-37cc-4905-8bf9-3e8b9155d6e8
+# ╟─e9fd46e4-78ce-4cba-b20f-1c997c80e842
+# ╠═fa019742-c473-4f1d-86ce-a795edbd1f92
+# ╠═d0c4b33b-63e2-49dd-aff2-d9bd1bbb4661
+# ╟─1de5d608-dc91-4f4a-995b-3dcfad38b81c
+# ╠═c3b59d62-144e-4541-9007-19187f2fea1c
+# ╟─64c4e42c-e444-44f1-8318-befed7d11bb5
+# ╟─17f3594f-b568-416f-9a19-38bfd4d99dd0
+# ╟─6f8714a1-1372-42f4-9b51-da93ef2ed4c9
 # ╟─528326dd-1344-4baa-9edd-5b09f63669dd
 # ╟─b19451b4-2a9e-4c25-888e-d72a13eb7589
 # ╟─f369cf71-6eea-4aaa-b75d-79c2629ce88e
@@ -1299,6 +1359,7 @@ version = "17.7.0+0"
 # ╠═f1ba3d3c-d0a5-4290-ab73-9ce34bd5e5f6
 # ╠═66a8b541-b06f-403a-a45d-23461a2c539b
 # ╠═878bec4d-9d8a-4e92-9817-ddcd95bd8d35
+# ╠═64250438-9ba6-44f7-b4a0-fcd5d72f05e5
 # ╟─cbfc0129-9361-4edb-a467-1456a1f3aeae
 # ╠═81deb227-a822-4857-a584-a51cc8ff51f4
 # ╟─00000000-0000-0000-0000-000000000001
