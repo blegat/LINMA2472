@@ -326,6 +326,9 @@ md"""
 * Instead, we could run the iteration through the end and once we get the pair `x, y`, we can see if there isn't a better way to find the derivative without rerunning the numerical iterations. This will be implicit differentiation.
 """)
 
+# ╔═╡ 383b3a50-ef75-4ccd-a6ea-1ddb87d6e9d2
+qa(md"Can't we do something simpler using the solution of the fixed point and the fixed point equation ?", md"IFT...")
+
 # ╔═╡ f1f1a354-cecc-4fb2-8d1e-096f51e4cf88
 qa(md"**Proof sketch**", md"""
 The proof of bijectivity and that ``f`` is ``C^2`` in the neighborhood of ``f(w_0)`` are in Section 11.5.3 of [The Elements of Differentiable Programming book](https://diffprog.github.io/).
@@ -413,7 +416,7 @@ We can then use the following result:
 
 In our case the Schur complement of the block ``I`` is ``\partial f(\lambda, w)/I = \partial_2 F(w, \lambda)``, this means that
 ```math
-\partial w^\star(\lambda) = \partial_1 F(w, \lambda)^{-1}\partial_2 F(w, \lambda).
+\partial w^\star(\lambda) = -\partial_1 F(w, \lambda)^{-1}\partial_2 F(w, \lambda).
 ```
 """)
 
@@ -1269,6 +1272,7 @@ version = "17.7.0+0"
 # ╠═cb886515-1635-43d7-82fd-a2604d1e3ad6
 # ╠═0867ec30-4fd7-4338-9256-4a84215ad5aa
 # ╠═08c4ac83-4361-41d5-b036-789c2475ff8e
+# ╟─383b3a50-ef75-4ccd-a6ea-1ddb87d6e9d2
 # ╟─c9603b16-113b-4e05-8517-d814b0879ab8
 # ╟─b23a4c1d-cf35-42e6-b286-7fbcdddfd424
 # ╟─f1f1a354-cecc-4fb2-8d1e-096f51e4cf88
