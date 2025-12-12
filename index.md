@@ -6,3 +6,4 @@ The html versions accessible here are static, see [here](Lectures) for details o
 * Transformers [html](Lectures/transformers.html) [pdf](Lectures/transformers.pdf)
 * Diffusion Models [html](Lectures/diffusion.html) [pdf](Lectures/diffusion.pdf)
 * Implicit Differentiation [html](Lectures/implicit.html) [pdf](Lectures/implicit.pdf)
+* Sparse AD [html](Lectures/sparse.html) [pdf](Lectures/sparse.pdf)
