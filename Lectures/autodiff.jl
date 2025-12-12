@@ -652,7 +652,7 @@ end
 
 function img(url::URL, args...; kws...)
     r, _ = save_image(url, args...; kws...)
-    return r
+    return @htl("<a href=$(url.url)>$r</a>")
 end
 
 function img(file::String, args...; kws...)
