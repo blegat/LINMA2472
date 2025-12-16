@@ -171,7 +171,7 @@ ijkl = sparse([
 ])
 
 # ╔═╡ c2e4982a-3798-4c45-8831-5a76b3b29f6e
-md"[Section 2.4](https://epubs.siam.org/doi/10.1137/S0036144504444711) Consider the adjacency graph ``G`` of a matrix ``A`` be the graph whose adjacency matrix has same sparsity pattern as ``A``. So ``i`` and ``j`` are adjacent iff ``a_{ij}`` is nonzero."
+md"[Section 2.4](https://epubs.siam.org/doi/10.1137/S0036144504444711) Consider the *adjacency graph* ``G`` of a matrix ``A`` be the graph whose adjacency matrix has same sparsity pattern as ``A``. So ``i`` and ``j`` are adjacent iff ``a_{ij}`` is nonzero."
 
 # ╔═╡ e6697119-2801-48e2-b978-facc00af636d
 md"## Need 3 colors for a path of 4 vertices"
@@ -182,21 +182,103 @@ md"""## Star coloring
 [Definition 4.5](https://epubs.siam.org/doi/10.1137/S0036144504444711) A mapping ``\phi: V \to \{1, \ldots, p\}`` is a *star coloring* if
 
 1. ``\phi`` is a distance-1 coloring
-2. every path of 4 vertices uses at least 3 colors
+2. every **path of 4 vertices** uses at least 3 colors
 
 [Theorem 4.6](https://epubs.siam.org/doi/10.1137/S0036144504444711)
 Let ``A`` be a symmetric matrix with **nonzero diagonal elements**,
-``G`` be its adjacency matrix. A mapping ``\phi`` is a star coloring of the adjacency matrix of ``
+``G`` be its adjacency matrix. A mapping ``\phi`` is a star coloring of the adjacency graph iff it induces a symmetrically structurally orthogonal partition of the columns of ``A``.
+
+Name star coloring comes from the fact that the subgraph induced by any pair of colors is a star.
 """
 
 # ╔═╡ 29d9f355-26aa-4714-9f9e-3d020016662e
 md"## Small Example"
 
+# ╔═╡ d0ba0c62-c788-4871-959c-fe7044519849
+md"""
+# Less colors but nontrivial substitution
+
+```math
+\begin{bmatrix}
+  a_{1} & a_{2} & &\\
+  a_2 & a_3 & a_4 &\\
+  & a_4 & a_5 & a_6\\
+  & & a_6 & a_7
+\end{bmatrix}
+```
+With star coloring, 3 colors:
+"""
+
+# ╔═╡ fab75cf6-21cc-4001-84b4-9e66f55d5a6a
+ijkl2 = sparse([
+	1 2 0 0
+	2 3 4 0
+	0 4 5 6
+	0 0 6 7
+]);
+
+# ╔═╡ b33bf212-5f88-47ab-ba10-a2815d17f235
+md"""
+## 2 colors with substitutions
+
+With 2 colors, our rwo forward tangents are
+```math
+
+D^\top = \begin{bmatrix}
+  1 & 0 & 1 & 0\\
+  0 & 1 & 0 & 1
+\end{bmatrix} \qquad\qquad\qquad
+AD = \begin{bmatrix}
+  a_1 & a_2\\
+  a_2 + a_4 & a_3\\
+  a_5 & a_4 + a_6\\
+  a_6 & a_7
+\end{bmatrix}
+```
+"""
+
+# ╔═╡ e3ae5697-6b0b-4d5f-99a0-d579b6eff655
+md"""## Acyclic coloring
+
+[Definition 6.3](https://epubs.siam.org/doi/10.1137/S0036144504444711) A mapping ``\phi: V \to \{1, \ldots, p\}`` is an *acyclic coloring* if
+
+1. ``\phi`` is a distance-1 coloring
+2. every **cycle** uses at least 3 colors
+
+[Theorem 4.6](https://epubs.siam.org/doi/10.1137/S0036144504444711)
+Let ``A`` be a symmetric matrix with **nonzero diagonal elements**,
+``G`` be its adjacency matrix. A mapping ``\phi`` is an acyclic coloring of the adjacency graph iff it induces a substitutable partition of the columns of ``A``.
+
+Name acyclic coloring comes from the fact that the subgraph induced by any pair of colors is a forest.
+"""
+
+# ╔═╡ f2418632-3261-4acb-8cc6-df333b5480a5
+md"## Illustrative example"
+
+# ╔═╡ d5b7f51b-e451-40a7-aa41-a8006decba33
+md"## Red-Blue subgraph"
+
+# ╔═╡ 15cf368c-cada-4a72-b59b-a0f9dd0115b4
+md"**Note**: rows with diagonal entries have only one nonzero entries hence have been omitted in the image above."
+
 # ╔═╡ 6c174bac-faef-424a-9de7-e4c7be8ddb27
-md"## Larger example"
+md"## Larger example : star vs acyclic coloring"
 
 # ╔═╡ dbef0e7d-b731-4d83-98e3-104b23f26042
 md"`n` = $(@bind n Slider(10:20, show_value = true, default = 16))"
+
+# ╔═╡ 2fe7f4eb-ca33-4338-ba8e-29b769b0dcce
+large = sparse(Symmetric(sprand(StableRNG(0), Bool, n, n, 0.2) + I));
+
+# ╔═╡ 1efb0f40-fb9e-4e5b-be59-84910afbf376
+md"""
+## Comparison of chromatic numbers
+
+[Theorem 7.1](https://epubs.siam.org/doi/10.1137/S0036144504444711) For every graph ``G``,
+```math
+\xi_1(G) \le \xi_\text{acyclic}(G) \le \xi_\text{star}(G) \le \xi_2(G) = \xi_1(G^2)
+```
+"""
 
 # ╔═╡ d23e7238-5edb-42d3-96d9-0dffa9e7f326
 hbox([
@@ -293,6 +375,12 @@ $(img("Gebremedhin_Figure_3_1"))
 See [Section 3.4 of What color is your Jacobian ?](https://epubs.siam.org/doi/10.1137/S0036144504444711)
 """
 
+# ╔═╡ cabeb42c-f40b-4549-b9a2-3bda7a988672
+img("Gebremedhin_Figure_6_1")
+
+# ╔═╡ 22c1030b-bef5-4af5-9d5f-6afb4a7ae699
+img("Gebremedhin_Figure_6_1_mat")
+
 # ╔═╡ e820e135-2df2-4fa3-a09b-8ce7e5a1f745
 two_columns(left, right) = hbox([
 	left,
@@ -361,8 +449,17 @@ viz(ijkl, decompression = :direct, structure = :symmetric, plot_size = (3cm, 3cm
 # ╔═╡ 3e6fc4af-19f4-4ff9-b9cf-759e831ff2a4
 viz(SparseMatrixColorings.what_fig_41().A, decompression = :direct, structure = :symmetric, plot_size = (5cm, 5cm))
 
+# ╔═╡ 884f9025-10e9-4657-88ec-55e6c9b6d530
+viz(ijkl2, decompression = :direct, structure = :symmetric, plot_size = (3cm, 3cm))
+
+# ╔═╡ 647c372e-c094-4dfc-8a48-7b7f93fb94dd
+viz(ijkl, decompression = :substitution, structure = :symmetric, plot_size = (3cm, 3cm))
+
 # ╔═╡ a413c12c-72c1-4f46-b7f2-0b0118c1b232
-viz(sparse(Symmetric(sprand(StableRNG(0), Bool, n, n, 0.2) + I)), decompression = :direct, structure = :symmetric, plot_size = (6cm, 6cm))
+viz(large, decompression = :direct, structure = :symmetric, plot_size = (6cm, 6cm))
+
+# ╔═╡ 9b427766-5290-4dee-8dd5-5aab20080d0a
+viz(large, decompression = :substitution, structure = :symmetric, plot_size = (6cm, 6cm))
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -1902,9 +1999,23 @@ version = "17.7.0+0"
 # ╟─a4ecf92d-6c45-4112-8f0c-06a6d227cd84
 # ╟─29d9f355-26aa-4714-9f9e-3d020016662e
 # ╟─3e6fc4af-19f4-4ff9-b9cf-759e831ff2a4
+# ╟─d0ba0c62-c788-4871-959c-fe7044519849
+# ╟─884f9025-10e9-4657-88ec-55e6c9b6d530
+# ╟─fab75cf6-21cc-4001-84b4-9e66f55d5a6a
+# ╟─b33bf212-5f88-47ab-ba10-a2815d17f235
+# ╟─647c372e-c094-4dfc-8a48-7b7f93fb94dd
+# ╟─e3ae5697-6b0b-4d5f-99a0-d579b6eff655
+# ╟─f2418632-3261-4acb-8cc6-df333b5480a5
+# ╟─cabeb42c-f40b-4549-b9a2-3bda7a988672
+# ╟─d5b7f51b-e451-40a7-aa41-a8006decba33
+# ╟─22c1030b-bef5-4af5-9d5f-6afb4a7ae699
+# ╟─15cf368c-cada-4a72-b59b-a0f9dd0115b4
 # ╟─6c174bac-faef-424a-9de7-e4c7be8ddb27
 # ╟─a413c12c-72c1-4f46-b7f2-0b0118c1b232
+# ╟─9b427766-5290-4dee-8dd5-5aab20080d0a
 # ╟─dbef0e7d-b731-4d83-98e3-104b23f26042
+# ╟─2fe7f4eb-ca33-4338-ba8e-29b769b0dcce
+# ╟─1efb0f40-fb9e-4e5b-be59-84910afbf376
 # ╟─d23e7238-5edb-42d3-96d9-0dffa9e7f326
 # ╟─4da92dbb-fcbd-4991-a2f1-f866778a27ef
 # ╠═75597493-3e69-437f-9408-b43a89b35559
