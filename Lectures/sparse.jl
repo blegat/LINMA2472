@@ -23,7 +23,7 @@ using PlutoUI, PlutoUI.ExperimentalLayout, HypertextLiteral, PlutoTeachingTools
 using SparseArrays, Images, SparseMatrixColorings
 
 # ╔═╡ 4f8de444-dcb4-411a-b087-6948699614e0
-using Graphs, GraphPlot, LinearAlgebra
+using Graphs, GraphPlot, LinearAlgebra, StableRNGs
 
 # ╔═╡ 39e06fde-d734-11f0-a308-89fba7e8abd6
 @htl("""
@@ -130,14 +130,11 @@ md"""
 
 # ╔═╡ 5892dfbb-b375-407b-a0a7-da66adb71b67
 md"""
-> A coloring of the columns is distance-2 in the bipartite graph iff columns of the same color are structurally orthogonal.
-[Theorem 3.5 of What color is your Jacobian ?](https://epubs.siam.org/doi/10.1137/S0036144504444711)
+[Theorem 3.5](https://epubs.siam.org/doi/10.1137/S0036144504444711) A coloring of the columns is distance-2 in the bipartite graph iff columns of the same color are structurally orthogonal.
 
-> The column intersection graph is the square of the biparted graph restricted to its column vertices.
-[Lemma 3.7 of What color is your Jacobian ?](https://epubs.siam.org/doi/10.1137/S0036144504444711)
+[Lemma 3.7](https://epubs.siam.org/doi/10.1137/S0036144504444711) The column intersection graph is the square of the biparted graph restricted to its column vertices.
 
-> A coloring is distance-``k`` in ``G`` iff it is distance-1 in ``G^k``.
-[Lemma 2.1 of What color is your Jacobian ?](https://epubs.siam.org/doi/10.1137/S0036144504444711)
+[Lemma 2.1](https://epubs.siam.org/doi/10.1137/S0036144504444711) A coloring is distance-``k`` in ``G`` iff it is distance-1 in ``G^k``.
 """
 
 # ╔═╡ e882ebee-36ad-43d9-8ab7-20f7e8b2d9fe
@@ -159,7 +156,47 @@ S = sparse([
 ])
 
 # ╔═╡ 19dd6563-1a4e-479f-881d-9bcbc720ea36
-md"# What color is your Hessian ?"
+md"""
+# What color is your Hessian ?
+
+How many HVP do we need to find the values of this sparse **symmetric** matrix ?
+"""
+
+# ╔═╡ 32440932-322a-46ce-911d-5fa6a1136bca
+ijkl = sparse([
+	1 2 3 0
+	2 4 0 5
+	3 0 6 0
+	0 5 0 7
+])
+
+# ╔═╡ c2e4982a-3798-4c45-8831-5a76b3b29f6e
+md"[Section 2.4](https://epubs.siam.org/doi/10.1137/S0036144504444711) Consider the adjacency graph ``G`` of a matrix ``A`` be the graph whose adjacency matrix has same sparsity pattern as ``A``. So ``i`` and ``j`` are adjacent iff ``a_{ij}`` is nonzero."
+
+# ╔═╡ e6697119-2801-48e2-b978-facc00af636d
+md"## Need 3 colors for a path of 4 vertices"
+
+# ╔═╡ a4ecf92d-6c45-4112-8f0c-06a6d227cd84
+md"""## Star coloring
+
+[Definition 4.5](https://epubs.siam.org/doi/10.1137/S0036144504444711) A mapping ``\phi: V \to \{1, \ldots, p\}`` is a *star coloring* if
+
+1. ``\phi`` is a distance-1 coloring
+2. every path of 4 vertices uses at least 3 colors
+
+[Theorem 4.6](https://epubs.siam.org/doi/10.1137/S0036144504444711)
+Let ``A`` be a symmetric matrix with **nonzero diagonal elements**,
+``G`` be its adjacency matrix. A mapping ``\phi`` is a star coloring of the adjacency matrix of ``
+"""
+
+# ╔═╡ 29d9f355-26aa-4714-9f9e-3d020016662e
+md"## Small Example"
+
+# ╔═╡ 6c174bac-faef-424a-9de7-e4c7be8ddb27
+md"## Larger example"
+
+# ╔═╡ dbef0e7d-b731-4d83-98e3-104b23f26042
+md"`n` = $(@bind n Slider(10:20, show_value = true, default = 16))"
 
 # ╔═╡ d23e7238-5edb-42d3-96d9-0dffa9e7f326
 hbox([
@@ -299,8 +336,8 @@ two_columns(
 
 # ╔═╡ 12ffe7c2-2bf6-4949-ae28-f3d8e03a5da5
 two_columns(
-	md"``\leftarrow`` columns of a color are structurally orthogonal",
-	md"Jacobian from 3 JVP, one per color ``\rightarrow``",
+	md"Color's columns are structurally orthogonal",
+	md"Jacobian from 3 JVP",
 )
 
 # ╔═╡ 21898d8d-f822-4128-ad56-d9a10865fb1d
@@ -318,8 +355,14 @@ viz(args...; kws...) = three_columns(colored_plots(args...; kws...)...)
 # ╔═╡ 91226321-fc72-4bd9-8d78-9c2bff5c760a
 viz(S, structure = :nonsymmetric, decompression = :direct, plot_size = (3cm, 3cm))
 
+# ╔═╡ 33b368e7-d71e-40ff-8170-a18d11db98fc
+viz(ijkl, decompression = :direct, structure = :symmetric, plot_size = (3cm, 3cm))
+
 # ╔═╡ 3e6fc4af-19f4-4ff9-b9cf-759e831ff2a4
 viz(SparseMatrixColorings.what_fig_41().A, decompression = :direct, structure = :symmetric, plot_size = (5cm, 5cm))
+
+# ╔═╡ a413c12c-72c1-4f46-b7f2-0b0118c1b232
+viz(sparse(Symmetric(sprand(StableRNG(0), Bool, n, n, 0.2) + I)), decompression = :direct, structure = :symmetric, plot_size = (6cm, 6cm))
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -333,6 +376,7 @@ PlutoTeachingTools = "661c6b06-c737-4d37-b85c-46df65de6f69"
 PlutoUI = "7f904dfe-b85e-4ff6-b463-dae2292396a8"
 SparseArrays = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
 SparseMatrixColorings = "0a514795-09f3-496d-8182-132a7b665d35"
+StableRNGs = "860ef19b-820b-49d6-a774-d7a799459cd3"
 
 [compat]
 GraphPlot = "~0.6.2"
@@ -342,6 +386,7 @@ Images = "~0.26.2"
 PlutoTeachingTools = "~0.4.6"
 PlutoUI = "~0.7.75"
 SparseMatrixColorings = "~0.4.23"
+StableRNGs = "~1.0.4"
 """
 
 # ╔═╡ 00000000-0000-0000-0000-000000000002
@@ -350,7 +395,7 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.12.3"
 manifest_format = "2.0"
-project_hash = "cd65441440992ceb39e5450ed6c25c282876e5c3"
+project_hash = "d0f350d99ab1208cd99a29ffb7cc7fb7a62f7213"
 
 [[deps.ADTypes]]
 git-tree-sha1 = "8b2b045b22740e4be20654175cc38291d48539db"
@@ -1557,6 +1602,12 @@ version = "0.4.23"
     JuMP = "4076af6c-e467-56ae-b986-b466b2749572"
     MathOptInterface = "b8f27783-ece8-5eb3-8dc8-9495eed66fee"
 
+[[deps.StableRNGs]]
+deps = ["Random"]
+git-tree-sha1 = "4f96c596b8c8258cc7d3b19797854d368f243ddc"
+uuid = "860ef19b-820b-49d6-a774-d7a799459cd3"
+version = "1.0.4"
+
 [[deps.StackViews]]
 deps = ["OffsetArrays"]
 git-tree-sha1 = "be1cf4eb0ac528d96f5115b4ed80c26a8d8ae621"
@@ -1844,7 +1895,16 @@ version = "17.7.0+0"
 # ╟─12ffe7c2-2bf6-4949-ae28-f3d8e03a5da5
 # ╟─91226321-fc72-4bd9-8d78-9c2bff5c760a
 # ╟─19dd6563-1a4e-479f-881d-9bcbc720ea36
+# ╟─32440932-322a-46ce-911d-5fa6a1136bca
+# ╟─c2e4982a-3798-4c45-8831-5a76b3b29f6e
+# ╟─e6697119-2801-48e2-b978-facc00af636d
+# ╟─33b368e7-d71e-40ff-8170-a18d11db98fc
+# ╟─a4ecf92d-6c45-4112-8f0c-06a6d227cd84
+# ╟─29d9f355-26aa-4714-9f9e-3d020016662e
 # ╟─3e6fc4af-19f4-4ff9-b9cf-759e831ff2a4
+# ╟─6c174bac-faef-424a-9de7-e4c7be8ddb27
+# ╟─a413c12c-72c1-4f46-b7f2-0b0118c1b232
+# ╟─dbef0e7d-b731-4d83-98e3-104b23f26042
 # ╟─d23e7238-5edb-42d3-96d9-0dffa9e7f326
 # ╟─4da92dbb-fcbd-4991-a2f1-f866778a27ef
 # ╠═75597493-3e69-437f-9408-b43a89b35559
