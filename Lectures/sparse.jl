@@ -34,6 +34,7 @@ $(PlutoUI.TableOfContents(depth=1))
 
 # ╔═╡ e2eb1894-06ad-47a0-9ee0-c65b24a669b5
 md"""
+* [What color is your Jacobian ? Graph Coloring for  Computing Derivatives](https://epubs.siam.org/doi/10.1137/S0036144504444711)
 * [An Illustrated Guide to Automatic Sparse Differentiation](https://iclr-blogposts.github.io/2025/blog/sparse-autodiff/)
 * [Revisiting Sparse Matrix Coloring and Bicoloring](https://arxiv.org/abs/2505.07308)
 """
@@ -174,7 +175,54 @@ ijkl = sparse([
 md"[Section 2.4](https://epubs.siam.org/doi/10.1137/S0036144504444711) Consider the *adjacency graph* ``G`` of a matrix ``A`` be the graph whose adjacency matrix has same sparsity pattern as ``A``. So ``i`` and ``j`` are adjacent iff ``a_{ij}`` is nonzero."
 
 # ╔═╡ e6697119-2801-48e2-b978-facc00af636d
-md"## Need 3 colors for a path of 4 vertices"
+md"""
+## Need 3 colors for a path of 4 vertices
+
+```math
+D^\top = \begin{bmatrix}
+  \color{yellow}\mathbf{1} &  &  & \\
+   & \color{pink}\mathbf{1} & \color{pink}\mathbf{1} & \\
+   &  &  & \color{blue}\mathbf{1}
+\end{bmatrix} \qquad\qquad\qquad
+AD = \begin{bmatrix}
+  \color{yellow}a_1 & \color{pink}a_2 + a_3 &\\
+  \color{yellow}a_2 & \color{pink}a_4 & \color{blue}a_5\\
+  \color{yellow}a_3 & \color{pink}a_6 &\\
+   & a_5 & \color{blue}a_7
+\end{bmatrix}
+```
+"""
+
+# ╔═╡ a7b85908-404b-475b-9875-c1190de5ff71
+md"""
+* Each off-diagonal entry ``a_{uv}`` corresponds to an edge in the graph.
+* The edge links nodes ``u, v`` of 2 different colors ``\phi(u)`` and ``\phi(v)``
+* If ``u`` is not adjacent to any other nodes of color ``\phi(v)`` then ``a_{uv}`` is the **only term** at the row ``u`` of the HVP of color ``\phi(v)``
+"""
+
+# ╔═╡ 760ef943-e9d9-4cdc-8977-932cf6fcb78a
+md"## Coloring of a star"
+
+# ╔═╡ 285d3797-5086-4adc-839c-2204128585e1
+md"""
+* For any pink node ``u > 1``, the offdiagonal entry ``a_{u,1}`` can be obtained from the yellow HVP.
+"""
+
+# ╔═╡ 0445aae6-2f7e-42b8-b30b-f31298cdeed0
+md"`n` = $(@bind star_n Slider(3:10, default = 6, show_value = true))"
+
+# ╔═╡ 95d7e9cd-b4a1-4205-b7d4-8c10916be8a2
+star = let
+	I = collect(1:star_n)
+	J = ones(Int, star_n)
+	for i in 2:star_n
+		push!(I, 1)
+		push!(J, i)
+		push!(I, i)
+		push!(J, i)
+	end
+	sparse(I, J, ones(Int, length(I)))
+end;
 
 # ╔═╡ a4ecf92d-6c45-4112-8f0c-06a6d227cd84
 md"""## Star coloring
@@ -221,9 +269,8 @@ ijkl2 = sparse([
 md"""
 ## 2 colors with substitutions
 
-With 2 colors, our rwo forward tangents are
+With 2 colors, our two forward tangents are
 ```math
-
 D^\top = \begin{bmatrix}
   1 & 0 & 1 & 0\\
   0 & 1 & 0 & 1
@@ -255,11 +302,18 @@ Name acyclic coloring comes from the fact that the subgraph induced by any pair 
 # ╔═╡ f2418632-3261-4acb-8cc6-df333b5480a5
 md"## Illustrative example"
 
-# ╔═╡ d5b7f51b-e451-40a7-aa41-a8006decba33
-md"## Red-Blue subgraph"
+# ╔═╡ 2bd9ea13-362e-47ac-b26d-8e36d33e04ea
+md"For each color ``c``, we consider the submatrix ``B_c = A_{:,I}`` where ``I = \{i \mid \phi(i) = c\}`` is the set of columns corresponding to color-``c`` nodes."
 
-# ╔═╡ 15cf368c-cada-4a72-b59b-a0f9dd0115b4
-md"**Note**: rows with diagonal entries have only one nonzero entries hence have been omitted in the image above."
+# ╔═╡ e3dec4ca-69c0-4955-9303-5f8a239546f2
+md"Let ``h_c`` be the sum of the columns of ``B_c`` hence the result of the corresponding HVP."
+
+# ╔═╡ d5b7f51b-e451-40a7-aa41-a8006decba33
+md"""## Red-Blue subgraph
+To compute an off-diagonal entry ``A_{ij}``, consider the subgraph induced by the two colors ``\phi(i)`` and ``\phi(j)``. The entry will be computed, from ``B_{\phi(i)}`` and ``B_{\phi(j)}``, possible after substitution.
+
+Consider below left ``B_\text{red}`` and right ``B_\text{blue}``. The rows corresponding to diagonal entries have been omitted as we already found how to compute them in the previous slide. The rows corresponding to green nodes are in bold as they will be computed from the subgraph induced by red/green or blue/green so we can ignore them for now.
+"""
 
 # ╔═╡ 6c174bac-faef-424a-9de7-e4c7be8ddb27
 md"## Larger example : star vs acyclic coloring"
@@ -280,15 +334,15 @@ md"""
 ```
 """
 
+# ╔═╡ 4da92dbb-fcbd-4991-a2f1-f866778a27ef
+md"## Utils"
+
 # ╔═╡ d23e7238-5edb-42d3-96d9-0dffa9e7f326
 hbox([
 	md"scale = $(@bind(scale, Slider(1:15, default = 10)))",
 	md"pad = $(@bind(pad, Slider(1:10, default = 3)))",
 	md"border = $(@bind(border, Slider(1:5, default = 2)))",
 ])
-
-# ╔═╡ 4da92dbb-fcbd-4991-a2f1-f866778a27ef
-md"## Utils"
 
 # ╔═╡ e9135060-75d4-4f5a-9315-2e5fbb493cdf
 function colored_plots(A; decompression, structure, partition = :column, kws...)
@@ -446,6 +500,9 @@ viz(S, structure = :nonsymmetric, decompression = :direct, plot_size = (3cm, 3cm
 # ╔═╡ 33b368e7-d71e-40ff-8170-a18d11db98fc
 viz(ijkl, decompression = :direct, structure = :symmetric, plot_size = (3cm, 3cm))
 
+# ╔═╡ 70296870-49af-4564-bdb7-bd2d49f9114b
+viz(star, decompression = :direct, structure = :symmetric, plot_size = (5cm, 5cm))
+
 # ╔═╡ 3e6fc4af-19f4-4ff9-b9cf-759e831ff2a4
 viz(SparseMatrixColorings.what_fig_41().A, decompression = :direct, structure = :symmetric, plot_size = (5cm, 5cm))
 
@@ -453,13 +510,98 @@ viz(SparseMatrixColorings.what_fig_41().A, decompression = :direct, structure = 
 viz(ijkl2, decompression = :direct, structure = :symmetric, plot_size = (3cm, 3cm))
 
 # ╔═╡ 647c372e-c094-4dfc-8a48-7b7f93fb94dd
-viz(ijkl, decompression = :substitution, structure = :symmetric, plot_size = (3cm, 3cm))
+viz(ijkl, decompression = :substitution, structure = :symmetric, plot_size = (4cm, 4cm))
 
 # ╔═╡ a413c12c-72c1-4f46-b7f2-0b0118c1b232
 viz(large, decompression = :direct, structure = :symmetric, plot_size = (6cm, 6cm))
 
 # ╔═╡ 9b427766-5290-4dee-8dd5-5aab20080d0a
 viz(large, decompression = :substitution, structure = :symmetric, plot_size = (6cm, 6cm))
+
+# ╔═╡ dfe3dffd-926b-4083-9e66-8536e5df198d
+begin
+function qa(question, answer)
+    return @htl("<details><summary>$question</summary>$answer</details>")
+end
+function _inline_html(m::Markdown.Paragraph)
+    return sprint(Markdown.htmlinline, m.content)
+end
+function qa(question::Markdown.MD, answer)
+    # `html(question)` will create `<p>` if `question.content[]` is `Markdown.Paragraph`
+    # This will print the question on a new line and we don't want that:
+    h = HTML(_inline_html(question.content[]))
+    return qa(h, answer)
+end
+end
+
+# ╔═╡ 592510fd-a0e4-42e5-ae5b-cac301e74f0a
+qa(md"How is the subgraph induced by a pair of colors ?", md"""
+It does not contain paths of more than 3 vertices and adjacent vertices have opposite colors.
+
+So it is a union of disjoint connected components and each component is a stars with one root node of a given color connected with leaf nodes of the other color.
+""")
+
+# ╔═╡ 26191290-2b2d-43fe-b2bf-d690fd0bbe15
+qa(md"From which HVP do we determine the off-diagonal entries ?",
+md"""
+* For the edges 34 and 64, respectively between the yellow nodes 3, 6 and the blue nodes 4, they are part of the star centered at the blue node 4 so they are obtained from the entries 3 and 6 blue HVP.
+* For the edges 12, 32, 52 and 62, respectively between the yellow nodes 1, 3, 5, 6 and the pink node 2, they are part of the star centered at the pink node 2 so they are obtained from the entries 1, 3, 5 and 6 of the pink HVP.
+""")
+
+# ╔═╡ 04ea8b79-63ba-4eb4-938c-98a21668924a
+qa(md"How is the subgraph induced by a pair of colors ?", md"""
+It does not contain cycles so it is a union of disjoint trees or in other words a forest.
+
+The concept of tree generalizes the concept of stars. Indeed, a star is a tree and, when rooted at the center of the star, the depth of the tree is 1.
+Since the depth is one, every edge is indicent to a leaf so no substitutions are needed. With acyclic coloring, the edges incident to a leaf will be obtained directly but the edges that are not incident to any tree leaves will need the entries corresponding to the edges deeper in their tree to be determined first.
+""")
+
+# ╔═╡ e721600c-1887-4e99-b474-a427b665e591
+qa(md"What are the nonzero entries of ``i``th row of ``B_{\phi(i)}`` ?",
+md"""
+It contains ``A_{ii}`` but can it contain other nonzero entries ?
+Suppose that ``A_{ij}`` is nonzero with ``\phi(j) = \phi(i)``.
+This would mean that ``i`` and ``j`` are adjacent and of same color which
+contradicts the fact that ``\phi`` is a distance-1 coloring.
+So the only nonzero entry of the ``i``th row of ``B_{\phi(i)}`` is ``A_{ii}``.
+""")
+
+# ╔═╡ 44a6b427-bd4b-4fa1-95d8-a8ea55719192
+qa(md"How can the diagonal entries be determined ?", md"""
+The value of ``(h_{\phi(i)})_i`` is the sum of the entries of the ``i``th row of ``B_{\phi(i)}``.
+Since the only nonzero entry of this row is ``A_{ii}``, we have ``A_{ii} = (h_{\phi(i)})_i``.
+""")
+
+# ╔═╡ 15cf368c-cada-4a72-b59b-a0f9dd0115b4
+qa(
+	md"How to compute the non-bold entries ?",
+md"""
+For star graphs, the entry ``a_{uv}`` was the edge of a star with either center ``u`` and leaf ``v`` or center ``v`` and leaf ``u``.
+It was then obtained from the HVP of the color of the center.
+
+We need to generalize this for arbitrary trees.
+For any edge from a leaf ``u`` to a node ``v``, we can compute
+``a_{uv}`` from the ``u``th entry of the HVP of color ``\phi(v)``.
+Then, we subtract ``a_{uv}`` from the ``v``th row of the HVP of color ``\phi(u)``.
+So we can do
+* ``a_{71} \gets (h_\text{red})_7`` then ``(h_\text{blue})_1 \gets (h_\text{blue})_1 - a_{71}``
+* ``a_{43} \gets (h_\text{red})_4`` then ``(h_\text{blue})_3 \gets (h_\text{blue})_3 - a_{43}``
+* ``a_{52} \gets (h_\text{blue})_5`` then ``(h_\text{red})_2 \gets (h_\text{red})_2 - a_{52}``
+
+Then, we can remove these leaves and edges. Doing so, some their parent in the tree becomes leaves and we can apply the same procedure recursively. So we get
+* ``a_{12} \gets (h_\text{blue})_5`` then ``(h_\text{red})_2 \gets (h_\text{red})_2 - a_{12}``
+* ``a_{32} \gets (h_\text{blue})_5`` then ``(h_\text{red})_2 \gets (h_\text{red})_2 - a_{32}``
+""",
+)
+
+# ╔═╡ 79910840-ec59-4433-bfb3-ae2d8da40d22
+qa(md"""
+What is the 1-chromatic number of planar graphs ?
+""",
+   md"""
+The [four color theorem](https://en.wikipedia.org/wiki/Four_color_theorem) shows that the 1-chromatic number of any planar graph ``G`` is ``\xi_1(G) \le 4``.
+This theorem is related to our context as it applies to the **same** coloring problem but the column intersection graphs of sparse matrices are not necessarily scalar hence the chromatic number can be as large as the number of columns of the matrices here.
+""")
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -1995,18 +2137,31 @@ version = "17.7.0+0"
 # ╟─32440932-322a-46ce-911d-5fa6a1136bca
 # ╟─c2e4982a-3798-4c45-8831-5a76b3b29f6e
 # ╟─e6697119-2801-48e2-b978-facc00af636d
-# ╟─33b368e7-d71e-40ff-8170-a18d11db98fc
+# ╠═33b368e7-d71e-40ff-8170-a18d11db98fc
+# ╟─a7b85908-404b-475b-9875-c1190de5ff71
+# ╟─760ef943-e9d9-4cdc-8977-932cf6fcb78a
+# ╟─70296870-49af-4564-bdb7-bd2d49f9114b
+# ╟─285d3797-5086-4adc-839c-2204128585e1
+# ╟─0445aae6-2f7e-42b8-b30b-f31298cdeed0
+# ╟─95d7e9cd-b4a1-4205-b7d4-8c10916be8a2
 # ╟─a4ecf92d-6c45-4112-8f0c-06a6d227cd84
+# ╟─592510fd-a0e4-42e5-ae5b-cac301e74f0a
 # ╟─29d9f355-26aa-4714-9f9e-3d020016662e
 # ╟─3e6fc4af-19f4-4ff9-b9cf-759e831ff2a4
+# ╟─26191290-2b2d-43fe-b2bf-d690fd0bbe15
 # ╟─d0ba0c62-c788-4871-959c-fe7044519849
 # ╟─884f9025-10e9-4657-88ec-55e6c9b6d530
 # ╟─fab75cf6-21cc-4001-84b4-9e66f55d5a6a
 # ╟─b33bf212-5f88-47ab-ba10-a2815d17f235
 # ╟─647c372e-c094-4dfc-8a48-7b7f93fb94dd
 # ╟─e3ae5697-6b0b-4d5f-99a0-d579b6eff655
+# ╟─04ea8b79-63ba-4eb4-938c-98a21668924a
 # ╟─f2418632-3261-4acb-8cc6-df333b5480a5
 # ╟─cabeb42c-f40b-4549-b9a2-3bda7a988672
+# ╟─2bd9ea13-362e-47ac-b26d-8e36d33e04ea
+# ╟─e721600c-1887-4e99-b474-a427b665e591
+# ╟─e3dec4ca-69c0-4955-9303-5f8a239546f2
+# ╟─44a6b427-bd4b-4fa1-95d8-a8ea55719192
 # ╟─d5b7f51b-e451-40a7-aa41-a8006decba33
 # ╟─22c1030b-bef5-4af5-9d5f-6afb4a7ae699
 # ╟─15cf368c-cada-4a72-b59b-a0f9dd0115b4
@@ -2016,8 +2171,9 @@ version = "17.7.0+0"
 # ╟─dbef0e7d-b731-4d83-98e3-104b23f26042
 # ╟─2fe7f4eb-ca33-4338-ba8e-29b769b0dcce
 # ╟─1efb0f40-fb9e-4e5b-be59-84910afbf376
-# ╟─d23e7238-5edb-42d3-96d9-0dffa9e7f326
+# ╟─79910840-ec59-4433-bfb3-ae2d8da40d22
 # ╟─4da92dbb-fcbd-4991-a2f1-f866778a27ef
+# ╟─d23e7238-5edb-42d3-96d9-0dffa9e7f326
 # ╠═75597493-3e69-437f-9408-b43a89b35559
 # ╠═6bd04f2f-ed5f-4ecf-91dd-8868ec5b83e1
 # ╠═4f8de444-dcb4-411a-b087-6948699614e0
@@ -2026,5 +2182,6 @@ version = "17.7.0+0"
 # ╟─2728dc2c-ca17-4989-9259-451f95a24bd2
 # ╟─e820e135-2df2-4fa3-a09b-8ce7e5a1f745
 # ╟─21898d8d-f822-4128-ad56-d9a10865fb1d
+# ╟─dfe3dffd-926b-4083-9e66-8536e5df198d
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
