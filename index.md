@@ -10,7 +10,6 @@ The html versions accessible here are static, see [here](Lectures) for details o
 
 ## Past exams
 
-> [!INFO] 
 > The content of the course as changed in the 2025-2026 year,
 > the questions from the 2025 January exam that were therefore
 > not relevant anymore have been omitted.
