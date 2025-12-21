@@ -959,11 +959,15 @@ md"""
 We find ``r_k = \text{Dual}(\frac{\partial f}{\partial s_k}, \frac{\partial^2 f}{\partial s_k \partial x_j})`` as solution:
 ```math
 \begin{align}
-r_2 \cdot J_2
+r_1 = r_2 \cdot J_2
 & = \text{Dual}(
 \frac{\partial f}{\partial s_2} \cdot J_2,
 \frac{\partial^2 f}{\partial s_2 \partial x_j} \cdot J_2 +
-\frac{\partial f_1}{\partial x_i} \cdot H_{2j})\\
+\frac{\partial f}{\partial s_2} \cdot H_{2j})\\
+& = \text{Dual}(
+\frac{\partial f}{\partial s_2}\frac{\partial s_2}{\partial s_1},
+\frac{\partial^2 f}{\partial s_2 \partial x_j}\frac{\partial s_2}{\partial s_1} +
+\frac{\partial f}{\partial s_2}\frac{\partial J_2}{\partial x_j})\\
 & = \text{Dual}(
 \frac{\partial f}{\partial s_1},
 \frac{\partial^2 f}{\partial s_1 \partial x_j})
