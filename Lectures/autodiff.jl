@@ -486,11 +486,11 @@ md"""
 md"""
 ## Notation
 * Let ``f_k : \mathbb{R}^{d_{k-1}} \to \mathbb{R}^{d_k}``. ``\partial f_k \triangleq \partial f_k(s_{k-1}) \in \mathbb{R}^{d_k \times d_{k-1}}``, ``\partial^2 f_k \triangleq \partial^2 f_k(s_{k-1}) \in \mathbb{R}^{d_k \times d_{k-1} \times d_{k-1}}`` is a 3D array/tensor.
-* Given ``v \in \mathbb{R}^{d_{k-1}}``, by the product ``(\partial^2 f_k \cdot v) \in \mathbb{R}^{d_k \times d_{k-1}}`` , we denote the contraction of the the 3rd (or 2nd since the tensor is symmetric over its last 2 dimensions) dimension:
+* Given ``v \in \mathbb{R}^{d_{k-1}}``, by the product ``(\partial^2 f_k \cdot v) \in \mathbb{R}^{d_k \times d_{k-1}}`` , we denote the contraction of the 3rd (or 2nd since the tensor is symmetric over its last 2 dimensions) dimension:
 ```math
 (\partial^2 f_k \cdot v)_{ij} = \sum_{l = 1}^{d_{k-1}} (\partial^2 f_k)_{ijl} \cdot v_l
 ```
-* Given ``u \in \mathbb{R}^{d_k}``, by the product ``(u \cdot \partial^2 f_k) \in \mathbb{R}^{d_{k-1} \times d_{k-1}}`` , we denote the contraction of the the 1st dimension.
+* Given ``u \in \mathbb{R}^{d_k}``, by the product ``(u \cdot \partial^2 f_k) \in \mathbb{R}^{d_{k-1} \times d_{k-1}}`` , we denote the contraction of the 1st dimension.
 ```math
 (u \cdot \partial^2 f_k)_{ij} = \sum_{l = 1}^{d_k} u_l \cdot (\partial^2 f_k)_{lij}
 ```
