@@ -725,7 +725,7 @@ md"""
 * Initialize ``\partial s_3 / \partial s_1 = \partial s_3 / \partial s_2 = \partial s_3 / \partial x = 0``
 * First part: ``\partial s_3/\partial s_1 \mathrel{\raise{0.19ex}{\scriptstyle+}} = 1``
   - ``\partial s_3 / \partial x \mathrel{\raise{0.19ex}{\scriptstyle+}} = 1 \cdot 1 \vert_{x=3}``
-* Second part: ``\partial s_3/\partial s_1 \mathrel{\raise{0.19ex}{\scriptstyle+}} = 1``
+* Second part: ``\partial s_3/\partial s_2 \mathrel{\raise{0.19ex}{\scriptstyle+}} = 1``
   - ``\partial s_3 / \partial x \mathrel{\raise{0.19ex}{\scriptstyle+}} = 1 \cdot 2x \vert_{x=3}``
 * The result is ``\partial s_3 / \partial x = 7``.
 """]))
