@@ -425,9 +425,6 @@ function reverse_diff(W, X, y)
     (J_1 .* (W[2]' * J_2)) * X'
 end
 
-# ╔═╡ 87c6a5bc-82bf-44a5-b4d6-6d50285348c0
-@time reverse_diff(W, X, y)
-
 # ╔═╡ 17c91ea8-acb7-4bbd-b0b0-0f8193f45303
 md"## 🚀 GPU acceleration ⚡"
 
@@ -442,6 +439,9 @@ W = [rand(Float32, h, size(X, 1)), rand(Float32, size(y, 1), h)]
 
 # ╔═╡ a580ef44-234a-4ed1-b007-920651415427
 sum((W[2] * tanh.(W[1] * X) - y).^2) / size(y, 2)
+
+# ╔═╡ 87c6a5bc-82bf-44a5-b4d6-6d50285348c0
+@time reverse_diff(W, X, y)
 
 # ╔═╡ 85303791-bdc4-468a-bc40-48ef2a186282
 if CUDA.functional()
@@ -486,11 +486,11 @@ md"""
 md"""
 ## Notation
 * Let ``f_k : \mathbb{R}^{d_{k-1}} \to \mathbb{R}^{d_k}``. ``\partial f_k \triangleq \partial f_k(s_{k-1}) \in \mathbb{R}^{d_k \times d_{k-1}}``, ``\partial^2 f_k \triangleq \partial^2 f_k(s_{k-1}) \in \mathbb{R}^{d_k \times d_{k-1} \times d_{k-1}}`` is a 3D array/tensor.
-* Given ``v \in \mathbb{R}^{d_{k-1}}``, by the product ``(\partial^2 f_k \cdot v) \in \mathbb{R}^{d_k \times d_{k-1}}`` , we denote the contraction of the the 3rd (or 2nd since the tensor is symmetric over its last 2 dimensions) dimension:
+* Given ``v \in \mathbb{R}^{d_{k-1}}``, by the product ``(\partial^2 f_k \cdot v) \in \mathbb{R}^{d_k \times d_{k-1}}`` , we denote the contraction of the 3rd (or 2nd since the tensor is symmetric over its last 2 dimensions) dimension:
 ```math
 (\partial^2 f_k \cdot v)_{ij} = \sum_{l = 1}^{d_{k-1}} (\partial^2 f_k)_{ijl} \cdot v_l
 ```
-* Given ``u \in \mathbb{R}^{d_k}``, by the product ``(u \cdot \partial^2 f_k) \in \mathbb{R}^{d_{k-1} \times d_{k-1}}`` , we denote the contraction of the the 1st dimension.
+* Given ``u \in \mathbb{R}^{d_k}``, by the product ``(u \cdot \partial^2 f_k) \in \mathbb{R}^{d_{k-1} \times d_{k-1}}`` , we denote the contraction of the 1st dimension.
 ```math
 (u \cdot \partial^2 f_k)_{ij} = \sum_{l = 1}^{d_k} u_l \cdot (\partial^2 f_k)_{lij}
 ```
@@ -959,14 +959,15 @@ md"""
 We find ``r_k = \text{Dual}(\frac{\partial f}{\partial s_k}, \frac{\partial^2 f}{\partial s_k \partial x_j})`` as solution:
 ```math
 \begin{align}
-r_2 \cdot J_2
-& = \text{Dual}(
-\frac{\partial f}{\partial s_2} \cdot J_2,
-\frac{\partial^2 f}{\partial s_2 \partial x_j} \cdot J_2 +
-\frac{\partial f_1}{\partial x_i} \cdot H_{2j})\\
-& = \text{Dual}(
-\frac{\partial f}{\partial s_1},
-\frac{\partial^2 f}{\partial s_1 \partial x_j})
+(r_1)_2 = (r_2)_2\cdot J_2+(r_2)_1\cdot H_{2j}
+& = \frac{\partial^2 f}{\partial s_2 \partial x_j} \cdot J_2 +
+\frac{\partial f}{\partial s_2} \cdot H_{2j}\\
+& = \frac{\partial^2 f}{\partial s_2 \partial x_j}\frac{\partial s_2}{\partial s_1} +
+\frac{\partial f}{\partial s_2}\frac{\partial J_2}{\partial x_j}\\
+& = \frac{\partial^2 f}{\partial s_2 \partial x_j}\frac{\partial s_2}{\partial s_1} +
+\frac{\partial f}{\partial s_2}\frac{\partial^2 s_2}{\partial s_1\partial x_j}\\
+& = \frac{\partial}{\partial x_j}\left(\frac{\partial f}{\cancel{\partial s_2}}\cdot\frac{\cancel{\partial s_2}}{\partial s_1}\right)\\
+& = \frac{\partial^2 f}{\partial s_1 \partial x_j}
 \end{align}
 ```
 """)
@@ -1046,7 +1047,7 @@ PlutoUI = "~0.7.72"
 PLUTO_MANIFEST_TOML_CONTENTS = """
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.12.1"
+julia_version = "1.12.3"
 manifest_format = "2.0"
 project_hash = "aa99bcff8430e0d486a62f08c13fbd4562a1a179"
 
@@ -1460,7 +1461,7 @@ version = "0.9.5"
 [[deps.Downloads]]
 deps = ["ArgTools", "FileWatching", "LibCURL", "NetworkOptions"]
 uuid = "f43a241f-c20a-4ad4-852c-f6b1247861c6"
-version = "1.6.0"
+version = "1.7.0"
 
 [[deps.EpollShim_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl"]
@@ -1958,7 +1959,7 @@ version = "0.6.4"
 [[deps.LibCURL_jll]]
 deps = ["Artifacts", "LibSSH2_jll", "Libdl", "OpenSSL_jll", "Zlib_jll", "nghttp2_jll"]
 uuid = "deac9b47-8bc7-5906-a0fe-35ac56dc84c0"
-version = "8.11.1+1"
+version = "8.15.0+0"
 
 [[deps.LibGit2]]
 deps = ["LibGit2_jll", "NetworkOptions", "Printf", "SHA"]
@@ -2278,7 +2279,7 @@ version = "1.5.0"
 [[deps.OpenSSL_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "458c3c95-2e84-50aa-8efc-19380b2a3a95"
-version = "3.5.1+0"
+version = "3.5.4+0"
 
 [[deps.Opus_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl"]
@@ -2341,7 +2342,7 @@ version = "0.44.2+0"
 [[deps.Pkg]]
 deps = ["Artifacts", "Dates", "Downloads", "FileWatching", "LibGit2", "Libdl", "Logging", "Markdown", "Printf", "Random", "SHA", "TOML", "Tar", "UUIDs", "p7zip_jll"]
 uuid = "44cfe95a-1eb2-52ea-b672-e2afdf69b78f"
-version = "1.12.0"
+version = "1.12.1"
 weakdeps = ["REPL"]
 
     [deps.Pkg.extensions]
@@ -3113,9 +3114,9 @@ uuid = "8e850ede-7688-5339-a07c-302acd2aaf8d"
 version = "1.64.0+1"
 
 [[deps.p7zip_jll]]
-deps = ["Artifacts", "Libdl"]
+deps = ["Artifacts", "CompilerSupportLibraries_jll", "Libdl"]
 uuid = "3f19e933-33d8-53b3-aaab-bd5110c3b7a0"
-version = "17.5.0+2"
+version = "17.7.0+0"
 
 [[deps.x264_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl"]
