@@ -588,7 +588,7 @@ So we can do
 * ``a_{43} \gets (h_\text{red})_4`` then ``(h_\text{blue})_3 \gets (h_\text{blue})_3 - a_{43}``
 * ``a_{52} \gets (h_\text{blue})_5`` then ``(h_\text{red})_2 \gets (h_\text{red})_2 - a_{52}``
 
-Then, we can remove these leaves and edges. Doing so, some their parent in the tree becomes leaves and we can apply the same procedure recursively. So we get
+Then, we can remove these leaves and edges. Doing so, some of their parents in the tree become leaves and we can apply the same procedure recursively. So we get
 * ``a_{12} \gets (h_\text{blue})_5`` then ``(h_\text{red})_2 \gets (h_\text{red})_2 - a_{12}``
 * ``a_{32} \gets (h_\text{blue})_5`` then ``(h_\text{red})_2 \gets (h_\text{red})_2 - a_{32}``
 """,
