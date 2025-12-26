@@ -92,7 +92,7 @@ Assume
 * ``(w_0, \lambda_0)`` such that ``F(w_0, \lambda_0) = 0`` and $(ift_inv.content[].content)
 * ``F(w, \lambda)`` is ``C^2`` in a neighborhood ``\mathcal{U}`` of ``(w_0, \lambda_0)``
 
-Then there exists a neighborhood ``\mathcal{V} \subseteq \mathcal{U}`` there exists ``w^\star(\lambda)`` such that
+Then there exists a neighborhood ``\mathcal{V} \subseteq \mathcal{U}`` where exists ``w^\star(\lambda)`` such that
 $ift_eq
 """
 end;
@@ -426,8 +426,8 @@ Define ``f(\lambda, w) = (\lambda, F(w, \lambda))``. The Jacobian is
 ```
 By assumption, ``\partial_1 F(w, \lambda)`` is invertible so ``\det(\partial f(\lambda, w)) = \det(I)\det(\partial_1 F(w, \lambda)) \neq 0``.
 By the inverse function theorem, the inverse of ``f`` around ``f(\lambda_0, w_0) = (\lambda_0, 0)`` is ``C^2``.
-The ``w^\star(\lambda)`` be the second component of ``f^{-1}``: ``(\lambda, w^\star(\lambda)) = f^{-1}(\lambda, 0)``.
-The Jacobian ``\partial w^\star(\lambda)`` is the derivative of the second component of ``f^{-1}`` with respect to its first input so it is the block 21 in the Jacobian
+Let ``w^\star(\lambda)`` be the second component of ``f^{-1}(\lambda, 0)``: ``(\lambda, w^\star(\lambda)) = f^{-1}(\lambda, 0)``.
+The Jacobian ``\partial w^\star(\lambda)`` is the derivative of the second component of ``f^{-1}(\lambda, 0)`` with respect to its first input so it is the block 21 in the Jacobian
 ```math
 \partial f^{-1}(\lambda, 0) = \begin{bmatrix}
    \sim & \sim\\
@@ -445,8 +445,9 @@ By the inverse function theorem
 ```
 We can then use the following result:
    
-> [**Schur complement**](https://en.wikipedia.org/wiki/Schur_complement): If ``A`` is an invertible matrix then for any matrices ``B, C, D`` of compatible dimension:
+> [**Schur complement**](https://en.wikipedia.org/wiki/Schur_complement): If ``A`` is an invertible matrix then for any matrices ``M, B, C, D`` of compatible dimensions:
 > ```math
+> M^{-1} =
 > \begin{bmatrix}
 > A & B\\
 > C & D
@@ -455,9 +456,9 @@ We can then use the following result:
 > -(M/A)^{-1}CA^{-1} & \sim
 > \end{bmatrix}
 > ```
-> where the *Schur complement* of the block ``A`` is ``M/A = D - CA^{-1}B``.
+> where the *Schur complement* of the block ``A``, denoted by ``M/A``, is ``M/A=D - CA^{-1}B``.
 
-In our case the Schur complement of the block ``I`` is ``\partial f(\lambda, w)/I = \partial_2 F(w, \lambda)``, this means that
+In our case the Schur complement of the block ``I`` is ``\partial f(\lambda, w)/I = \partial_1 F(w, \lambda)``, this means that
 ```math
 \partial w^\star(\lambda) = -\partial_1 F(w, \lambda)^{-1}\partial_2 F(w, \lambda).
 ```
