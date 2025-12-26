@@ -325,7 +325,7 @@ md"## Key-Value (KV) cache"
 # ╔═╡ 9a8eef1b-27c0-4d57-a389-53708ade9058
 md"""
 Let ``\hat{Y}_{i}`` be the intermediate output of ``i \in \{1, \ldots, N\}``.
-The the columns of the matrix ``\text{softmax}(C^\top \hat{Y}_i)`` (column-wise softmax) can be thought as intermediate probabilities that we denote ``\hat{p}_i``:
+The columns of the matrix ``\text{softmax}(C^\top \hat{Y}_i)`` (column-wise softmax) can be thought as intermediate probabilities that we denote ``\hat{p}_i``:
 ```math
 (\hat{p}_i(x_{-n_\text{ctx}+1} | x_{-n_\text{ctx}}), \ldots, \hat{p}_i(x_{-1} | x_{-2}, \ldots, x_{-n_\text{ctx}}), \hat{p}_i(x_0 | x_{-1}, \ldots, x_{-n_\text{ctx}}))
 ```
