@@ -911,8 +911,6 @@ As this is scalar, it is trivially equal to its scalar product with ``1``. That 
 & =
 \langle \partial W_1 X, J_1 \odot (W_2^\top J_2) \rangle\\
 & =
-\langle \partial W_1 X, J_1 \odot (W_2^\top J_2) \rangle\\
-& =
 \langle \partial W_1, (J_1 \odot (W_2^\top J_2))X^\top \rangle\\
 \end{align}
 ```
