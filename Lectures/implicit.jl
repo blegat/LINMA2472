@@ -223,7 +223,7 @@ The pullback operation is the adjoint of the pushforward operator:
 ```
 So the pullback operator maps ``r`` to ``B^*(A^*)^{-1} r``.
 
-This means that it first solves the linear system ``A^*v = r`` (possibly in a matrix-free way) and then returns ``Bv``.
+This means that it first solves the linear system ``A^*v = r`` (possibly in a matrix-free way) and then returns ``B^*v``.
 """
 
 # ╔═╡ 10ca4307-929a-4e5f-942b-5d6c0e28e2be
