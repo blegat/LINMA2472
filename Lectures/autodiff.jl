@@ -147,14 +147,14 @@ t_3 & = \partial_1 f_3 \cdot t_1 + \partial_2 f_3 \cdot t_2\\
 	r_1 &
 	r_2
 \end{bmatrix}
-& \mathrel{\raise{0.19ex}{\scriptstyle+}} = r_1 \cdot \partial f_3\\
-& \mathrel{\raise{0.19ex}{\scriptstyle+}} = r_1 \cdot
+& \mathrel{\raise{0.19ex}{\scriptstyle+}} = r_3 \cdot \partial f_3\\
+& \mathrel{\raise{0.19ex}{\scriptstyle+}} = r_3 \cdot
 \begin{bmatrix}
 	\partial_1 f_3 & \partial_2 f_3
 \end{bmatrix}\\
 & \mathrel{\raise{0.19ex}{\scriptstyle+}} =
 \begin{bmatrix}
-	r_1 \cdot\partial_1 f_3 & r_1 \cdot\partial_2 f_3
+	r_3 \cdot\partial_1 f_3 & r_3 \cdot\partial_2 f_3
 \end{bmatrix}
 \end{align}
 ```
@@ -168,14 +168,14 @@ t_3 & = \partial_1 f_3 \cdot t_1 + \partial_2 f_3 \cdot t_2\\
 \begin{bmatrix}
 	r_1\\
 	r_2
-\end{bmatrix} & \mathrel{\raise{0.19ex}{\scriptstyle+}} = \partial f_3^* \cdot r_1\\
+\end{bmatrix} & \mathrel{\raise{0.19ex}{\scriptstyle+}} = \partial f_3^* \cdot r_3\\
 & \mathrel{\raise{0.19ex}{\scriptstyle+}} =
 \begin{bmatrix}
 	\partial_1 f_3\\ \partial_2 f_3
-\end{bmatrix} \cdot r_1\\
+\end{bmatrix} \cdot r_3\\
 & \mathrel{\raise{0.19ex}{\scriptstyle+}} =
 \begin{bmatrix}
-	\partial_1 f_3 \cdot r_1 \\ \partial_2 f_3 \cdot r_1
+	\partial_1 f_3 \cdot r_3 \\ \partial_2 f_3 \cdot r_3
 \end{bmatrix}
 \end{align}
 ```
