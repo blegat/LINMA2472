@@ -385,7 +385,7 @@ The formula for ``\partial f^{-1}(\omega)`` is a direct consequence of the chain
 """)
 
 # ╔═╡ 0fc99cae-bfe4-4517-a578-453cab15d977
-circle_qa = qa(md"Does that contradict the Inverse Function Theorem (IFT) ?", md"""
+circle_qa = qa(md"Does that contradict the Implicit Function Theorem (IFT) ?", md"""
 Let ``F(y, x) = x^2 + y^2 - 1``.
 Given an initial point ``(x_0, y_0)`` with ``x_0^2 + y_0^2 = 1``,
 * if ``y_0 > 0`` then IFT holds and ``y^\star(x) = y^+(x)``,
