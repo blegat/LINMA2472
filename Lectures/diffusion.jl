@@ -53,9 +53,9 @@ f_Y(y)
 & = \int_x \frac{x-y}{\sigma^2} f_{X,Y}(x,y) \, \text{d} x\\
 \sigma^2 \nabla_y f_Y(y)
 & = \int_x x f_{X,Y}(x,y) \, \text{d} x - y \int_x f_{X,Y}(x,y) \, \text{d} x\\
-& = \int_x x f_{X|Y}(x|y) \, \text{d} x f_{Y}(y) - y\\
+& = \int_x x f_{X|Y}(x|y) \, \text{d} x f_{Y}(y) - y f_{Y}(y)\\
 \sigma^2 \nabla_y f_Y(y) / f_{Y}(y)
-& = \mathbb{E}[X | Y = y] - y f_{Y}(y)\\
+& = \mathbb{E}[X | Y = y] - y\\
 y + \sigma^2 \nabla_y \log f_Y(y) & = \mathbb{E}[X | Y = y].
 \end{align*}
 ```
