@@ -255,7 +255,7 @@ md"""
 ```
 """,
 md"""
-Mask prevents ``\hat{p}`` to look inputs in the future:
+Mask prevents ``\hat{p}`` to look at inputs in the future:
 ```math
 M
 =
