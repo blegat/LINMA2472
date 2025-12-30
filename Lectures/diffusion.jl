@@ -185,7 +185,7 @@ As ``W_t`` and ``\mathcal{E}_\theta(x_t, \sigma_t)`` are independent, their cova
 ```math
 \sigma_{t-1}^2 = \sigma_{t'}^2 \text{Var}(\mathcal{E}_\theta(x_t, \sigma_t)) + \eta^2 \text{Var}(W_t)
 ```
-Their variance is one so we have
+Their variance is one, so we have
 ```math
 \sigma_{t-1}^2 = \sigma_{t'}^2 + \eta^2
 ```
@@ -204,7 +204,7 @@ Find encoder ``E`` and decoder ``D`` that minimize the loss:
 ```math
 \mathbb{E}[\|X - D(E(X))\|_2^2]
 ```
-The *code* (aka *latent variable*) ``z = E(x)`` typically has smaller size compared to ``x`` to force the model to only keep essential features.
+The *code* (aka *latent variable*) ``z = E(x)`` typically has a smaller size compared to ``x`` to force the model to only keep essential features.
 """
 
 # ╔═╡ 40f21927-1d88-41f4-b55d-6b81ca2ec211
@@ -244,7 +244,7 @@ An insightful way to model this is as follows.
 * Assume our dataset come from a distribution ``X`` that is obtained from a latent space ``Z`` using a decoder ``X = D(Z)``.
 * If we knew the latent variable ``z``, we would search for a decoder ``D`` that maximizes ``\mathbb{E}[\log(f_{X|Z}(x|z))]``.
 * Since we do not know ``z``, we make an estimate of ``y`` using an encoder ``Y = E(X)``.
-* The validity of these encoder and decoder models can now be measure with a Maximum Likelihood Estimator that search for the encoder and decoder models that maximizes ``\mathbb{E}[\log(f_X(X))]``.
+* The validity of these encoder and decoder models can now be measured with a Maximum Likelihood Estimator that searches for the encoder and decoder models that maximize ``\mathbb{E}[\log(f_X(X))]``.
 """
 
 # ╔═╡ 6d63c708-6f10-4a21-b57b-a9bd138b5c8c
@@ -259,15 +259,15 @@ md"""
 \begin{align}
   D_\text{KL}((Y|X = x) \parallel (Z | X = x))
   & =
-  \mathbb{E}_{Y|X}[\log(f_{Y|X}(Y|x)) - \log(f_{Z|X}(Y|x))]\\
+  \mathbb{E}[\log(f_{Y|X}(Y|x)) - \log(f_{Z|X}(Y|x)) | X = x]\\
   & =
-  \mathbb{E}_{Y|X}[\log(f_{Y|X}(Y|x)) - \log(f_{Z,X}(Y,x))]\\
+  \mathbb{E}[\log(f_{Y|X}(Y|x)) - \log(f_{Z,X}(Y,x)) | X = x]\\
   & \qquad + \log(f_{X}(x))\\
   & =
-  \mathbb{E}_{Y|X}[\log(f_{Y|X}(Y|x)) - \log(f_{X|Z}(x|Y)) - \log(f_{Z}(Y))]\\
+  \mathbb{E}[\log(f_{Y|X}(Y|x)) - \log(f_{X|Z}(x|Y)) - \log(f_{Z}(Y)) | X = x]\\
   & \qquad + \log(f_{X}(x))\\
   & =
-  D_\text{KL}((Y|X = x) \parallel Z) - \mathbb{E}_{Y|X}[\log(f_{X|Z}(x|Y))]\\
+  D_\text{KL}((Y|X = x) \parallel Z) - \mathbb{E}_{Y|X}[\log(f_{X|Z}(x|Y)) | X = x]\\
   & \qquad + \log(f_{X}(x))
 \end{align}
 ```
@@ -278,7 +278,7 @@ md"""
 md"""
 ``\mathcal{L}(x)`` is a **lower bound** to ``\log(f_X(x))`` as the Kullback-Leibler divergence ``D_\text{KL}((Y|X = x) \parallel (Z | X = x))`` is always nonnegative.
 
-In the context of VAEs, ``Z`` represents the actual latent variable and ``Y`` represents the estimated random variables so ``D_\text{KL}((Y|X = x) \parallel (Z | X = x))`` is a measure of the error made by our estimator.
+In the context of VAEs, ``Z`` represents the actual latent variable and ``Y`` represents the estimated random variables, so ``D_\text{KL}((Y|X = x) \parallel (Z | X = x))`` is a measure of the error made by our estimator.
 """
 
 # ╔═╡ 0788ac02-dab8-4ddd-9130-2a632d8d3685
@@ -311,7 +311,7 @@ md"""
 * The encoder maps a data point ``x`` to a Gaussian distribution ``Y \sim \mathcal{N}(E_\mu(x), E_{\Sigma}(x))`` over the latent space
 * The decoder maps a latent variable ``z \sim Z`` to a the Gaussian distribution ``\mathcal{N}(D_\mu(z), D_\sigma(Z))``
 
-The Maximum Likelyhood Estimator (MLE) maximizes the following sum over our datapoints ``x`` with its ELBO:
+The Maximum Likelihood Estimator (MLE) maximizes the following sum over our datapoints ``x`` with its ELBO:
 ```math
 \sum_x \log(f_X(x)) \ge \sum_x -D_\text{KL}((Y|X = x) \parallel Z) + \mathbb{E}[\log(f_{X|Z}(x|Y))]
 ```
@@ -390,7 +390,7 @@ md"""
 As ``\epsilon_\theta(x_t, \sigma_t)`` is more accurate than
 ``\epsilon_\theta(x_{t+1}, \sigma_{t+1})``,
 $(cite("permenter2024Interpretinga", "Section 5"))
-suggests to accelerate the convergence by correcting part of
+suggests accelerating the convergence by correcting part of
 the previous step. That is, we take:
 ```math
 \bar{\epsilon}_t = \textcolor{purple}{\gamma} \epsilon_\theta(x_t, \sigma_t) \textcolor{purple}{+ (1 - \gamma) \epsilon_\theta(x_{t+1}, \sigma_{t+1})}
@@ -410,7 +410,7 @@ For any random variables ``X``, ``Y`` and ``Z``, we have
 ```
 where the *evidence lower bound* $(cite("kingma2013AutoEncoding"))
 ```math
-\mathcal{L}(x) = -D_\text{KL}((Y|X = x) \parallel Z) + \mathbb{E}_{Y|X}[\log(f_{X|Z}(x|Y))]]
+\mathcal{L}(x) = -D_\text{KL}((Y|X = x) \parallel Z) + \mathbb{E}[\log(f_{X|Z}(x|Y)) | X = x]
 ```
 """
 
@@ -453,14 +453,14 @@ To train the denoising Auto-Encoder, we can use the Evidence Lower-Bound with ``
 """
 
 # ╔═╡ e0ba3b61-a618-49ce-9466-e6a8f674bd53
-md"""Source : $(cite("rombach2022HighResolution", "Figure 3"))"""
+md"""Source: $(cite("rombach2022HighResolution", "Figure 3"))"""
 
 # ╔═╡ 410eac96-a384-48fa-b3f3-478be5bd236c
 md"""
-Improvement for conditioned diffusion for multi-modal distributions : use classifier $(cite("dhariwal2024Diffusion")). **Issue**: need to train a classifier...
+Improvement for conditioned diffusion for multi-modal distributions: use classifier $(cite("dhariwal2024Diffusion")). **Issue**: need to train a classifier...
 
 This classifier-guided strategy was replaced in $(cite("ho2022ClassifierFree"))
-by a simpler trick: Train both a conditioned (with condition ``\tau``) and unconditioned diffusion model and combine then with:
+by a simpler trick: Train both a conditioned (with condition ``\tau``) and an unconditioned diffusion model, and combine them with:
 ```math
 \bar{\epsilon}_t = \textcolor{purple}{\lambda} \epsilon_\theta(x_t, \sigma_t, \tau) \textcolor{purple}{+ (1 - \lambda) \epsilon_\theta(x_t, \sigma_t)} \qquad \text{with } \lambda > 1
 ```
