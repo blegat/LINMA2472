@@ -253,7 +253,7 @@ frametitle("Evidence Lower BOund (ELBO)")
 # ╔═╡ 8e39960f-ab0a-4103-bd6b-00e779333b01
 qa(md"Proof",
 md"""
-> Reminder: ``D_\text{KL}(A \parallel B) = \sum_{a \in \text{Dom}(A)} f_A(a) \log \frac{f_A(a)}{f_B(a)} = \mathbb{E}_A[\log f_A(A) - \log f_B(A)]``
+> Reminder: ``D_\text{KL}(A \parallel B) = \sum_{a \in \text{Dom}(A)} f_A(a) \log \frac{f_A(a)}{f_B(a)} = \mathbb{E}[\log f_A(A) - \log f_B(A)]``
 
 ```math
 \begin{align}
