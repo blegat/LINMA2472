@@ -37,7 +37,7 @@ Given a sequence of ``n_\text{ctx}`` past vectors ``x_{-1}, \ldots, x_{-n_\text{
 
 * **Model** : Probability of next vector ``\hat{p}(x_0 | X)`` where ``X`` concatenates ``x_{-1}, \ldots, x_{-n_\text{ctx}}``.
 * **Loss** : Cross-entropy : ``\mathcal{L}_{\hat{p}}(X) \triangleq H(p, \hat{p}) = -\textbf{E}_p[\log(\hat{p})] = -\sum_{x_0} p(x_0 | X) \log(\hat{p}(x_0 | X))``
-* Particular case for ``\hat{p}(x_0 | X) = \delta_y`` : ``\mathcal{L}_{\hat{p}}(X) = -\log(\hat{p}(y | X))``
+* Particular case for ``p(x_0 | X) = \delta_y`` : ``\mathcal{L}_{\hat{p}}(X) = -\log(\hat{p}(y | X))``
 
 #### What about Language Models ?
 
@@ -255,7 +255,7 @@ md"""
 ```
 """,
 md"""
-Mask prevent ``\hat{p}`` to look input the future:
+Mask prevents ``\hat{p}`` to look at inputs in the future:
 ```math
 M
 =
