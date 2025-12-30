@@ -1,0 +1,7 @@
+version: 2
+updates:
+# https://docs.github.com/github/administering-a-repository/configuration-options-for-dependency-updates
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
