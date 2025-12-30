@@ -267,7 +267,7 @@ md"""
   \mathbb{E}[\log(f_{Y|X}(Y|x)) - \log(f_{X|Z}(x|Y)) - \log(f_{Z}(Y)) | X = x]\\
   & \qquad + \log(f_{X}(x))\\
   & =
-  D_\text{KL}((Y|X = x) \parallel Z) - \mathbb{E}_{Y|X}[\log(f_{X|Z}(x|Y)) | X = x]\\
+  D_\text{KL}((Y|X = x) \parallel Z) - \mathbb{E}[\log(f_{X|Z}(x|Y)) | X = x]\\
   & \qquad + \log(f_{X}(x))
 \end{align}
 ```
