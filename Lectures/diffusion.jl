@@ -291,13 +291,13 @@ frametitle("Monte-Carlo sampling")
 md"""
 This can be approximated using Monte-Carlo given ``L`` samples ``\epsilon_1, \ldots \epsilon_L`` from the distribution ``\mathcal{N}(0, I)`` as
 ```math
-\mathbb{E}[\log(f_{X|Z}(x|Y))]] \approx \frac{1}{L} \sum_{i=1}^L \log(f_{X|Z}(x|E_\mu(x) + \epsilon_i \odot E_\sigma(x))).
+\mathbb{E}[\log(f_{X|Z}(x|Y))] \approx \frac{1}{L} \sum_{i=1}^L \log(f_{X|Z}(x|E_\mu(x) + \epsilon_i \odot E_\sigma(x))).
 ```
 In the simpler case where ``D_\sigma(z) = \mathbf{1}``, we recognize the classical L2 norm:
 ```math
 \begin{align}
-\mathbb{E}[\log(f_{X|Z}(x|Y))]]
-& \approx -\frac{\log(2\pi)}{2}+\frac{1}{L}\sum_{i=1}^L\|x - D_\mu(E_\mu(x) + \epsilon_i\|_2^2.
+\mathbb{E}[\log(f_{X|Z}(x|Y))]
+& \approx -\frac{\log(2\pi)}{2}+\frac{1}{L}\sum_{i=1}^L\|x - D_\mu(E_\mu(x) + \epsilon_i \odot E_\sigma(x))\|_2^2.
 \end{align}
 ```
 """
@@ -308,8 +308,8 @@ frametitle("Variational AutoEncoders (VAEs)")
 # ╔═╡ 23f3de75-0617-4232-bb71-bd9f3e355a1e
 md"""
 * We want to learn the distribution of our data represented by the random variable ``X``.
-* The encoder maps a data point ``x`` to a Gaussian distribution ``Y \sim \mathcal{N}(E_\mu(x), E_{\Sigma}(x))`` over the latent space
-* The decoder maps a latent variable ``z \sim Z`` to a the Gaussian distribution ``\mathcal{N}(D_\mu(z), D_\sigma(Z))``
+* The encoder maps a data point ``x`` to a Gaussian distribution ``Y \sim \mathcal{N}(E_\mu(x), E_{\sigma}(x))`` over the latent space
+* The decoder maps a latent variable ``z \sim Z`` to a the Gaussian distribution ``\mathcal{N}(D_\mu(z), D_\sigma(z))``
 
 The Maximum Likelihood Estimator (MLE) maximizes the following sum over our datapoints ``x`` with its ELBO:
 ```math
@@ -425,10 +425,10 @@ We have (see $(cite("kingma2013AutoEncoding", "Appendix B")) for a proof):
 For the second part of the ELBO, we have
 ```math
 \begin{align}
-& \mathbb{E}[\log(f_{X|Z}(x|Y))]]\\
-& = \mathbb{E}[\log(f_{X|Z}(x|E_\mu(x) + \mathcal{E}_2 \odot E_\sigma(x)))]]\\
-& = \mathbb{E}[\log(f_{\mathcal{E}_1}(\text{Diag}(D_\sigma(E_\mu(x) + \mathcal{E}_2 \odot E_\sigma(x)))^{-1} (x - D_\mu(E_\mu(x) + \mathcal{E}_2 \odot E_\sigma(x)))))]]\\
-& = -\frac{\log(2\pi)}{2}+\mathbb{E}[\|\text{Diag}(D_\sigma(E_\mu(x) + \mathcal{E}_2 \odot E_\sigma(x)))^{-1} (x - D_\mu(E_\mu(x) + \mathcal{E}_2 \odot E_\sigma(x)))\|_2^2]].
+& \mathbb{E}[\log(f_{X|Z}(x|Y))]\\
+& = \mathbb{E}[\log(f_{X|Z}(x|E_\mu(x) + \mathcal{E}_2 \odot E_\sigma(x)))]\\
+& = \mathbb{E}[\log(f_{\mathcal{E}_1}(\text{Diag}(D_\sigma(E_\mu(x) + \mathcal{E}_2 \odot E_\sigma(x)))^{-1} (x - D_\mu(E_\mu(x) + \mathcal{E}_2 \odot E_\sigma(x)))))]\\
+& = -\frac{\log(2\pi)}{2}+\mathbb{E}[\|\text{Diag}(D_\sigma(E_\mu(x) + \mathcal{E}_2 \odot E_\sigma(x)))^{-1} (x - D_\mu(E_\mu(x) + \mathcal{E}_2 \odot E_\sigma(x)))\|_2^2].
 \end{align}
 ```
 """
