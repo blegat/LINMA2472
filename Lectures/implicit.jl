@@ -76,7 +76,7 @@ Assume
 
 Then
 * ``f`` is bijective from a neighborhood of ``w_0`` to a neighborhood of ``f(w_0)``
-* For ``\omega`` in a neighborhood of ``f(w_0)``, ``f^{-1}`` is ``C^2`` and ``\partial f^{-1}(\omega) = (\partial f(f^{-1}(w)))^{-1}``
+* For ``\omega`` in a neighborhood of ``f(w_0)``, ``f^{-1}`` is ``C^2`` and ``\partial f^{-1}(\omega) = (\partial f(f^{-1}(\omega)))^{-1}``
 """
 
 # ╔═╡ 0b091706-da13-41f8-9852-4fa685a0fa95
