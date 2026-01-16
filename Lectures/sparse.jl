@@ -553,7 +553,7 @@ qa(md"How is the subgraph induced by a pair of colors ?", md"""
 It does not contain cycles so it is a union of disjoint trees or in other words a forest.
 
 The concept of tree generalizes the concept of stars. Indeed, a star is a tree and, when rooted at the center of the star, the depth of the tree is 1.
-Since the depth is one, every edge is indicent to a leaf so no substitutions are needed. With acyclic coloring, the edges incident to a leaf will be obtained directly but the edges that are not incident to any tree leaves will need the entries corresponding to the edges deeper in their tree to be determined first.
+Since the depth is one, every edge is incident to a leaf so no substitutions are needed. With acyclic coloring, the edges incident to a leaf will be obtained directly but the edges that are not incident to any tree leaves will need the entries corresponding to the edges deeper in their tree to be determined first.
 """)
 
 # ╔═╡ e721600c-1887-4e99-b474-a427b665e591
