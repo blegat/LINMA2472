@@ -62,7 +62,7 @@ md"## The same applies to reverse mode"
 md"# Sparsity detection of Jacobian"
 
 # ╔═╡ 0a91e27f-3cea-415e-aed4-123482da375a
-md"Simple [operator overleading implementation](https://adrianhill.de/SparseConnectivityTracer.jl/dev/internals/how_it_works/)"
+md"Simple [operator overloading implementation](https://adrianhill.de/SparseConnectivityTracer.jl/dev/internals/how_it_works/)"
 
 # ╔═╡ 97c94c5a-fab5-4226-b803-10c85a298f2a
 struct MyGradientTracer
@@ -117,7 +117,7 @@ md"""
 Given a graph ``G(V,E)``,
 * Nodes ``u, v`` are distance ``k`` neighbors if there exists a path from ``u`` to ``v`` of length at most ``k``.
 * A *distance-*``k`` coloring : mapping ``\phi:V \to \{1, \ldots, p\}`` such that ``\phi(u) \neq \phi(v)`` whenever ``u, v`` are distance-``k`` neighbors.
-* ``k``*-chromatic number* ``\xi_k(G)`` : mininum ``p`` such that ``\exists`` distance-``k`` coloring with ``p`` colors.
+* ``k``*-chromatic number* ``\xi_k(G)`` : minimum ``p`` such that ``\exists`` distance-``k`` coloring with ``p`` colors.
 * Distance-``k`` coloring problem : Find distance-``k`` coloring with fewest colors.
 * For every fixed integer ``k \ge 1``, the distance-``k`` graph coloring problem [is NP-hard](https://doi.org/10.1137/S089548019120016X).
 
