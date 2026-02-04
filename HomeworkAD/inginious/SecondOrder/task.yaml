@@ -1,0 +1,22 @@
+author: ''
+contact_url: ''
+context: Upload here the updated version of https://github.com/blegat/LINMA2472/blob/main/HomeworkAD/reverse_vectorized.jl
+environment_id: math
+environment_parameters:
+    limits:
+        time: '240'
+        hard_time: ''
+        memory: '1000'
+    run_cmd: ''
+environment_type: docker
+file: ''
+input_random: 0
+name: Second Order AD
+network_grading: false
+problems:
+    SecondOrder:
+        type: file
+        name: ''
+        header: ''
+        allowed_exts:
+        - .jl
