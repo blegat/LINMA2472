@@ -15,3 +15,4 @@ The html versions accessible here are static, see [here](Lectures) for details o
 > not relevant anymore have been omitted.
 
 * [2025 January](Exams/2025_01/main.pdf)
+* [2026 January](Exams/2026_01/main.pdf)
