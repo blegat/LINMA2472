@@ -1,0 +1,22 @@
+%\documentclass[addpoints,12pt,a4paper]{exam}
+\documentclass[addpoints,answers,12pt,a4paper]{exam}   % print solutions
+
+\newcommand{\ExamDate}{January 2026}
+\input{../utils/preamble}
+
+\DeclareMathOperator{\sign}{sign}
+
+\begin{document}
+    \input{../utils/rules}
+
+	\begin{questions}
+		\input{kernel}
+        \clearpage
+        \input{diffusion}
+        \clearpage
+        \input{implicit}
+        \clearpage
+        \input{sparse}
+    \end{questions}
+
+\end{document}
