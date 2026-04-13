@@ -30,6 +30,12 @@ jobs:
                 working_directory: Exams/2025_01/
                 root_file: main.tex
 
+            - name: Compile exam 2026_01
+              uses: xu-cheng/latex-action@v4
+              with:
+                working_directory: Exams/2026_01/
+                root_file: main.tex
+
             - name: Install Julia
               uses: julia-actions/setup-julia@v2
               with:
