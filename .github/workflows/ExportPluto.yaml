@@ -24,17 +24,11 @@ jobs:
             - name: Checkout this repository
               uses: actions/checkout@v6
 
-            - name: Compile exam 2025_01
+            - name: Compile exams
               uses: xu-cheng/latex-action@v4
               with:
-                working_directory: Exams/2025_01/
-                root_file: main.tex
-
-            - name: Compile exam 2026_01
-              uses: xu-cheng/latex-action@v4
-              with:
-                working_directory: Exams/2026_01/
-                root_file: main.tex
+                root_file: Exams/*/main.tex
+                work_in_root_file_dir: true
 
             - name: Install Julia
               uses: julia-actions/setup-julia@v3
