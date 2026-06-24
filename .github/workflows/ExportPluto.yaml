@@ -22,7 +22,7 @@ jobs:
         runs-on: ubuntu-latest
         steps:
             - name: Checkout this repository
-              uses: actions/checkout@v6
+              uses: actions/checkout@v7
 
             - name: Compile exams
               uses: xu-cheng/latex-action@v4
