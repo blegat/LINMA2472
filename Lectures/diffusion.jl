@@ -446,7 +446,7 @@ The goal of the diffusion model is, given a noisy image ``Y = X + \sigma \mathca
 The denoising Auto-Encoder instead attempts to find the original image ``X``.
 At the limit ``\sigma \to 0``, the denoising Auto-Encoder ``D(E(X + \sigma \mathcal{E}))`` is a classical Auto-Encoder, hence the name.
 
-To train the denoising Auto-Encoder, we can use the Evidence Lower-Bound with ``Y = X + \sigma \mathcal{E}`` and ``Z`` such that ``X = D(E(Z))`` $(cite("ho2020Denoising")):
+To train the denoising Auto-Encoder, we can use the Evidence Lower-Bound with ``Y = X + \sigma \mathcal{E}`` and ``Z`` such that ``X = D(Z)`` $(cite("ho2020Denoising")):
 ```math
 -\log(f_X(x)) \le \mathbb{E}[-\log(f_{X|Z}(x|Y))] + D((Y|X = x) \parallel Z)
 ```
