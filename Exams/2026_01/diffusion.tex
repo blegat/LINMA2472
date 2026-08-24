@@ -1,0 +1,52 @@
+% https://arxiv.org/pdf/2502.03810
+\titledquestion{Diffusion}
+
+You would like to find a method for deblurring images.
+You have a program $b(x, \sigma)$ that can be used to blur an image $x$
+with blurring intensity $\sigma$.
+For blurring intensity $\sigma = 0$, $b(x, \sigma) = x$ and the larger
+$\sigma$ is, the more the image is blurred.
+
+\begin{itemize}
+	\item
+	  Given a datasets of clear images,
+	  explain how you can use the Evidence Lower Bound to train
+	  a model $f_\theta(y, \sigma)$, parameterized by $\theta$,
+	  that attempts to predicts the clear image
+      $x$ that produced the blurry image $y = b(x, \sigma)$.
+	
+	\begin{solutionbox}{7.5cm}
+		We want to train a Denoising Auto-Encoder.
+		We define $Z_\sigma$ to be the latent variable in the space of images of blur intensity $\sigma$ that produces the clear image $X$ and
+		the variable $Y_\sigma = b(X, \sigma)$.
+		Sample clear images $x$ from the dataset and various different blur intensities $\sigma$.
+		Create pairs $(y, x)$ with $y = b(x, \sigma)$.
+		The ELBO bounds $\log p(y|\sigma)$:
+		\[
+			\log f_X(x) \ge -D_{\mathrm{KL}}((Y|X=x) \| Z)
+			+ \mathbb{E}[\log f_{X|Z}(x|Y)].
+		\]
+		The first term serves as regularizer and the second term is the error.
+	\end{solutionbox}
+
+	\item You now use a trained model $f_{\theta^*}$ to deblur an image
+	  $y$ of supposed blurred intensity $\sigma$ using $\hat{x} = f_{\theta^*}(y, \sigma)$.
+      You observe that, while this works well for small $\sigma$,
+      the estimate is less precise for deblurring image with high blurred intensity $\sigma$.
+      How would you suggest to improve this using an iterative approach ?
+
+	\begin{solutionbox}{7.5cm}
+		$f_{\theta^*}(y, \sigma)$ is based on an estimate of
+		the gradient of the log of the PDF of the distribution ofimages blurred with intensity $\sigma$.
+		For higher $\sigma$, this distribution is more spread out, so the gradient is less precise.
+		For large $\sigma$, it's only good to get \emph{close} to the distribution of less blurry images.
+
+		Therefore, we use an \textbf{iterative refinement} with decreasing blur levels.
+		Define $\sigma_0 = \sigma > \sigma_1 > \cdots > \sigma_T \approx 0$.
+		Initialize $\hat{x}_0 = f_{\theta^*}(y, \sigma_0)$.
+		For $k = 1, \ldots, T$:
+		simulate a ``less blurry'' observation by $\tilde{y}_k = b(\hat{x}_{k-1}, \sigma_k)$,
+		then set $\hat{x}_k = f_{\theta^*}(\tilde{y}_k, \sigma_k)$.
+		Final deblurred image: $\hat{x}_T$.
+	\end{solutionbox}
+\end{itemize}

@@ -1,0 +1,147 @@
+\titledquestion{Hessian coloring}
+
+Consider the function
+\[
+	f : \mathbb{R}^{7} \to \mathbb{R} : f(x) = \sum_{i=1}^3 x_{2i}(x_{2i-1} - x_{7}) + \sum_{i=1}^{7} x_i^2
+\]
+Our aim is to compute the Hessian $\nabla^2 f(x)$ by exploiting its sparsity.
+
+\begin{itemize}
+	\item Find the adjacency graph of the Hessian matrix:
+	
+	\begin{solutionbox}{8.5cm}
+		\begin{center}
+			\includegraphics[height=8cm]{adjacency_graph.png}
+		\end{center}
+	\end{solutionbox}
+	
+	\item How many colors would be used with \textbf{star} coloring ?
+
+	\begin{solutionbox}{8.5cm}
+		\begin{center}
+			\includegraphics[height=7cm]{star_coloring.png} \hspace{3cm} \framebox{3}
+		\end{center}
+	\end{solutionbox}
+
+	\item
+	How would the nonzero entries of the Hessian be obtained from
+	Hessian-Vector Products using this star coloring ?
+	
+	\begin{solutionbox}{11cm}
+%		The Hessian matrix is
+%		\[
+%		\begin{pmatrix}
+%		a_{11} & a_{12} & 0      & 0      & 0      & 0      & 0      \\
+%		a_{12} & a_{22} & 0      & 0      & 0      & 0      & a_{27} \\
+%		0      & 0      & a_{33} & a_{34} & 0      & 0      & 0      \\
+%		0      & 0      & a_{34} & a_{44} & 0      & 0      & a_{47} \\
+%		0      & 0      & 0      & 0      & a_{55} & a_{56} & 0      \\
+%		0      & 0      & 0      & 0      & a_{56} & a_{66} & a_{67} \\
+%		0      & a_{27} & 0      & a_{47} & 0      & a_{67} & a_{77}
+%		\end{pmatrix}
+%		\]
+		The three Hessian-Vector Products (HVPs) corresponding to the two colors are:
+	
+		\begin{align*}
+			H\begin{bmatrix} 1\\0\\1\\0\\1\\0\\0 \end{bmatrix} &=
+			\begin{bmatrix}
+				a_{11}\\
+				a_{12}\\
+				a_{33}\\
+				a_{34}\\
+				a_{55}\\
+				a_{56}\\
+				0
+			\end{bmatrix} &
+			H\begin{bmatrix} 0\\1\\0\\1\\0\\1\\0 \end{bmatrix} &=
+			\begin{bmatrix}
+				a_{12}\\
+				a_{22}\\
+				a_{34}\\
+				a_{44}\\
+				a_{56}\\
+				a_{66}\\
+				a_{27} + a_{47} + a_{67}
+			\end{bmatrix} &
+			H\begin{bmatrix} 0\\0\\0\\0\\0\\0\\1 \end{bmatrix} &=
+			\begin{bmatrix}
+				0\\
+				a_{27}\\
+				0\\
+				a_{47}\\
+				0\\
+				a_{67}\\
+				a_{77}
+			\end{bmatrix}
+		\end{align*}
+
+
+		The diagonal entry $a_{ii}$ is obtained from the HVP of the
+		$\phi(i)$-th color.
+		The off-diagonal entry $a_{ij}$ of a star with center $j$ in the subgraph of colors $\phi(i)$ and $\phi(j)$ is obtained
+		from the $i$-th entry of the HVP of the $\phi(j)$-th color.
+
+		In this case,
+		the off-diagonal entries $a_{27}, a_{47}, a_{67}$
+		are obtained from the rows $2, 4, 6$ respectively of
+		the HVP $He_7$.
+		For the off-diagonal entries $a_{12}, a_{34}, a_{56}$,
+		the 2-color subgraph is a simple edge so both nodes can be treated as center of the star.
+		So they can either be obtained from the rows $1, 3, 5$ respectively of
+		the HVP $H(e_2+e_4+e_6)$ or from the rows $2, 4, 6$ respectively of
+		the HVP $H(e_1+e_3+e_5)$.
+	\end{solutionbox}
+
+	\item How many colors would be used with \textbf{acyclic} coloring ?
+
+	\begin{solutionbox}{8cm}
+		\begin{center}
+			\includegraphics[height=7cm]{acyclic_coloring.png} \hspace{3cm} \framebox{2}
+		\end{center}
+	\end{solutionbox}
+
+	\item How would the nonzero entries of the Hessian be obtained from the
+	Hessian-Vector Products using this acyclic coloring ?
+	
+	\begin{solutionbox}{10cm}		
+		\begin{align*}
+			H\begin{bmatrix} 0\\1\\0\\1\\0\\1\\0 \end{bmatrix} &=
+			\begin{bmatrix}
+				a_{12}\\
+				a_{22}\\
+				a_{34}\\
+				a_{44}\\
+				a_{56}\\
+				a_{66}\\
+				a_{27} + a_{47} + a_{67}
+			\end{bmatrix} &
+			H\begin{bmatrix} 1\\0\\1\\0\\1\\0\\1 \end{bmatrix} &=
+			\begin{bmatrix}
+				a_{11}\\
+				a_{12} + a_{27}\\
+				a_{33}\\
+				a_{34} + a_{47}\\
+				a_{55}\\
+				a_{56} + a_{67}\\
+				a_{77}
+			\end{bmatrix}
+		\end{align*}
+
+		The diagonal entry $a_{ii}$ is obtained from the HVP of the
+		$i$th color.
+		The off-diagonal entry $a_{ij}$ of a leaf $i$ in the subgraph of colors $\phi(i)$ and $\phi(j)$ is obtained
+		from the $i$-th entry of the HVP of the $\phi(j)$-th color.
+		We then substract their values from the row $j$ of the HVP of color $\phi(i)$ and
+		remove this edge from the subgraph to allow new leaves to emerge and continue the process.
+
+		In this case,
+		the off-diagonal entries $a_{12}, a_{34}, a_{56}$
+		are obtained from the rows $1, 3, 5$ resp. of
+		the HVP $H(e_2+e_4+e_6)$.
+		Their values are then substracted from the
+		rows $2, 4, 6$ resp. of
+		the HVP $H(e_1+e_3+e_5+e_7)$.
+		The off-diagonal entries $a_{27}, a_{47}, a_{67}$
+		are then obtained from these respective rows.
+	\end{solutionbox}
+\end{itemize}
