@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.20.21
+# v1.0.3
 
 using Markdown
 using InteractiveUtils
@@ -131,11 +131,15 @@ md"""
 
 # ╔═╡ 5892dfbb-b375-407b-a0a7-da66adb71b67
 md"""
-[Theorem 3.5](https://epubs.siam.org/doi/10.1137/S0036144504444711) A coloring of the columns is distance-2 in the bipartite graph iff columns of the same color are structurally orthogonal.
+[**Theorem 3.5**](https://epubs.siam.org/doi/10.1137/S0036144504444711) A coloring of the columns is distance-2 in the bipartite graph iff columns of the same color are structurally orthogonal.
 
-[Lemma 3.7](https://epubs.siam.org/doi/10.1137/S0036144504444711) The column intersection graph is the square of the biparted graph restricted to its column vertices.
+Let the ``k``-th power ``G^k`` of a graph ``G`` be the graph with same nodes as ``G`` and an edge in ``G^k`` for each distance ``k`` neighbors in ``G``.
 
-[Lemma 2.1](https://epubs.siam.org/doi/10.1137/S0036144504444711) A coloring is distance-``k`` in ``G`` iff it is distance-1 in ``G^k``.
+[**Lemma 3.7**](https://epubs.siam.org/doi/10.1137/S0036144504444711) The column intersection graph is the square of the biparted graph restricted to its column vertices.
+
+[**Lemma 2.1**](https://epubs.siam.org/doi/10.1137/S0036144504444711) A coloring is distance-``k`` in ``G`` iff it is distance-1 in ``G^k``.
+
+**Corollary** A coloring of the columns is distance-1 in the column intersection graph iff columns of the same color are structurally orthogonal.
 """
 
 # ╔═╡ e882ebee-36ad-43d9-8ab7-20f7e8b2d9fe
@@ -174,9 +178,12 @@ ijkl = sparse([
 # ╔═╡ c2e4982a-3798-4c45-8831-5a76b3b29f6e
 md"[Section 2.4](https://epubs.siam.org/doi/10.1137/S0036144504444711) Consider the *adjacency graph* ``G`` of a matrix ``A`` be the graph whose adjacency matrix has same sparsity pattern as ``A``. So ``i`` and ``j`` are adjacent iff ``a_{ij}`` is nonzero."
 
+# ╔═╡ 4ab46ef8-0f6e-4e6d-8f6f-ac466977b476
+md"Do we need to aim for distance-2 coloring or does the symmetry of the matrix allows us to relax this ?"
+
 # ╔═╡ e6697119-2801-48e2-b978-facc00af636d
 md"""
-## Need 3 colors for a path of 4 vertices
+## What changes with symmetry ?
 
 ```math
 D^\top = \begin{bmatrix}
@@ -195,9 +202,7 @@ AD = \begin{bmatrix}
 
 # ╔═╡ a7b85908-404b-475b-9875-c1190de5ff71
 md"""
-* Each off-diagonal entry ``a_{uv}`` corresponds to an edge in the graph.
-* The edge links nodes ``u, v`` of 2 different colors ``\phi(u)`` and ``\phi(v)``
-* If ``u`` is not adjacent to any other nodes of color ``\phi(v)`` then ``a_{uv}`` is the **only term** at the row ``u`` of the HVP of color ``\phi(v)``
+[**Definition 4.2**](https://epubs.siam.org/doi/10.1137/S0036144504444711) A coloring of the columns of a symmetric matrix ``A`` is *symmetrically orthogonal* if for every nonzero element ``a_{uv}``, either (1) there is no other column of color ``\phi(u)`` with a nonzero in row ``r_u``, or (2) there is no other column of color ``\phi(v)`` with a nonzero in row ``r_v``.
 """
 
 # ╔═╡ 760ef943-e9d9-4cdc-8977-932cf6fcb78a
@@ -209,7 +214,7 @@ md"""
 """
 
 # ╔═╡ 0445aae6-2f7e-42b8-b30b-f31298cdeed0
-md"`n` = $(@bind star_n Slider(3:10, default = 6, show_value = true))"
+md"`n` = $(@bind star_n Slider(3:10, default = 5, show_value = true))"
 
 # ╔═╡ 95d7e9cd-b4a1-4205-b7d4-8c10916be8a2
 star = let
@@ -245,31 +250,11 @@ md"## Small Example"
 # ╔═╡ d0ba0c62-c788-4871-959c-fe7044519849
 md"""
 # Less colors but nontrivial substitution
-
-```math
-\begin{bmatrix}
-  a_{1} & a_{2} & &\\
-  a_2 & a_3 & a_4 &\\
-  & a_4 & a_5 & a_6\\
-  & & a_6 & a_7
-\end{bmatrix}
-```
-With star coloring, 3 colors:
 """
-
-# ╔═╡ fab75cf6-21cc-4001-84b4-9e66f55d5a6a
-ijkl2 = sparse([
-	1 2 0 0
-	2 3 4 0
-	0 4 5 6
-	0 0 6 7
-]);
 
 # ╔═╡ b33bf212-5f88-47ab-ba10-a2815d17f235
 md"""
-## 2 colors with substitutions
-
-With 2 colors, our two forward tangents are
+With star coloring, we need at least 3 colors. With 2 colors, our two forward tangents are
 ```math
 D^\top = \begin{bmatrix}
   1 & 0 & 1 & 0\\
@@ -367,7 +352,8 @@ function colored_plots(A; decompression, structure, partition = :column, kws...)
 		end
 	end
 	adj = SparseMatrixColorings.AdjacencyGraph(A)
-	gp = gplot(Graphs.SimpleDiGraph(S - Diagonal(diag(S))); nodefillc = colorscheme[result.color], kws...)
+	G = Graphs.SimpleDiGraph(S - Diagonal(diag(S)))
+	gp = gplot(G; nodefillc = colorscheme[result.color], nodelabel=1:Graphs.nv(G), kws...)
 	A_img, gp, B_img
 end
 
@@ -506,9 +492,6 @@ viz(star, decompression = :direct, structure = :symmetric, plot_size = (5cm, 5cm
 # ╔═╡ 3e6fc4af-19f4-4ff9-b9cf-759e831ff2a4
 viz(SparseMatrixColorings.what_fig_41().A, decompression = :direct, structure = :symmetric, plot_size = (5cm, 5cm))
 
-# ╔═╡ 884f9025-10e9-4657-88ec-55e6c9b6d530
-viz(ijkl2, decompression = :direct, structure = :symmetric, plot_size = (3cm, 3cm))
-
 # ╔═╡ 647c372e-c094-4dfc-8a48-7b7f93fb94dd
 viz(ijkl, decompression = :substitution, structure = :symmetric, plot_size = (4cm, 4cm))
 
@@ -534,6 +517,24 @@ function qa(question::Markdown.MD, answer)
 end
 end
 
+# ╔═╡ b9dc524d-6c0b-4507-842c-b4b6cc90fd96
+qa(md"Is a coloring of the columns is distance-2 in the adjacency graph iff columns of the same color are structurally orthogonal ?", md"""
+The adjacency graph ``G`` is the quotient graph of the bipartite graph, say ``B``, under the identification ``r_i \sim a_i`` for all ``i``.
+If the diagonal entries of ``A`` are nonzero, for distance-1 neighbors ``a_u r_v`` of ``B``, we have a distance-2 neighbor ``a_ua_v`` of ``B`` (with the path ``a_ur_v, r_v a_v``). So two nodes are distance-2 neighbors in ``G`` iff they are distance-2 neighbors in ``B``.
+As a consequence, the statement is true **if the diagonal entries of ``A`` are nonzero.
+If diagonal entries of ``A`` are allowed to be zero, there is the following counter example where both columns are structurally orthogonal even though they are distance 1 neighbors (and hence also distance 2 neighbors).
+```math
+\begin{bmatrix}\cdot & 1\\1 & \cdot\end{bmatrix}
+```
+"""
+)
+
+# ╔═╡ 1f02fda8-6b22-429e-9ef4-243e97372526
+qa(md"Is this a distance-2 coloring ? Can we deduce all values of the hessian given the values of ``AD``.", md"""
+It is not a distance-2 coloring because the nodes 2 and 3 are distance 2 neighbors. Because of this, in the first row of the second column of ``AD`` we get ``a_2 + a_3`` which prevents us distinguish ``a_2`` or ``a_3``.
+However, ``a_2`` and ``a_3`` can be obtained from the first column of ``AD`` so we can retrieve all values of the Hessian from ``AD``.
+""")
+
 # ╔═╡ 592510fd-a0e4-42e5-ae5b-cac301e74f0a
 qa(md"How is the subgraph induced by a pair of colors ?", md"""
 It does not contain paths of more than 3 vertices and adjacent vertices have opposite colors.
@@ -546,6 +547,16 @@ qa(md"From which HVP do we determine the off-diagonal entries ?",
 md"""
 * For the edges 34 and 64, respectively between the yellow nodes 3, 6 and the blue nodes 4, they are part of the star centered at the blue node 4 so they are obtained from the entries 3 and 6 blue HVP.
 * For the edges 12, 32, 52 and 62, respectively between the yellow nodes 1, 3, 5, 6 and the pink node 2, they are part of the star centered at the pink node 2 so they are obtained from the entries 1, 3, 5 and 6 of the pink HVP.
+""")
+
+# ╔═╡ 60070a94-d9ca-474b-9c6f-37468e3f030d
+qa(md"How do we get the value of ``a_4`` ?",
+md"""
+Two ways:
+1) Get the value of ``a_2`` from ``(AD)_{12}`` then get ``a_4`` from ``(AD)_{21} - a_2``
+2) Get the value of ``a_6`` from ``(AD)_{41}`` then get ``a_4`` from ``(AD)_{32} - a_6``
+
+``a_4`` cannot be read directly from a single entry, it needs **substitutions**. This example shows that enabling substitutions allows us to use less colors to find all entries of the Hessian!
 """)
 
 # ╔═╡ 04ea8b79-63ba-4eb4-938c-98a21668924a
@@ -632,7 +643,7 @@ StableRNGs = "~1.0.4"
 PLUTO_MANIFEST_TOML_CONTENTS = """
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.12.3"
+julia_version = "1.12.7"
 manifest_format = "2.0"
 project_hash = "d0f350d99ab1208cd99a29ffb7cc7fb7a62f7213"
 
@@ -874,7 +885,7 @@ weakdeps = ["Dates", "LinearAlgebra"]
 [[deps.CompilerSupportLibraries_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "e66e0078-7015-5450-92f7-15fbd957f2ae"
-version = "1.3.0+1"
+version = "1.3.1+2"
 
 [[deps.Compose]]
 deps = ["Base64", "Colors", "DataStructures", "Dates", "IterTools", "JSON", "LinearAlgebra", "Measures", "Printf", "Random", "Requires", "Statistics", "UUIDs"]
@@ -1492,7 +1503,7 @@ version = "0.3.4"
 
 [[deps.MozillaCACerts_jll]]
 uuid = "14a3606d-f60d-562e-9121-12d972cd8159"
-version = "2025.5.20"
+version = "2025.11.4"
 
 [[deps.NaNMath]]
 deps = ["OpenLibm_jll"]
@@ -1556,7 +1567,7 @@ version = "0.8.7+0"
 [[deps.OpenSSL_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "458c3c95-2e84-50aa-8efc-19380b2a3a95"
-version = "3.5.4+0"
+version = "3.5.6+0"
 
 [[deps.OrderedCollections]]
 git-tree-sha1 = "05868e21324cede2207c6f0f466b4bfef6d5e7ee"
@@ -2136,8 +2147,11 @@ version = "17.7.0+0"
 # ╟─19dd6563-1a4e-479f-881d-9bcbc720ea36
 # ╟─32440932-322a-46ce-911d-5fa6a1136bca
 # ╟─c2e4982a-3798-4c45-8831-5a76b3b29f6e
+# ╟─b9dc524d-6c0b-4507-842c-b4b6cc90fd96
+# ╟─4ab46ef8-0f6e-4e6d-8f6f-ac466977b476
 # ╟─e6697119-2801-48e2-b978-facc00af636d
-# ╠═33b368e7-d71e-40ff-8170-a18d11db98fc
+# ╟─33b368e7-d71e-40ff-8170-a18d11db98fc
+# ╟─1f02fda8-6b22-429e-9ef4-243e97372526
 # ╟─a7b85908-404b-475b-9875-c1190de5ff71
 # ╟─760ef943-e9d9-4cdc-8977-932cf6fcb78a
 # ╟─70296870-49af-4564-bdb7-bd2d49f9114b
@@ -2150,9 +2164,8 @@ version = "17.7.0+0"
 # ╟─3e6fc4af-19f4-4ff9-b9cf-759e831ff2a4
 # ╟─26191290-2b2d-43fe-b2bf-d690fd0bbe15
 # ╟─d0ba0c62-c788-4871-959c-fe7044519849
-# ╟─884f9025-10e9-4657-88ec-55e6c9b6d530
-# ╟─fab75cf6-21cc-4001-84b4-9e66f55d5a6a
 # ╟─b33bf212-5f88-47ab-ba10-a2815d17f235
+# ╟─60070a94-d9ca-474b-9c6f-37468e3f030d
 # ╟─647c372e-c094-4dfc-8a48-7b7f93fb94dd
 # ╟─e3ae5697-6b0b-4d5f-99a0-d579b6eff655
 # ╟─04ea8b79-63ba-4eb4-938c-98a21668924a
@@ -2177,8 +2190,8 @@ version = "17.7.0+0"
 # ╠═75597493-3e69-437f-9408-b43a89b35559
 # ╠═6bd04f2f-ed5f-4ecf-91dd-8868ec5b83e1
 # ╠═4f8de444-dcb4-411a-b087-6948699614e0
-# ╠═dcf92bc9-5e0f-4716-bb07-ca0d9b73b166
-# ╠═e9135060-75d4-4f5a-9315-2e5fbb493cdf
+# ╟─dcf92bc9-5e0f-4716-bb07-ca0d9b73b166
+# ╟─e9135060-75d4-4f5a-9315-2e5fbb493cdf
 # ╟─2728dc2c-ca17-4989-9259-451f95a24bd2
 # ╟─e820e135-2df2-4fa3-a09b-8ce7e5a1f745
 # ╟─21898d8d-f822-4128-ad56-d9a10865fb1d
