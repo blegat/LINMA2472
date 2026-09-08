@@ -1,0 +1,83 @@
+\titledquestion{Automatic Differentiation and Attention}
+
+Consider the matrices
+$V \in \mathbb{R}^{d_v \times n_\text{ctx}},
+K \in \mathbb{R}^{d_k \times n_\text{ctx}}$
+and an attention head applied to a vector $q$ : $a(q) = V\text{softmax}(K^\top q / \sqrt{d_k})$
+where the $i$-th entry of $\text{softmax}(x)$ is $\exp(x_i) / \sum_j \exp(x_j)$.
+Suppose that you want to compute Jacobian $L$ of $a(q)$, which is the derivative of all outputs of the attention
+head with respect to each entry of the vector $q$.
+In other words, $L_{ij} = \partial a_i / \partial q_j$.
+
+\begin{itemize}
+	\item Find the matrix $J$ to be used to compute
+	  the derivative of $a$ with respect to the $j$-th entry of $q$
+	  with the formula
+	  $$\partial a / \partial q_j = V J K^\top e_j / \sqrt{d_k}.$$
+	  \emph{Hint:} The entries of the matrix $J$ can be written purely in terms
+	  of the entries of the vector $s = \text{softmax}(K^\top q / \sqrt{d_k})$.
+    \begin{solutionbox}{9cm}
+		Let $x = K^\top q / \sqrt{d_k}$. We have
+		\begin{align*}
+			J_{ij} & =
+			\partial s_i / \partial x_j\\
+			& =
+			\frac{\partial}{\partial x_j} \frac{\exp(x_i)}{\sum_{k=1}^{n_{\text{ctx}}} \exp(x_k)}\\
+			& =
+			\frac{\exp(x_i)}{\sum_{k=1}^{n_{\text{ctx}}} \exp(x_k)}
+			\frac{\partial x_i}{\partial x_j}
+			-
+			\frac{\exp(x_i)}{(\sum_{j=1}^{n_{\text{ctx}}} \exp(x_j))^2}
+			\frac{\partial}{\partial x_j} \sum_{k=1}^{n_{\text{ctx}}} \exp(x_k)\\
+			& =
+			s_i
+			\frac{\partial x_i}{\partial x_j}
+			- s_is_j.
+		\end{align*}
+		So the entries of $J$ are:
+		\begin{align*}
+		  J_{ii} & = s_i - s_i^2\\
+		  J_{ij} & = -s_is_j & \quad i \neq j.
+		\end{align*}
+    \end{solutionbox}
+    \item The previous question corresponds to \emph{forward} differentiation.
+      Using \emph{reverse} differentiation, you would like now to
+	  compute the gradient of $a_i$ with respect to the vector $q$.
+	  How can you compute this gradient vector via matrix-vector products ?
+
+	  \emph{Hint:} $\partial a_i / \partial q_j$ is the scalar product between
+	  $\partial a / \partial q_j$ and $e_i$.
+    \begin{solutionbox}{6cm}
+		As $J$ is diagonal, it is its own transpose.
+		\begin{align*}
+	      \partial a_i / \partial q_j
+		  & =
+		  \langle V J K^\top e_j / \sqrt{d_k}, e_i \rangle\\
+		  & =
+		  \langle e_j, K J^\top V^\top e_i / \sqrt{d_k} \rangle\\
+	      \partial a_i / \partial q
+		  & =
+		  K J V^\top e_i / \sqrt{d_k}\\
+		\end{align*}
+    \end{solutionbox}
+    \item
+	Depending on $d_v, d_k, n_\text{ctx}$, which one will be faster between forward and reverse differentiation
+	to compute the \textbf{full} Jacobian matrix $\partial a / \partial q$ ? Why ?
+    \begin{solutionbox}{4cm}
+		Forward diff concatenates $\partial a / \partial q_j$ horizontally for each $j$ and 
+		reverse diff concatenates $\partial a_i / \partial q$
+		vertically for each $i$.
+		In other words, forward diff computes $V(JK^\top)$ while
+		reverse diff computes $K(J^\top V^\top)$ or equivalently
+		$(VJ)K^\top$.
+		The complexity of forward diff is $O(n_\text{ctx}^2 d_k + n_\text{ctx} d_k d_v)$
+		while the complexity of reverse diff is
+		$O(n_\text{ctx}^2 d_v + n_\text{ctx} d_k d_v)$.
+		This means that forward diff is faster if $d_k < d_v$, otherwise reverse diff is faster.
+    \end{solutionbox}
+    \item How could this computation be accelerated using a GPU instead of a CPU ?
+    \begin{solutionbox}{2cm}
+		As these are matrix-matrix products, this computation is highly parallelizable
+		and hence will get a good speed up on a GPU.
+    \end{solutionbox}
+\end{itemize}
