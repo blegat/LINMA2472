@@ -15,17 +15,17 @@ See the README in each subfolder for more details and troubleshooting:
 
 | Week  | Monday     | Lecture Topic | Lecturer |       Practice         |
 |-------|------------|---------------|----------|------------------------|
-| S1    | 15/09/2025 | Scalar AD     | Legat    | ⚗️ Forward Lab         |
-| S2    | 22/09/2025 | Tensor AD     | Legat    | 🚀 HW1 + ️⚗ Reverse Lab |
-| S3    | 29/09/2025 | Tensor AD     | Legat    |                        |
+| S1    | 14/09/2025 | Scalar AD     | Legat    | ⚗️ Forward Lab         |
+| S2    | 21/09/2025 | Tensor AD     | Legat    | 🚀 HW1 + ️⚗ Reverse Lab |
+| S3    | 28/09/2025 | Tensor AD     | Legat    |                        |
 | S4    | 05/10/2025 | Second order  | Legat    |                        |
-| S5    | 13/10/2025 | Transformers  | Legat    |                        |
-| S6    | 20/10/2025 | Transformers  | Legat    | 💬 Midterm HW1         |
-|       | 27/10/2025 | 🎃            |          |                        |
-| S7    | 03/11/2025 | Kernel        | Calbert  |                        |
-| S8    | 10/11/2025 | Kernel        | Calbert  |                        |
-| S9    | 17/11/2025 | Kernel        | Calbert  |                        |
-| S10   | 24/11/2025 | Diffusion     | Legat    | 🏁 HW1                 |
-| S11   | 01/12/2025 | Diffusion     | Legat    | 💬 Oral HW1            |
-| S12   | 08/12/2025 | Implicit Diff | Legat    | 💬 Oral HW1            |
-| S13   | 15/12/2025 | Sparse AD     |          | 💬 Oral HW1            |
+| S5    | 12/10/2025 | Transformers  | Legat    |                        |
+| S6    | 19/10/2025 | Transformers  | Legat    | 💬 Midterm HW1         |
+|       | 26/10/2025 | 🎃            |          |                        |
+| S7    | 02/11/2025 |               | Blondel  |                        |
+| S8    | 09/11/2025 |               | Blondel  |                        |
+| S9    | 16/11/2025 |               | Blondel  |                        |
+| S10   | 23/11/2025 | Diffusion     | Legat    | 🏁 HW1                 |
+| S11   | 30/11/2025 | Diffusion     | Legat    | 💬 Oral HW1            |
+| S12   | 07/12/2025 | Implicit Diff | Legat    | 💬 Oral HW1            |
+| S13   | 14/12/2025 | Sparse AD     |          | 💬 Oral HW1            |
