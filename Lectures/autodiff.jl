@@ -594,7 +594,7 @@ md"""
 
 **Forward pass (2nd)**:
 1. Forward pass computes ``s_2 = f_2(s_1)`` → Jacobian ``\partial s_2 / \partial s_1 = J_2``
-2. Local Jacobian ``J_2 = \partial f_2(s_1)`` → The Jacobian is the 3D array ``\partial J_2 / \partial s_1 = \partial^2 f_2``
+2. Local Jacobian ``J_2 = \partial f_2(s_1)`` → The Hessian is the 3D array ``\partial J_2 / \partial s_1 = \partial^2 f_2``
 3. Backward pass computes ``r_1 = r_2 \cdot \partial f_2(s_1)`` → Jacobian of ``(s_1, r_2) \mapsto r_2 \cdot \partial f_2(s_1)`` is ``(r_2 \cdot \partial^2 f_2(s_1), \partial f_2(s_1)) = (r_2 \cdot \partial^2 f_2, J_2)``. Note that here ``r_2 \in \mathbb{R}^{d_k}`` is multiplying the first dimension of the tensor ``\partial^2 f_2(s_1) \in \mathbb{R}^{d_k \times d_{k-1} \times d_{k-1}}`` so the result is a symmetric matrix of dimension ``\mathbb{R}^{d_{k-1} \times d_{k-1}}``
 
 **Reverse pass (2nd)**:
