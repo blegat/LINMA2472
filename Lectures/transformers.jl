@@ -290,25 +290,6 @@ md"# Decoder-only transformer"
 # ╔═╡ a3efd921-eb14-4901-9d6c-800cc812fe02
 md"## Self-Attention"
 
-# ╔═╡ b9caae1a-38aa-4d01-9cda-3d6782fb0e03
-HAlign(md"""
-*Self-Attention* with embedding ``C`` is:
-```math
-\text{Masked-MultiHead}(CX, CX, CX)
-```
-
-The embedding vectors ``CX`` take then different projections
-for value, key, query and also for different heads!
-```math
-\text{head}_j = \text{Masked-Attention}(W_j^VCX, W_j^KCX, W_j^QCX)
-```
-""",
-HTML(html(@draw begin
-	draw_transformer()
-	highlight(200, 250, 375, 350)
-end 300 400)),
-)
-
 # ╔═╡ 4b61363d-87c9-4755-8286-44df34e9dd6a
 qa(
 html"Is the order between the tokens taken into account by the model ?",
@@ -319,24 +300,6 @@ No. Since the same matrices ``W_j^V``, ``W_j^K`` and ``W_j^Q`` multiply the diff
 
 # ╔═╡ 453544fc-0e3e-4e04-8c0c-192f3a038884
 md"## Positional encoding"
-
-# ╔═╡ c5be3956-5102-4d88-bfdb-9813c0555fe1
-HAlign(
-md"""
-Cannot sum ``Cx_i + e_i`` with one-hot encoding ``e_i \in \mathbb{R}^{n_\text{ctx}}`` as the dimension of ``Cx_i`` is ``\mathbb{R}^{d_\text{emb}}``.
-
-So we also add a positional embedding ``P`` : ``Cx_i + Pe_i = Cx_i + p_i``.
-
-With Self-Attention:
-```math
-\text{Self-MultiHead}(CX + P, CX + P, CX + P)
-```
-""",
-HTML(html(@draw begin
-	draw_transformer()
-	highlight(310, 410, 530, 510)
-end 300 400))
-)
 
 # ╔═╡ 92e01e21-ca77-43fc-9bf8-0c5a7aaed1bb
 md"## Residual connection"
@@ -355,39 +318,6 @@ md"## Transformer variations"
 
 # ╔═╡ a5b20939-9afa-48c0-aa67-cbca6bc99804
 md"## Cost of LLMs"
-
-# ╔═╡ 8d6ec2b3-997e-4df5-a3b2-c1dffa53d0ec
-qa(
-	md"What is the time complexity of inference with respect to ``d_\text{emb}``, ``n_\text{voc}``, ``n_\text{ctx}``, ``d_\text{ff}``, ``h`` and ``N`` ?",
-HAlign(
-md"""
-| Input | Parameters | Time |
-|-------|------------|------|
-| ``CX + P \in \mathbb{R}^{d_\text{emb} \times n_\text{ctx}}`` | ``W_j^V \in \mathbb{R}^{d_v \times d_\text{emb}}`` | ``O(d_v d_\text{emb} n_\text{ctx})`` |
-| ``CX + P \in \mathbb{R}^{d_\text{emb} \times n_\text{ctx}}`` | ``W_j^K, W_j^Q \in \mathbb{R}^{d_k \times d_\text{emb}}`` | ``O(d_k d_\text{emb} n_\text{ctx})`` |
-| ``K, Q \in \mathbb{R}^{d_k \times n_\text{ctx}}`` |  | ``O(d_k n_\text{ctx}^2)`` |
-| ``V \in \mathbb{R}^{d_v \times n_\text{ctx}}, ... \in \mathbb{R}^{n_\text{ctx} \times n_\text{ctx}}`` |  | ``O(d_v n_\text{ctx}^2)`` |
-| ``... \in \mathbb{R}^{d_v \times n_\text{ctx}}`` | ``W^O \in \mathbb{R}^{d_\text{emb} \times d_v}`` | ``O(d_\text{emb} d_v n_\text{ctx})`` |
-| ``... \in \mathbb{R}^{d_\text{emb} \times n_\text{ctx}}`` | ``W_1 \in \mathbb{R}^{d_\text{ff} \times d_\text{emb}}`` | ``O(d_\text{emb} d_\text{ff} n_\text{ctx})`` |
-| ``... \in \mathbb{R}^{d_\text{ff} \times n_\text{ctx}}`` | ``W_2 \in \mathbb{R}^{d_\text{emb} \times d_\text{ff}}`` | ``O(d_\text{emb} d_\text{ff} n_\text{ctx})`` |
-
-So for ``N`` layers (ignoring the complexity of the embedding):
-```math
-O(Nn_\text{ctx}(n_\text{ctx}(d_v + d_k) + d_\text{emb}(d_v+d_k+d_\text{ff})))
-```
-Assuming that ``d_v, d_k, d_\text{ff}`` has the same scale as ``d_\text{emb}``:
-```math
-O(Nn_\text{ctx}^2d_\text{emb} + Nn_\text{ctx}d_\text{emb}^2)
-```
-""",
-HTML(html(@draw begin
-	draw_transformer()
-	translate(-10, 150)
-	scale(0.6)
-	Luxor.placeimage(readpng("images/multi-head.png"), centered = true)
-end 300 400))
-)
-)
 
 # ╔═╡ a14e505e-2e4a-4c73-8133-7560ba58916b
 md"## Key-Value (KV) cache"
@@ -437,37 +367,6 @@ img("sutskever2014Sequence")
 
 # ╔═╡ 6bff7bca-ea1d-44c6-b8c3-040250f90654
 md"## Cross-Attention"
-
-# ╔═╡ 3d8add97-59e1-444a-838b-85c2a2ac60b3
-HAlign(
-md"""
-*Cross-Attention* between
-* values and keys ``E(CX + P)`` where ``E`` is the encoder, and ``X`` is the matrix of input tokens
-* query ``Q`` depending on past output ``Y`` and number of layers already applied
-```math
-\text{MultiHead}(E(CX + P), E(CX + P), Q)
-```
-
-The embedding vectors ``CX`` take then different projections
-for value, key, query and also for different heads!
-```math
-\begin{multline}
-\text{head}_j = \text{Attention}(W_j^VV, W_j^KK, W_j^QQ)\\
-\text{where } V = K = E(CX + P)
-\end{multline}
-```
-""",
-HTML(html(@draw begin
-	draw_transformer(false)
-	highlight(31, -97, 205, 5)
-	#sethue("red")
-	#setopacity(1)
-	fontsize(32)
-	text("CX + P", Point(-60, 252), halign = :center)
-	text("CY + P", Point(65, 252), halign = :center)
-	text(L"E(CX + P)", Point(-70, -160), halign = :center)
-end 300 400)),
-)
 
 # ╔═╡ f572e113-b36b-4a6b-96c7-c26f100e1ad4
 md"## Utils"
@@ -604,68 +503,6 @@ Similarly, in the masked case:
 	[70, 30],
 )
 
-# ╔═╡ 18c26901-85eb-45ac-89bf-b03bd255007a
-HAlign(
-md"""
-Residual connection $(cite("he2015Deep"))
-$(img("resnet"))
-""",
-HTML(html(@draw begin
-	draw_transformer()
-	highlight(210, -85, 290, -45)
-	highlight(360, -75, 440, 50)
-	highlight(210, 210, 290, 250)
-	highlight(360, 220, 440, 420)
-end 300 400))
-)
-
-# ╔═╡ 5f05e717-a51a-4a99-bb11-cc493217f93f
-HAlign(
-md"""
-Norm of gradient increases exponentially with depth.
-Issue for deep neural net.
-Consider output
-```math
-\begin{bmatrix}
-  y_{1,1} & \ldots & y_{1,d_\text{emb}}\\
-  \vdots & \ddots & \vdots\\
-  y_{d_\text{batch},1} & \ldots & y_{d_\text{batch},d_\text{emb}}
-\end{bmatrix}
-```
-Normalization : ``y_{i,j} \mapsto g(y_{i,j} - \mu_{i,j})/\sigma_{i,j}`` for gain ``g``, mean ``\mu`` and standard deviation ``\sigma``.
-
-* Batch normalization : ``\sigma_{i,j} = \sigma_{j}`` $(cite("ioffe2015Batch"))
-* Layer normalization : ``\sigma_{i,j} = \sigma_{i}`` $(cite("ba2016Layer"))
-
-Batch norm depends on the batch hence [is tricky to implement](https://www.youtube.com/watch?v=P6sfmUTpUmc). Layer normalization is used in $(cite("vaswani2017Attentiona")).
-""",
-HTML(html(@draw begin
-	draw_transformer()
-	highlight(290, -85, 360, -45)
-	highlight(290, 210, 360, 250)
-end 300 400))
-)
-
-# ╔═╡ d1ba8da3-add8-4dbe-9ebf-9a32fa5cd5dd
-HAlign(
-md"""
-*Pre-activation* for residual neural networks introduced in $(cite("he2016Identity")) and used in GPT-2 $(cite("radford2019Language")). See figure on the right.
-
-*Rotary Positional Encoding* $(cite("su2023RoFormer")) replaces
-``W^K(Cx_i + p_i)`` and ``W^Q(Cx_i + p_i)``
-by ``R^i W^KCx_i`` and ``R^i W^QCx_i`` where ``R`` is a rotation matrix.
-Advantage : ``\langle k_i, q_j \rangle`` contains ``R^{i - j}`` → **relative** difference of position.
-""",
-HTML(html(@draw begin
-	draw_transformer()
-	sethue("blue")
-	scale(2, 2)
-	arrow(Point(175, -36), Point(180, -43), Point(170, -48), Point(145, -53), :stroke, startarrow=false, finisharrow=true)
-	arrow(Point(175, -30), Point(190, -10), Point(195, 10), Point(145, 17), :stroke, startarrow=false, finisharrow=true)
-	arrow(Point(175, 120), Point(190, 130), Point(195, 150), Point(145, 192), :stroke, startarrow=false, finisharrow=true)
-end 300 400)),
-)
-
 # ╔═╡ 25b79953-fd7c-46c1-b760-d57c09910981
 qa(md"""
 How does the number of parameters of transformers compare with $(cite("bengio2000Neural")) or RNNs for large ``n_\text{ctx}`` ?
@@ -746,6 +583,59 @@ function draw_transformer(decoder_only = true)
 	end
 end
 
+# ╔═╡ d1ba8da3-add8-4dbe-9ebf-9a32fa5cd5dd
+HAlign(
+md"""
+*Pre-activation* for residual neural networks introduced in $(cite("he2016Identity")) and used in GPT-2 $(cite("radford2019Language")). See figure on the right.
+
+*Rotary Positional Encoding* $(cite("su2023RoFormer")) replaces
+``W^K(Cx_i + p_i)`` and ``W^Q(Cx_i + p_i)``
+by ``R^i W^KCx_i`` and ``R^i W^QCx_i`` where ``R`` is a rotation matrix.
+Advantage : ``\langle k_i, q_j \rangle`` contains ``R^{i - j}`` → **relative** difference of position.
+""",
+HTML(html(@draw begin
+	draw_transformer()
+	sethue("blue")
+	scale(2, 2)
+	arrow(Point(175, -36), Point(180, -43), Point(170, -48), Point(145, -53), :stroke, startarrow=false, finisharrow=true)
+	arrow(Point(175, -30), Point(190, -10), Point(195, 10), Point(145, 17), :stroke, startarrow=false, finisharrow=true)
+	arrow(Point(175, 120), Point(190, 130), Point(195, 150), Point(145, 192), :stroke, startarrow=false, finisharrow=true)
+end 300 400)),
+)
+
+# ╔═╡ 8d6ec2b3-997e-4df5-a3b2-c1dffa53d0ec
+qa(
+	md"What is the time complexity of inference with respect to ``d_\text{emb}``, ``n_\text{voc}``, ``n_\text{ctx}``, ``d_\text{ff}``, ``h`` and ``N`` ?",
+HAlign(
+md"""
+| Input | Parameters | Time |
+|-------|------------|------|
+| ``CX + P \in \mathbb{R}^{d_\text{emb} \times n_\text{ctx}}`` | ``W_j^V \in \mathbb{R}^{d_v \times d_\text{emb}}`` | ``O(d_v d_\text{emb} n_\text{ctx})`` |
+| ``CX + P \in \mathbb{R}^{d_\text{emb} \times n_\text{ctx}}`` | ``W_j^K, W_j^Q \in \mathbb{R}^{d_k \times d_\text{emb}}`` | ``O(d_k d_\text{emb} n_\text{ctx})`` |
+| ``K, Q \in \mathbb{R}^{d_k \times n_\text{ctx}}`` |  | ``O(d_k n_\text{ctx}^2)`` |
+| ``V \in \mathbb{R}^{d_v \times n_\text{ctx}}, ... \in \mathbb{R}^{n_\text{ctx} \times n_\text{ctx}}`` |  | ``O(d_v n_\text{ctx}^2)`` |
+| ``... \in \mathbb{R}^{d_v \times n_\text{ctx}}`` | ``W^O \in \mathbb{R}^{d_\text{emb} \times d_v}`` | ``O(d_\text{emb} d_v n_\text{ctx})`` |
+| ``... \in \mathbb{R}^{d_\text{emb} \times n_\text{ctx}}`` | ``W_1 \in \mathbb{R}^{d_\text{ff} \times d_\text{emb}}`` | ``O(d_\text{emb} d_\text{ff} n_\text{ctx})`` |
+| ``... \in \mathbb{R}^{d_\text{ff} \times n_\text{ctx}}`` | ``W_2 \in \mathbb{R}^{d_\text{emb} \times d_\text{ff}}`` | ``O(d_\text{emb} d_\text{ff} n_\text{ctx})`` |
+
+So for ``N`` layers (ignoring the complexity of the embedding):
+```math
+O(Nn_\text{ctx}(n_\text{ctx}(d_v + d_k) + d_\text{emb}(d_v+d_k+d_\text{ff})))
+```
+Assuming that ``d_v, d_k, d_\text{ff}`` has the same scale as ``d_\text{emb}``:
+```math
+O(Nn_\text{ctx}^2d_\text{emb} + Nn_\text{ctx}d_\text{emb}^2)
+```
+""",
+HTML(html(@draw begin
+	draw_transformer()
+	translate(-10, 150)
+	scale(0.6)
+	Luxor.placeimage(readpng("images/multi-head.png"), centered = true)
+end 300 400))
+)
+)
+
 # ╔═╡ a873f760-bfc1-489f-a58e-75e12afa54f2
 function highlight(a, b, c, d)
 	sethue("green")
@@ -755,6 +645,116 @@ function highlight(a, b, c, d)
 	setopacity(1)
 	polysmooth(box(Point(a, b), Point(c, d), vertices=true), 10, action = :stroke)
 end
+
+# ╔═╡ b9caae1a-38aa-4d01-9cda-3d6782fb0e03
+HAlign(md"""
+*Self-Attention* with embedding ``C`` is:
+```math
+\text{Masked-MultiHead}(CX, CX, CX)
+```
+
+The embedding vectors ``CX`` take then different projections
+for value, key, query and also for different heads!
+```math
+\text{head}_j = \text{Masked-Attention}(W_j^VCX, W_j^KCX, W_j^QCX)
+```
+""",
+HTML(html(@draw begin
+	draw_transformer()
+	highlight(200, 250, 375, 350)
+end 300 400)),
+)
+
+# ╔═╡ c5be3956-5102-4d88-bfdb-9813c0555fe1
+HAlign(
+md"""
+Cannot sum ``Cx_i + e_i`` with one-hot encoding ``e_i \in \mathbb{R}^{n_\text{ctx}}`` as the dimension of ``Cx_i`` is ``\mathbb{R}^{d_\text{emb}}``.
+
+So we also add a positional embedding ``P`` : ``Cx_i + Pe_i = Cx_i + p_i``.
+
+With Self-Attention:
+```math
+\text{Self-MultiHead}(CX + P, CX + P, CX + P)
+```
+""",
+HTML(html(@draw begin
+	draw_transformer()
+	highlight(310, 410, 530, 510)
+end 300 400))
+)
+
+# ╔═╡ 18c26901-85eb-45ac-89bf-b03bd255007a
+HAlign(
+md"""
+Residual connection $(cite("he2015Deep"))
+$(img("resnet"))
+""",
+HTML(html(@draw begin
+	draw_transformer()
+	highlight(210, -85, 290, -45)
+	highlight(360, -75, 440, 50)
+	highlight(210, 210, 290, 250)
+	highlight(360, 220, 440, 420)
+end 300 400))
+)
+
+# ╔═╡ 5f05e717-a51a-4a99-bb11-cc493217f93f
+HAlign(
+md"""
+Norm of gradient increases exponentially with depth.
+Issue for deep neural net.
+Consider output
+```math
+\begin{bmatrix}
+  y_{1,1} & \ldots & y_{1,d_\text{emb}}\\
+  \vdots & \ddots & \vdots\\
+  y_{d_\text{batch},1} & \ldots & y_{d_\text{batch},d_\text{emb}}
+\end{bmatrix}
+```
+Normalization : ``y_{i,j} \mapsto g(y_{i,j} - \mu_{i,j})/\sigma_{i,j}`` for gain ``g``, mean ``\mu`` and standard deviation ``\sigma``.
+
+* Batch normalization : ``\sigma_{i,j} = \sigma_{j}`` $(cite("ioffe2015Batch"))
+* Layer normalization : ``\sigma_{i,j} = \sigma_{i}`` $(cite("ba2016Layer"))
+
+Batch norm depends on the batch hence [is tricky to implement](https://www.youtube.com/watch?v=P6sfmUTpUmc). Layer normalization is used in $(cite("vaswani2017Attentiona")).
+""",
+HTML(html(@draw begin
+	draw_transformer()
+	highlight(290, -85, 360, -45)
+	highlight(290, 210, 360, 250)
+end 300 400))
+)
+
+# ╔═╡ 3d8add97-59e1-444a-838b-85c2a2ac60b3
+HAlign(
+md"""
+*Cross-Attention* between
+* values and keys ``E(CX + P)`` where ``E`` is the encoder, and ``X`` is the matrix of input tokens
+* query ``Q`` depending on past output ``Y`` and number of layers already applied
+```math
+\text{MultiHead}(E(CX + P), E(CX + P), Q)
+```
+
+The embedding vectors ``CX`` take then different projections
+for value, key, query and also for different heads!
+```math
+\begin{multline}
+\text{head}_j = \text{Attention}(W_j^VV, W_j^KK, W_j^QQ)\\
+\text{where } V = K = E(CX + P)
+\end{multline}
+```
+""",
+HTML(html(@draw begin
+	draw_transformer(false)
+	highlight(31, -97, 205, 5)
+	#sethue("red")
+	#setopacity(1)
+	fontsize(32)
+	text("CX + P", Point(-60, 252), halign = :center)
+	text("CY + P", Point(65, 252), halign = :center)
+	text(L"E(CX + P)", Point(-70, -160), halign = :center)
+end 300 400)),
+)
 
 # ╔═╡ d050a7ee-3aa7-4539-a236-5b6446599ded
 struct BPE
@@ -914,16 +914,16 @@ PlutoUI = "7f904dfe-b85e-4ff6-b463-dae2292396a8"
 PrettyTables = "08abe8d2-0d0c-5749-adfa-8a2ac140af0d"
 
 [compat]
-CSV = "~0.10.15"
-DataFrames = "~1.8.1"
-DocumenterCitations = "~1.4.1"
-HypertextLiteral = "~0.9.5"
-LaTeXStrings = "~1.4.0"
-Luxor = "~4.3.0"
-MathTeXEngine = "~0.6.6"
-PlutoTeachingTools = "~0.3.1"
-PlutoUI = "~0.7.72"
-PrettyTables = "~3.1.0"
+CSV = "~1.0.0"
+DataFrames = "~1.8.2"
+DocumenterCitations = "~1.5.0"
+HypertextLiteral = "~1.0.0"
+LaTeXStrings = "~1.4.1"
+Luxor = "~4.5.0"
+MathTeXEngine = "~0.6.9"
+PlutoTeachingTools = "~0.4.7"
+PlutoUI = "~0.7.83"
+PrettyTables = "~3.4.8"
 """
 
 # ╔═╡ 00000000-0000-0000-0000-000000000002
@@ -932,7 +932,7 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.13.0"
 manifest_format = "2.1"
-project_hash = "8cf5017c347c067a952c4fa0584b3d429744517c"
+project_hash = "2fc8ef83ef52c737e7f1b433bec45077ad6216dd"
 
 [[deps.ANSIColoredPrinters]]
 git-tree-sha1 = "574baf8110975760d391c710b6341da1afa48d8c"
@@ -979,24 +979,44 @@ version = "1.4.0"
 
 [[deps.BibInternal]]
 deps = ["TestItems"]
-git-tree-sha1 = "9bdbf50f7a887f765688cc91e69ca9640146f583"
+git-tree-sha1 = "ec1f1c78c1a6c917125abdee98518685fe653e64"
 registries = "General"
 uuid = "2027ae74-3657-4b95-ae00-e2f7d55c3e64"
-version = "0.3.8"
+version = "0.4.0"
 
 [[deps.BibParser]]
-deps = ["BibInternal", "DataStructures", "Dates", "JSONSchema", "TestItems", "YAML"]
-git-tree-sha1 = "d08b6681c80305ad00688fc3d89e8fccd6360770"
+deps = ["BibInternal", "DataStructures", "TestItems"]
+git-tree-sha1 = "5a6aeb593475157a5911cda3e0297f1552d45102"
 registries = "General"
 uuid = "13533e5b-e1c2-4e57-8cef-cac5e52f6474"
-version = "0.2.4"
+version = "0.3.0"
+
+    [deps.BibParser.extensions]
+    BibParserCFFExt = ["Dates", "JSONSchema", "YAML"]
+    BibParserCSLExt = "JSON3"
+    BibParserXMLExt = "EzXML"
+
+    [deps.BibParser.weakdeps]
+    Dates = "ade2ca70-3891-5945-98fb-dc099432e06a"
+    EzXML = "8f5d6c58-4d21-5cfd-889c-e3ad7ee6a615"
+    JSON3 = "0f8b85d8-7281-11e9-16c2-39a750bddbf1"
+    JSONSchema = "7d188eb4-7ad8-530c-ae41-71a32a6d4692"
+    YAML = "ddb6d928-2868-570f-bddf-ab3f9cf99eb6"
 
 [[deps.Bibliography]]
-deps = ["BibInternal", "BibParser", "DataStructures", "Dates", "FileIO", "TestItems", "YAML"]
-git-tree-sha1 = "0b3e1837077d570bb0c231b9548093de4fa46629"
+deps = ["BibInternal", "BibParser", "DataStructures", "Dates", "FileIO", "JSONSchema", "TestItems", "YAML"]
+git-tree-sha1 = "2246611f8da01251b73665fe0d57ed9d0e3b880b"
 registries = "General"
 uuid = "f1be7e48-bf82-45af-a471-ae754a193061"
-version = "0.3.1"
+version = "0.4.0"
+
+    [deps.Bibliography.extensions]
+    BibliographyCSLExt = "JSON3"
+    BibliographyXMLExt = "EzXML"
+
+    [deps.Bibliography.weakdeps]
+    EzXML = "8f5d6c58-4d21-5cfd-889c-e3ad7ee6a615"
+    JSON3 = "0f8b85d8-7281-11e9-16c2-39a750bddbf1"
 
 [[deps.Bijections]]
 git-tree-sha1 = "a2d308fcd4c2fb90e943cf9cd2fbfa9c32b69733"
@@ -1017,16 +1037,22 @@ registries = "General"
 uuid = "fa961155-64e5-5f13-b03f-caf6b980ea82"
 version = "0.5.0"
 
-[[deps.CRC32c]]
-uuid = "8bf52ea8-c179-5cab-976a-9e18b702a9bc"
-version = "1.11.0"
-
 [[deps.CSV]]
-deps = ["CodecZlib", "Dates", "FilePathsBase", "InlineStrings", "Mmap", "Parsers", "PooledArrays", "PrecompileTools", "SentinelArrays", "Tables", "Unicode", "WeakRefStrings", "WorkerUtilities"]
-git-tree-sha1 = "abed1e735dd4152f48c90cf0767e1790e25f332f"
+deps = ["CodecZlib", "DataStrings", "Dates", "Downloads", "Durations", "Mmap", "Parsers", "PooledArrays", "PrecompileTools", "Printf", "Tables", "Unicode"]
+git-tree-sha1 = "b5c1d7ec1595d9cca3f8b7b8879d3a372e6972be"
 registries = "General"
 uuid = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
-version = "0.10.17"
+version = "1.0.0"
+
+    [deps.CSV.extensions]
+    CSVDataDecimalsExt = "DataDecimals"
+    CSVFilePathsBaseExt = "FilePathsBase"
+    CSVInlineStringsExt = "InlineStrings"
+
+    [deps.CSV.weakdeps]
+    DataDecimals = "3e2245cb-6932-498d-a7cf-39d39de8bde3"
+    FilePathsBase = "48062228-2e41-5def-b9a4-89aafe57970f"
+    InlineStrings = "842dd82b-1e85-43dc-bf29-5d0ee9dffc48"
 
 [[deps.Cairo]]
 deps = ["Cairo_jll", "Colors", "Glib_jll", "Graphics", "Libdl", "Pango_jll"]
@@ -1041,13 +1067,6 @@ git-tree-sha1 = "1fa950ebc3e37eccd51c6a8fe1f92f7d86263522"
 registries = "General"
 uuid = "83423d85-b0ee-5818-9007-b63ccbeb887a"
 version = "1.18.7+0"
-
-[[deps.CodeTracking]]
-deps = ["InteractiveUtils", "REPL", "UUIDs"]
-git-tree-sha1 = "cfb7a2e89e245a9d5016b70323db412b3a7438d5"
-registries = "General"
-uuid = "da1fd8a2-8d9e-5ec2-8556-3022fb5608a2"
-version = "3.0.2"
 
 [[deps.CodecZlib]]
 deps = ["TranscodingStreams", "Zlib_jll"]
@@ -1098,12 +1117,6 @@ weakdeps = ["Dates", "LinearAlgebra"]
     [deps.Compat.extensions]
     CompatLinearAlgebraExt = "LinearAlgebra"
 
-[[deps.Compiler]]
-git-tree-sha1 = "382d79bfe72a406294faca39ef0c3cef6e6ce1f1"
-registries = "General"
-uuid = "807dbc54-b67e-4c79-8afb-eafe4df6f2e1"
-version = "0.1.1"
-
 [[deps.CompilerSupportLibraries_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "e66e0078-7015-5450-92f7-15fbd957f2ae"
@@ -1144,12 +1157,18 @@ registries = "General"
 uuid = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
 version = "1.8.2"
 
+[[deps.DataStrings]]
+git-tree-sha1 = "b8032263d364177a0b192ea15f277df4e6ab07e2"
+registries = "General"
+uuid = "48204bd6-5611-42ea-b167-fc1d713f9be2"
+version = "1.1.0"
+
 [[deps.DataStructures]]
-deps = ["Compat", "InteractiveUtils", "OrderedCollections"]
-git-tree-sha1 = "4e1fe97fdaed23e9dc21d4d664bea76b65fc50a0"
+deps = ["OrderedCollections"]
+git-tree-sha1 = "b0bc6d2cad1fed8b7fd59a1551a991cb3d2809e6"
 registries = "General"
 uuid = "864edb3b-99cc-5e75-8d2d-829cb0a9cfe8"
-version = "0.18.22"
+version = "0.19.6"
 
 [[deps.DataValueInterfaces]]
 git-tree-sha1 = "bfc1187b79289637fa0ef6d4436ebdfe6905cbd6"
@@ -1176,16 +1195,29 @@ uuid = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
 version = "1.19.0"
 
 [[deps.DocumenterCitations]]
-deps = ["AbstractTrees", "Bibliography", "Bijections", "Dates", "Documenter", "Logging", "Markdown", "MarkdownAST", "OrderedCollections", "Unicode"]
-git-tree-sha1 = "c9953a03a0049333bec89ac254ea28e86fa7a1a9"
+deps = ["AbstractTrees", "Bibliography", "Bijections", "Dates", "Documenter", "Logging", "Markdown", "MarkdownAST", "OrderedCollections", "SHA", "Unicode"]
+git-tree-sha1 = "5699464c66535cb99ad6ab075513cb215217b9f2"
 registries = "General"
 uuid = "daee34ce-89f3-4625-b898-19384cb65244"
-version = "1.4.1"
+version = "1.5.0"
 
 [[deps.Downloads]]
 deps = ["ArgTools", "FileWatching", "LibCURL", "NetworkOptions"]
 uuid = "f43a241f-c20a-4ad4-852c-f6b1247861c6"
 version = "1.7.0"
+
+[[deps.Durations]]
+deps = ["Dates"]
+git-tree-sha1 = "a2f9c974a78a23661f0e41d0b80b687f844c018e"
+registries = "General"
+uuid = "41ac09f5-0a95-4810-aa18-c88bf48ee130"
+version = "1.2.0"
+
+    [deps.Durations.extensions]
+    DurationsArrowExt = "Arrow"
+
+    [deps.Durations.weakdeps]
+    Arrow = "69666777-d1a9-59fb-9406-91d4454c9d45"
 
 [[deps.EarCut_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl"]
@@ -1227,18 +1259,6 @@ version = "1.20.0"
 
     [deps.FileIO.weakdeps]
     HTTP = "cd3eb016-35fb-5094-929b-558a96fad6f3"
-
-[[deps.FilePathsBase]]
-deps = ["Compat", "Dates"]
-git-tree-sha1 = "3bab2c5aa25e7840a4b065805c0cdfc01f3068d2"
-registries = "General"
-uuid = "48062228-2e41-5def-b9a4-89aafe57970f"
-version = "0.9.24"
-weakdeps = ["Mmap", "Test"]
-
-    [deps.FilePathsBase.extensions]
-    FilePathsBaseMmapExt = "Mmap"
-    FilePathsBaseTestExt = "Test"
 
 [[deps.FileWatching]]
 uuid = "7b1f6079-737a-58dc-b8bc-7a2ca5c1b5ee"
@@ -1376,10 +1396,10 @@ version = "0.0.5"
 
 [[deps.HypertextLiteral]]
 deps = ["Tricks"]
-git-tree-sha1 = "7134810b1afce04bbc1045ca1985fbe81ce17653"
+git-tree-sha1 = "d1a86724f81bcd184a38fd284ce183ec067d71a0"
 registries = "General"
 uuid = "ac1192a8-f4b3-4bfe-ba22-af5b92cd3ab2"
-version = "0.9.5"
+version = "1.0.0"
 
 [[deps.IOCapture]]
 deps = ["Logging", "Random"]
@@ -1464,13 +1484,6 @@ git-tree-sha1 = "037babc10853eeb8e585418922246cb97b8e5b74"
 registries = "General"
 uuid = "aacddb02-875f-59d6-b918-886e6ef4fbf8"
 version = "3.2.0+1"
-
-[[deps.JuliaInterpreter]]
-deps = ["CodeTracking", "InteractiveUtils", "Random", "UUIDs"]
-git-tree-sha1 = "c3d401f110454b4ea24a76be33f6ee0d7d385103"
-registries = "General"
-uuid = "aa1ae85d-cabe-5617-a682-6adf51b2e16a"
-version = "0.11.4"
 
 [[deps.JuliaSyntaxHighlighting]]
 deps = ["StyledStrings"]
@@ -1609,19 +1622,12 @@ version = "1.13.0"
 uuid = "56ddb016-857b-54e1-b83d-db4d58db5568"
 version = "1.11.0"
 
-[[deps.LoweredCodeUtils]]
-deps = ["CodeTracking", "Compiler", "JuliaInterpreter"]
-git-tree-sha1 = "1d4c737ab26f51ceed52ab2019c09b7660eb7440"
-registries = "General"
-uuid = "6f1432cf-f94c-5a45-995e-cdbf5db27b0b"
-version = "3.8.0"
-
 [[deps.Luxor]]
 deps = ["Base64", "Cairo", "Colors", "DataStructures", "Dates", "FFMPEG", "FileIO", "PolygonAlgorithms", "PrecompileTools", "Random", "Rsvg"]
-git-tree-sha1 = "54bdbc3b05b3a4cf25ec4c00054038758c1c090b"
+git-tree-sha1 = "fe8060b3d693f682e14f1019b058c64effb62b43"
 registries = "General"
 uuid = "ae8d54c2-7ccd-5906-9d76-62fc9837b5bc"
-version = "4.3.0"
+version = "4.5.0"
 
     [deps.Luxor.extensions]
     LuxorExtLatex = ["LaTeXStrings", "MathTeXEngine"]
@@ -1726,10 +1732,10 @@ uuid = "91d4177d-7536-5919-b921-800302f37372"
 version = "1.6.1+0"
 
 [[deps.OrderedCollections]]
-git-tree-sha1 = "94ba93778373a53bfd5a0caaf7d809c445292ff4"
+git-tree-sha1 = "05f45c2e0de6259db764adbfd2f1dc6d3f8de13c"
 registries = "General"
 uuid = "bac558e1-5e72-5ebc-8fee-abe8a469f55d"
-version = "1.8.2"
+version = "2.0.1"
 
 [[deps.PCRE2_jll]]
 deps = ["Artifacts", "Libdl"]
@@ -1744,11 +1750,11 @@ uuid = "36c8627f-9965-5494-a995-c6b170f724f3"
 version = "1.58.2+0"
 
 [[deps.Parsers]]
-deps = ["Dates", "PrecompileTools", "UUIDs"]
-git-tree-sha1 = "ba0dc8a8a67cacac4842631f960c046e4e563675"
+deps = ["Dates", "PrecompileTools"]
+git-tree-sha1 = "663e8b48b789916221e0765393b289ca6c88f24e"
 registries = "General"
 uuid = "69de0a69-1ddd-5017-9359-2bf0b02dc9f0"
-version = "2.8.8"
+version = "3.0.0"
 
 [[deps.Pixman_jll]]
 deps = ["Artifacts", "CompilerSupportLibraries_jll", "JLLWrappers", "LLVMOpenMP_jll", "Libdl"]
@@ -1766,26 +1772,12 @@ weakdeps = ["REPL"]
     [deps.Pkg.extensions]
     REPLExt = "REPL"
 
-[[deps.PlutoHooks]]
-deps = ["InteractiveUtils", "Markdown", "UUIDs"]
-git-tree-sha1 = "844a829c8dc9fd0fe62eced22bc2d0dfd66a3f51"
-registries = "General"
-uuid = "0ff47ea0-7a50-410d-8455-4348d5de0774"
-version = "0.1.0"
-
-[[deps.PlutoLinks]]
-deps = ["FileWatching", "InteractiveUtils", "Markdown", "PlutoHooks", "Revise", "UUIDs"]
-git-tree-sha1 = "aea4eede5ab3ee188906d0cf3bbfa36eb543dccc"
-registries = "General"
-uuid = "0ff47ea0-7a50-410d-8455-4348d5de0420"
-version = "0.1.8"
-
 [[deps.PlutoTeachingTools]]
-deps = ["Downloads", "HypertextLiteral", "Latexify", "Markdown", "PlutoLinks", "PlutoUI"]
-git-tree-sha1 = "8252b5de1f81dc103eb0293523ddf917695adea1"
+deps = ["Downloads", "HypertextLiteral", "Latexify", "Markdown", "PlutoUI"]
+git-tree-sha1 = "90b41ced6bacd8c01bd05da8aed35c5458891749"
 registries = "General"
 uuid = "661c6b06-c737-4d37-b85c-46df65de6f69"
-version = "0.3.1"
+version = "0.4.7"
 
 [[deps.PlutoUI]]
 deps = ["AbstractPlutoDingetjes", "Base64", "ColorTypes", "Dates", "Downloads", "FixedPointNumbers", "Hyperscript", "HypertextLiteral", "IOCapture", "InteractiveUtils", "Logging", "MIMEs", "Markdown", "Random", "Reexport", "URIs", "UUIDs"]
@@ -1823,10 +1815,18 @@ version = "1.6.0"
 
 [[deps.PrettyTables]]
 deps = ["Crayons", "LaTeXStrings", "Markdown", "PrecompileTools", "Printf", "REPL", "Reexport", "StringManipulation", "Tables"]
-git-tree-sha1 = "c5a07210bd060d6a8491b0ccdee2fa0235fc00bf"
+git-tree-sha1 = "1b8aa19f229b1cea7fc93874a52e49db6a854450"
 registries = "General"
 uuid = "08abe8d2-0d0c-5749-adfa-8a2ac140af0d"
-version = "3.1.2"
+version = "3.4.8"
+
+    [deps.PrettyTables.extensions]
+    PrettyTablesExcelExt = "XLSX"
+    PrettyTablesTypstryExt = "Typstry"
+
+    [deps.PrettyTables.weakdeps]
+    Typstry = "f0ed7684-a786-439e-b1e3-3b82803b501e"
+    XLSX = "fdbf4ff8-1666-58a4-91e7-1b58723a45e0"
 
 [[deps.Printf]]
 deps = ["Unicode"]
@@ -1869,19 +1869,6 @@ git-tree-sha1 = "62389eeff14780bfe55195b7204c0d8738436d64"
 registries = "General"
 uuid = "ae029012-a4dd-5104-9daa-d747884805df"
 version = "1.3.1"
-
-[[deps.Revise]]
-deps = ["CRC32c", "CodeTracking", "FileWatching", "JuliaInterpreter", "LibGit2", "LoweredCodeUtils", "OrderedCollections", "Preferences", "REPL", "UUIDs"]
-git-tree-sha1 = "82ac67271b84f674fccccbc9f92b106941fb8c65"
-registries = "General"
-uuid = "295af30f-e4ad-537b-8983-00126c2a3abe"
-version = "3.17.1"
-
-    [deps.Revise.extensions]
-    DistributedExt = "Distributed"
-
-    [deps.Revise.weakdeps]
-    Distributed = "8ba89e20-285c-5b6f-9357-94700520ee1b"
 
 [[deps.Rsvg]]
 deps = ["Cairo", "Glib_jll", "Librsvg_jll"]
@@ -1966,10 +1953,10 @@ version = "0.3.7"
 
 [[deps.StringManipulation]]
 deps = ["PrecompileTools"]
-git-tree-sha1 = "8a90c1d77c3277a5d43b83927b3cbe2c70a37484"
+git-tree-sha1 = "773065c6e0e903924a9d838259be74338422aef2"
 registries = "General"
 uuid = "892a3eda-7b42-436c-8928-eab12a02cf0e"
-version = "0.4.7"
+version = "0.5.0"
 
 [[deps.StructArrays]]
 deps = ["ConstructionBase", "DataAPI", "Tables"]
@@ -2089,19 +2076,6 @@ git-tree-sha1 = "53915e50200959667e78a92a418594b428dffddf"
 registries = "General"
 uuid = "1cfade01-22cf-5700-b092-accc4b62d6e1"
 version = "0.4.1"
-
-[[deps.WeakRefStrings]]
-deps = ["DataAPI", "InlineStrings", "Parsers"]
-git-tree-sha1 = "0716e01c3b40413de5dedbc9c5c69f27cddfddfc"
-registries = "General"
-uuid = "ea10d353-3f73-51f8-a26c-33c1cb351aa5"
-version = "1.4.3"
-
-[[deps.WorkerUtilities]]
-git-tree-sha1 = "cd1659ba0d57b71a464a29e64dbc67cfe83d54e7"
-registries = "General"
-uuid = "76eceee3-57b5-4d4a-8e66-0e911cebbf60"
-version = "1.6.1"
 
 [[deps.XML2_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Libiconv_jll", "Zlib_jll"]
