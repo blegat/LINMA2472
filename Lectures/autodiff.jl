@@ -432,34 +432,6 @@ end
 # ╔═╡ 17c91ea8-acb7-4bbd-b0b0-0f8193f45303
 md"## 🚀 GPU acceleration ⚡"
 
-# ╔═╡ 2ca19ff6-ec22-4327-aea2-80bdca55ccef
-h_slider = @bind h Slider(10:1000, default = 16, show_value = true);
-
-# ╔═╡ 722ad63a-c2ac-4ed6-b268-41d0f8b745f1
-md"`h` = $(h_slider)"
-
-# ╔═╡ b5c3e2ef-3d47-4f44-b968-d04734be2f16
-W = [rand(Float32, h, size(X, 1)), rand(Float32, size(y, 1), h)]
-
-# ╔═╡ a580ef44-234a-4ed1-b007-920651415427
-sum((W[2] * tanh.(W[1] * X) - y).^2) / size(y, 2)
-
-# ╔═╡ 87c6a5bc-82bf-44a5-b4d6-6d50285348c0
-@time reverse_diff(W, X, y)
-
-# ╔═╡ 85303791-bdc4-468a-bc40-48ef2a186282
-if CUDA.functional()
-	X_gpu = CUDA.CuArray(X)
-	y_gpu = CUDA.CuArray(y)
-	W_gpu = CUDA.CuArray.(W)
-	@time reverse_diff(W_gpu, X_gpu, y_gpu)
-end
-
-# ╔═╡ 9b4a78d8-e6da-41dd-b922-b35c895eee1a
-if h < 200 # Forward Diff start being too slow for `h > 200`
-	@time forward_diff(W, X, y)
-end
-
 # ╔═╡ 9bbbda1f-74a6-458b-a084-9d034d6c291f
 md"""
 # Second-order
@@ -662,6 +634,102 @@ let
 	)
 end
 
+# ╔═╡ e8b1c40d-27a6-4f39-b95e-6d3a0f81c72b
+begin
+	"""
+	    StepSlider(range::AbstractRange; default = first(range), show_value = true)
+
+	A `Slider` flanked by `◀` and `▶` buttons, so that a range can be walked
+	one step at a time instead of by dragging.
+	"""
+	struct StepSlider
+		range::AbstractRange
+		default::Real
+		show_value::Bool
+	end
+
+	StepSlider(range::AbstractRange; default = first(range), show_value = true) =
+		StepSlider(range, default, show_value)
+
+	function Base.show(io::IO, m::MIME"text/html", slider::StepSlider)
+		show(io, m, @htl("""
+		<div style="display: flex; align-items: center; gap: 0.6em;">
+			<input type="button" value="&#9664;" title="Previous step">
+			<input
+				type="range"
+				min=$(first(slider.range))
+				step=$(step(slider.range))
+				max=$(last(slider.range))
+				value=$(slider.default)
+				style="flex-grow: 1;">
+			<input type="button" value="&#9654;" title="Next step">
+			$(slider.show_value ?
+				@htl("<output style='font-variant-numeric: tabular-nums;'>$(slider.default)</output>") :
+				nothing)
+			<script>
+				const div = currentScript.parentElement
+				const [back, range, forward] = div.querySelectorAll("input")
+				const output = div.querySelector("output")
+
+				const render = () => {
+					if (output != null) output.value = range.value
+				}
+
+				// `@bind` reads and writes `div.value`; forward both to the range.
+				Object.defineProperty(div, "value", {
+					get: () => Number(range.value),
+					set: (v) => { range.value = v; render() },
+				})
+
+				const publish = () => {
+					render()
+					div.dispatchEvent(new CustomEvent("input"))
+				}
+
+				back.addEventListener("click", () => { range.stepDown(); publish() })
+				forward.addEventListener("click", () => { range.stepUp(); publish() })
+				range.addEventListener("input", (e) => { e.stopPropagation(); publish() })
+			</script>
+		</div>
+		"""))
+	end
+
+	# Pluto's `@bind` prefers `Base.get` over `Bonds.initial_value`, so this is
+	# all that is needed for `graph_step` to be defined before the browser
+	# renders the widget.
+	Base.get(slider::StepSlider) = slider.default
+
+	StepSlider
+end;
+
+# ╔═╡ 2ca19ff6-ec22-4327-aea2-80bdca55ccef
+h_slider = @bind h Slider(10:1000, default = 16, show_value = true);
+
+# ╔═╡ 722ad63a-c2ac-4ed6-b268-41d0f8b745f1
+md"`h` = $(h_slider)"
+
+# ╔═╡ b5c3e2ef-3d47-4f44-b968-d04734be2f16
+W = [rand(Float32, h, size(X, 1)), rand(Float32, size(y, 1), h)]
+
+# ╔═╡ a580ef44-234a-4ed1-b007-920651415427
+sum((W[2] * tanh.(W[1] * X) - y).^2) / size(y, 2)
+
+# ╔═╡ 87c6a5bc-82bf-44a5-b4d6-6d50285348c0
+@time reverse_diff(W, X, y)
+
+# ╔═╡ 85303791-bdc4-468a-bc40-48ef2a186282
+if CUDA.functional()
+	X_gpu = CUDA.CuArray(X)
+	y_gpu = CUDA.CuArray(y)
+	W_gpu = CUDA.CuArray.(W)
+	@time reverse_diff(W_gpu, X_gpu, y_gpu)
+end
+
+# ╔═╡ 9b4a78d8-e6da-41dd-b922-b35c895eee1a
+if h < 200 # Forward Diff start being too slow for `h > 200`
+	@time forward_diff(W, X, y)
+end
+
 # ╔═╡ a06be2d9-73c1-4f85-b2e7-18d3c5a90f47
 import ComputationGraphExplorer as CGE
 
@@ -746,35 +814,10 @@ graph_frames = let
 end;
 
 # ╔═╡ d18fb5c2-6e47-4a90-b3d1-90c7af4e2b16
-@bind graph_step @htl("""
-<div style="display: flex; align-items: center; gap: 0.6em;">
-	<input type="button" value="&#9664;" title="Previous step">
-	<input type="range" min="1" max="$(length(graph_frames))" value="1" style="flex-grow: 1;">
-	<input type="button" value="&#9654;" title="Next step">
-	<span style="font-variant-numeric: tabular-nums; min-width: 4em;"></span>
-	<script>
-		const div = currentScript.parentElement
-		const [back, range, fwd] = div.querySelectorAll("input")
-		const label = div.querySelector("span")
-
-		const publish = () => {
-			label.innerText = range.value + " / " + range.max
-			div.value = Number(range.value)
-			div.dispatchEvent(new CustomEvent("input"))
-		}
-
-		back.addEventListener("click", () => { range.stepDown(); publish() })
-		fwd.addEventListener("click", () => { range.stepUp(); publish() })
-		range.addEventListener("input", (e) => { e.stopPropagation(); publish() })
-
-		label.innerText = range.value + " / " + range.max
-		div.value = Number(range.value)
-	</script>
-</div>
-""")
+@bind graph_step StepSlider(eachindex(graph_frames))
 
 # ╔═╡ e52c7a3b-8d19-4c60-a7f2-31b6ec9d5a08
-HTML(CGE.render_svg(graph_example, graph_frames[coalesce(graph_step, 1)]))
+HTML(CGE.render_svg(graph_example, graph_frames[graph_step]))
 
 # ╔═╡ cbfc0129-9361-4edb-a467-1456a1f3aeae
 begin
@@ -3342,6 +3385,7 @@ uuid = "23338594-aafe-5451-b93e-139f81909106"
 # ╠═f1ba3d3c-d0a5-4290-ab73-9ce34bd5e5f6
 # ╠═b7d4a91e-3c52-4f86-9a0d-5e8c1f2b6d47
 # ╠═a06be2d9-73c1-4f85-b2e7-18d3c5a90f47
+# ╟─e8b1c40d-27a6-4f39-b95e-6d3a0f81c72b
 # ╟─b3c8d70e-9a41-4d26-85fb-6e02f19ca4d3
 # ╟─c71e4f82-0d35-49ba-97c6-84a1bd50e739
 # ╟─d492a165-3e70-4c18-b0d9-57fc2e8a1b96
