@@ -4,11 +4,8 @@
 using Markdown
 using InteractiveUtils
 
-# ╔═╡ 643dcb7e-f83b-4fee-a3f3-f3354ca28a48
-using Colors, PlotlyLight
-
 # ╔═╡ b8eb2d42-a432-46e3-8700-1c0b7e2ad134
-using PlutoUI, PlutoUI.ExperimentalLayout, HypertextLiteral, PlutoTeachingTools, ShortCodes
+using Colors, PlutoUI, PlutoUI.ExperimentalLayout, HypertextLiteral, PlutoTeachingTools, ShortCodes
 
 # ╔═╡ 9284f5a0-6a36-4285-93a0-a55a55f3b040
 @htl("""
@@ -63,19 +60,25 @@ g(a, b) = f(a) * b + (1 - f(a)) * a
 # ╔═╡ 8c59c005-4cd2-4374-9488-fe7edfc131b2
 grade(HW, EX) = min(g(HW, EX), g(EX, HW))
 
+# ╔═╡ cb7e87a3-699a-488a-a8ca-d8837907f0cb
+html"<p align=center style=\"font-size: 20px; margin-bottom: 5cm; margin-top: 5cm;\">The End</p>"
+
+# ╔═╡ 643dcb7e-f83b-4fee-a3f3-f3354ca28a48
+import PlotlyLight
+
 # ╔═╡ f906062d-7311-42dc-8fd3-aaabdc969f47
 begin
 	_range = collect(0:20)
-	Plot(
+	PlotlyLight.Plot(
 		[
-			Config(
+			PlotlyLight.Config(
 				type = "surface",
 				x = _range,
 				y = _range,
 				z = [grade(hw, ex) for ex in _range, hw in _range],
 				showscale = false,
 			),
-			Config(
+			PlotlyLight.Config(
 				type = "surface",
 				x = _range,
 				y = _range,
@@ -84,18 +87,15 @@ begin
 				showscale = false,
 			),
 		],
-		Config(
-			scene = Config(
-				xaxis = Config(title = Config(text = "Homework")),
-				yaxis = Config(title = Config(text = "Exam")),
-				zaxis = Config(title = Config(text = "Grade")),
+		PlotlyLight.Config(
+			scene = PlotlyLight.Config(
+				xaxis = PlotlyLight.Config(title = PlotlyLight.Config(text = "Homework")),
+				yaxis = PlotlyLight.Config(title = PlotlyLight.Config(text = "Exam")),
+				zaxis = PlotlyLight.Config(title = PlotlyLight.Config(text = "Grade")),
 			),
 		),
 	)
 end
-
-# ╔═╡ cb7e87a3-699a-488a-a8ca-d8837907f0cb
-html"<p align=center style=\"font-size: 20px; margin-bottom: 5cm; margin-top: 5cm;\">The End</p>"
 
 # ╔═╡ 71cf5b92-499d-4485-9303-4fc9777328da
 begin
