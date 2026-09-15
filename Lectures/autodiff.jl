@@ -98,7 +98,7 @@ f_2(s1) = -s1
 (f_2 ∘ f_1)(Dual(1, 2), Dual(3, 4))
 
 # ╔═╡ 85fc455c-36cf-4a4c-aa64-84a827884693
-md"# Reverse differentiation"
+md"# Reverse Differentiation"
 
 # ╔═╡ 277bd2ce-fa7f-4288-be8a-0ddd8f23635c
 md"""
@@ -204,6 +204,9 @@ at ``x_1 = 1``, ``x_2 = 2``. The slider first reveals the forward evaluation
 of each node ``v_i``, then accumulates the adjoints
 ``\bar{v}_i = \partial f / \partial v_i`` backwards, one node at a time.
 """
+
+# ╔═╡ 1d56075c-e28d-46c9-9a0a-210079172388
+md"## Reverse mode in action"
 
 # ╔═╡ 7f75e3f3-c4e2-402d-be7b-336a4f65042a
 md"""# Comparison
@@ -3248,13 +3251,14 @@ uuid = "23338594-aafe-5451-b93e-139f81909106"
 # ╟─83ef86e0-bcfb-42ee-a574-16758606423a
 # ╟─90850509-463d-44c7-88ae-4406aebd4be1
 # ╟─c4e91a07-2b8d-4f1e-9a63-7d05be21c8f4
-# ╟─d18fb5c2-6e47-4a90-b3d1-90c7af4e2b16
-# ╠═e52c7a3b-8d19-4c60-a7f2-31b6ec9d5a08
-# ╠═f9a37c14-5b62-4e8d-96a0-2c41db73e65f
 # ╟─673c3acc-0009-416a-91bb-f57c1fe8eefc
 # ╟─28df733e-7db9-4e78-9121-52d8e6ca7591
 # ╟─626abc7c-87ef-4838-9f0a-294cf0a4be6a
 # ╟─6c60f9ca-ba04-41e2-9625-c9e10f1a853b
+# ╟─1d56075c-e28d-46c9-9a0a-210079172388
+# ╟─d18fb5c2-6e47-4a90-b3d1-90c7af4e2b16
+# ╟─e52c7a3b-8d19-4c60-a7f2-31b6ec9d5a08
+# ╟─f9a37c14-5b62-4e8d-96a0-2c41db73e65f
 # ╟─7f75e3f3-c4e2-402d-be7b-336a4f65042a
 # ╟─bab3a3cb-0ad2-4ea5-a15c-6593fc22e496
 # ╟─c73f79c6-a28f-4c7a-89e5-8d70a245a210
