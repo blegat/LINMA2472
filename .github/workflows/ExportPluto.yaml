@@ -27,7 +27,9 @@ jobs:
             - name: Compile exams
               uses: xu-cheng/latex-action@v4
               with:
-                root_file: Exams/*/main.tex
+                root_file: |
+                  Exams/*/main.tex
+                  Exams/*/solutions.tex
                 work_in_root_file_dir: true
 
             - name: Install Julia

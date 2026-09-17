@@ -14,5 +14,6 @@ The html versions accessible here are static, see [here](Lectures) for details o
 > the questions from the 2025 January exam that were therefore
 > not relevant anymore have been omitted.
 
-* [2025 January](Exams/2025_01/main.pdf)
-* [2026 January](Exams/2026_01/main.pdf)
+* 2025 January: [questions](Exams/2025_01/main.pdf) / [with solutions](Exams/2025_01/solutions.pdf)
+* 2026 January: [questions](Exams/2026_01/main.pdf) / [with solutions](Exams/2026_01/solutions.pdf)
+* 2026 August: [questions](Exams/2026_08/main.pdf) / [with solutions](Exams/2026_08/solutions.pdf)
