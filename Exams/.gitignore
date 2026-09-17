@@ -6,5 +6,4 @@
 *.out
 #*.pdf # We shouldn't ignore it otherwise `github-pages-deploy-action` will not add the produced pdf and won't push it to `gh-pages`
 *.synctex.gz
-*.pdf
 build
