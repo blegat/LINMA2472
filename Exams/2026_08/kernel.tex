@@ -1,0 +1,135 @@
+\titledquestion{Kernels (cosine kernel)}
+
+Suppose that you have $N$ datapoints $x_i \in \mathcal{X}$ with labels $y_i \in \{-1,1\}$ that you want to classify, where $1\leqslant i \leqslant N$. For the whole exercise, we introduce the following kernel-related definitions:
+\begin{itemize}
+    \item $\mathcal{H}$ is an RKHS,
+    \item $\langle \cdot, \cdot \rangle_{\mathcal{H}} : \mathcal{H} \times \mathcal{H} \to \mathbb{R}$ is the inner product associated with $\mathcal{H}$,
+    \item $\| \cdot \|_{\mathcal{H}} : \mathcal{H} \to \mathbb{R}^+$ is the induced norm in $\mathcal{H}$ such that $ \| f \|_{\mathcal{H}} = \sqrt{\langle f, f \rangle_{\mathcal{H}}}$ for any $f\in \mathcal{H}$,
+    \item $k: \mathcal{X} \times \mathcal{X} \to \mathbb{R}$ is the (symmetric positive-definite) kernel,
+    \item $\phi: \mathcal{X} \to \mathcal{H}$ is a feature map such that $k(x,y) = \langle \phi(x), \phi(y) \rangle_{\mathcal{H}}$ for any $x,y \in \mathcal{X}$,
+    \item $K \in \mathbb{R}^{N \times N}$ is the kernel matrix such that $K_{ij} = k(x_i,x_j) = \langle \phi(x_i), \phi(x_j) \rangle_{\mathcal{H}}$.
+\end{itemize}
+
+\textbf{A) Cosine kernel.}
+Consider the \textit{cosine kernel}:
+\begin{align*}
+    k(x,y) = \cos ((x - y)^\top t),
+\end{align*} where $x,y \in \mathbb{R}^n$ and $t \in \mathbb{R}^n$ is a fixed hyperparameter associated with the \textit{direction} and the \textit{frequency} of the kernel.
+\begin{enumerate}
+    \item Show that $k(x,y)$ is a symmetric kernel.
+    \begin{solutionbox}{3cm}
+    We need to show $k(x,y) = k(y,x)$:
+    \begin{align*}
+    k(y,x) &= \cos((y-x)^\top t) = \cos(-(x-y)^\top t) = \cos((x-y)^\top t) = k(x,y),
+    \end{align*}
+    since cosine is an even function: $\cos(-\theta) = \cos(\theta)$.
+    \end{solutionbox}
+    \item Find the expression of a simple feature map $\phi : \mathbb{R}^n \to \mathbb{R}^h$ such that $k(x,y) = \langle \phi(x),\phi(y) \rangle_{\mathbb{R}^h}$, where $\langle \cdot,\cdot \rangle_{\mathbb{R}^h}$ is the usual inner product in $\mathbb{R}^h$.
+
+    Moreover, give the value of $h$.
+
+    \textit{Hint:} Recall the trigonometric identity $\cos(a-b)=\cos(a)\cos(b) +\sin(a)\sin(b)$.
+    \begin{solutionbox}{4.5cm}
+    Using the hint with $a = x^\top t$ and $b = y^\top t$:
+    \begin{align*}
+    k(x,y) &= \cos(x^\top t)\cos(y^\top t) + \sin(x^\top t)\sin(y^\top t) = \langle \phi(x), \phi(y) \rangle_{\mathbb{R}^2}, \\
+    &\quad \text{with } \phi(x) = \begin{bmatrix} \cos(x^\top t) \\ \sin(x^\top t) \end{bmatrix} \in \mathbb{R}^2.
+    \end{align*}
+    Therefore, $h = 2$.
+    \end{solutionbox}
+    \item Using the previous subquestion, show that $k(x,y)$ is a positive-definite kernel. In other words, show that for any set of $M$ points $x_i \in \mathbb{R}^n$ with $1\leqslant i \leqslant M$ and for any $c \in \mathbb{R}^M$, we have $c^\top K c \geqslant 0$, where $K_{ij} = k(x_i,x_j)$.
+    \begin{solutionbox}{9cm}
+    Since $k(x,y) = \langle \phi(x), \phi(y) \rangle_{\mathbb{R}^2}$, for any $c \in \mathbb{R}^M$:
+    \begin{align*}
+    c^\top K c &= \sum_{i,j=1}^M c_i c_j K_{ij} = \sum_{i,j=1}^M c_i c_j k(x_i, x_j) \\
+    &= \sum_{i,j=1}^M c_i c_j \langle \phi(x_i), \phi(x_j) \rangle_{\mathbb{R}^2} \\
+    &= \left\langle \sum_{i=1}^M c_i \phi(x_i), \sum_{j=1}^M c_j \phi(x_j) \right\rangle_{\mathbb{R}^2} \\
+    &= \left\| \sum_{i=1}^M c_i \phi(x_i) \right\|_{\mathbb{R}^2}^2 \geq 0.
+    \end{align*}
+    Therefore, $k$ is positive-definite. Note that this argument holds for any kernel admitting a feature map.
+    \end{solutionbox}
+    \item Compute $k(x,x)$ for any $x \in \mathbb{R}^n$. What does this imply about where the embedded datapoints $\phi(x)$ live in the feature space $\mathbb{R}^h$?
+    \begin{solutionbox}{8cm}
+    $k(x,x) = \cos((x-x)^\top t) = \cos(0) = 1$. Since $k(x,x) = \|\phi(x)\|_{\mathbb{R}^2}^2$, every embedded point satisfies $\|\phi(x)\|_{\mathbb{R}^2} = 1$: all datapoints are mapped onto the unit circle in $\mathbb{R}^2$.
+    \end{solutionbox}
+    \newpage
+    \item Now consider $m$ frequency vectors $t_1, \ldots, t_m \in \mathbb{R}^n$ and define the kernel
+    \begin{align*}
+    k_m(x,y) = \frac{1}{m} \sum_{j=1}^m \cos((x-y)^\top t_j).
+    \end{align*}
+    Show that $k_m(x,y)$ is a symmetric positive-definite kernel. Moreover, give a feature map $\phi_m : \mathbb{R}^n \to \mathbb{R}^{h_m}$ such that $k_m(x,y) = \langle \phi_m(x),\phi_m(y) \rangle_{\mathbb{R}^{h_m}}$, together with the value of $h_m$.
+    \begin{solutionbox}{12.5cm}
+    \textbf{Symmetry:} $k_m$ is a sum of symmetric kernels (by subquestion 1, each term is symmetric), hence $k_m(x,y) = k_m(y,x)$.
+
+    \textbf{Positive-definiteness:} let $K^{(j)}$ be the kernel matrix associated with the single-frequency kernel of frequency $t_j$. For any $c \in \mathbb{R}^M$:
+    \begin{align*}
+    c^\top K_m c = \frac{1}{m} \sum_{j=1}^m c^\top K^{(j)} c \geq 0,
+    \end{align*}
+    since each single-frequency cosine kernel is positive-definite (subquestion 3).
+
+    \textbf{Feature map:} stack the single-frequency feature maps, scaled by $1/\sqrt{m}$:
+    \begin{align*}
+    \phi_m(x) = \frac{1}{\sqrt{m}} \begin{bmatrix} \cos(x^\top t_1) \\ \sin(x^\top t_1) \\ \vdots \\ \cos(x^\top t_m) \\ \sin(x^\top t_m) \end{bmatrix} \in \mathbb{R}^{2m}.
+    \end{align*}
+    Then
+    \begin{align*}
+    \langle \phi_m(x), \phi_m(y) \rangle_{\mathbb{R}^{2m}} &= \frac{1}{m} \sum_{j=1}^m \left[\cos(x^\top t_j)\cos(y^\top t_j) + \sin(x^\top t_j)\sin(y^\top t_j)\right] \\
+    &= k_m(x,y).
+    \end{align*}
+    Therefore, $h_m = 2m$.
+    \end{solutionbox}
+\end{enumerate}
+
+\newpage
+\textbf{B) Classification methods with the cosine kernel.}
+For this second part, assume that the data are real vectors in $\mathcal{X} = \mathbb{R}^n$ and that the embedding space $\mathcal{H}= \mathbb{R}^h$ is of finite dimension $h$, thus it can be understood as the Euclidean space equipped with the usual inner product $\langle \cdot , \cdot \rangle_{\mathcal{H}} = \langle \cdot , \cdot \rangle_{\mathbb{R}^h} $.
+
+Under these assumptions, you choose to use the cosine kernel for your classification task, and you consider two classical classification methods. Both predict the class of a new point $x \in \mathcal{X}$ as $\hat{y}(x) = \sign(d(x))$, where $d$ is the decision function of the method and the sign function is defined as $\sign(u) = -1$ if $u<0$, $\sign(0) = 0$ and $\sign(u) = 1$ if $u>0$.
+\begin{itemize}
+    \item \textbf{Method I: hard-margin kernel support-vector machine ($k$-SVM).} Its decision function reads
+    \[
+    d_{I}(x) = \sum_{i=1}^N \gamma_i^* k(x_i, x) + b^*,
+    \]
+    where $\gamma^* \in \mathbb{R}^N$ and $b^* \in \mathbb{R}$ are the solutions of the $k$-SVM optimization problem (we assume that they exist).
+    \item \textbf{Method II: (squared) distance to the (lifted) mean.} Its decision function reads
+    \[
+    d_{II}(x) = \|\phi(x) - \mu_-\|_{\mathcal{H}}^2 - \|\phi(x) - \mu_+\|_{\mathcal{H}}^2,
+    \]
+    where the centers of each class are defined as
+    \[
+    \mu_+ = \frac{1}{n_+} \sum_{i = 1 \atop y_i = 1}^N \phi(x_i),
+    \qquad
+    \mu_- = \frac{1}{n_-} \sum_{i = 1 \atop y_i = -1}^N \phi(x_i),
+    \]
+    and $n_+$ (resp. $n_-$) is the number of points labeled $+1$ (resp. $-1$).
+\end{itemize}
+\newpage
+Focus on the decision functions $d_{I}(x)$ and $d_{II}(x)$ using the cosine kernel.
+\begin{enumerate}
+    \item If all datapoints $x_i$ were shifted by the same vector $s\in \mathbb{R}^n$, would the decision functions $d_{I}(x)$ and $d_{II}(x)$ qualitatively "look the same" (simply be shifted by $s$)? Justify briefly.
+
+    Moreover, give the name of kernels satisfying this property.
+    \begin{solutionbox}{6.5cm}
+    \textbf{Yes}, the decision functions would simply be shifted by $s$.
+
+    The cosine kernel depends only on the difference $x-y$, so $k(x_i+s, x_j+s) = k(x_i, x_j)$: the kernel matrix $K$ is unchanged, and so are the coefficients defining the decision functions ($\gamma^*$ and $b^*$ for Method I, the means for Method II). Denoting $\tilde{d}$ a decision function trained on the shifted datapoints, every kernel evaluation satisfies $k(x+s, x_i+s) = \cos((x-x_i)^\top t) = k(x,x_i)$, so $\tilde{d}(x+s) = d(x)$ for all $x$: $\tilde{d}$ is exactly $d$ translated by $s$.
+
+    Kernels depending only on the difference $(x-y)$ are called \textbf{translation-invariant} (or \textbf{stationary}) kernels.
+    \end{solutionbox}
+    \item Show that if $k(x,y) = 1$ for some pair of points $x, y \in \mathbb{R}^n$, then $x$ and $y$ are \textit{indistinguishable} for both methods, meaning that $d_I(x) = d_I(y)$ and $d_{II}(x) = d_{II}(y)$, so they always receive the same prediction. Moreover, characterize all such pairs for the cosine kernel, and briefly discuss the practical limitation that this reveals.
+
+    \textit{Hint:} Use the result of subquestion 4 of Part A.
+    \begin{solutionbox}{7.5cm}
+    By subquestion 4 of Part A, $\|\phi(x)\|_{\mathcal{H}} = 1$ for any $x \in \mathbb{R}^n$. Hence, if $k(x,y) = 1$:
+    \begin{align*}
+    \|\phi(x) - \phi(y)\|_{\mathcal{H}}^2 &= \|\phi(x)\|_{\mathcal{H}}^2 - 2\langle \phi(x), \phi(y) \rangle_{\mathcal{H}} + \|\phi(y)\|_{\mathcal{H}}^2 \\
+    &= 1 - 2k(x,y) + 1 = 0,
+    \end{align*}
+    so $\phi(x) = \phi(y)$. Since both decision functions depend on the input only through its embedding $\phi(x)$, it follows that $d_I(x) = d_I(y)$ and $d_{II}(x) = d_{II}(y)$.
+
+    \textbf{Characterization:} $\cos((x-y)^\top t) = 1$ if and only if $(x-y)^\top t = 2\pi z$ with $z \in \mathbb{Z}$; in particular, whenever $x-y$ is orthogonal to $t$.
+
+    \textbf{Limitation:} the methods only see the projection $x^\top t$ (modulo $2\pi$); all information orthogonal to $t$ is lost. A remedy is to combine several frequencies, e.g. the kernel $k_m$ of Part A.
+    \end{solutionbox}
+\end{enumerate}
+\clearpage
