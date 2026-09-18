@@ -1,0 +1,67 @@
+\titledquestion{Implicit differentiation of a PDE}
+
+Consider the one-dimensional Poisson equation
+\[
+    -u''(x) = \alpha, \qquad x \in (0,1),
+    \qquad u(0)=u(1)=1,
+\]
+where $\alpha \in \mathbb{R}$ is a parameter. We discretize the interval at
+$x_i=i/10$, for $i=0,\ldots,10$, and denote by
+$\boldsymbol{u}(\alpha)=(u_1(\alpha),\ldots,u_9(\alpha))^\top$
+the values at the nine interior points. The standard centered finite-difference
+discretization gives the implicit equation
+\[
+    A\boldsymbol{u}(\alpha)=h^2\alpha\boldsymbol{1}+\boldsymbol{b},
+    \qquad h=\frac{1}{10},
+\]
+where $\boldsymbol{1}\in\mathbb{R}^9$ is the vector of ones and
+\[
+ A=\begin{pmatrix}
+  2&-1& 0& 0& 0& 0& 0& 0& 0\\
+ -1& 2&-1& 0& 0& 0& 0& 0& 0\\
+  0&-1& 2&-1& 0& 0& 0& 0& 0\\
+  0& 0&-1& 2&-1& 0& 0& 0& 0\\
+  0& 0& 0&-1& 2&-1& 0& 0& 0\\
+  0& 0& 0& 0&-1& 2&-1& 0& 0\\
+  0& 0& 0& 0& 0&-1& 2&-1& 0\\
+  0& 0& 0& 0& 0& 0&-1& 2&-1\\
+  0& 0& 0& 0& 0& 0& 0&-1& 2
+ \end{pmatrix},
+ \qquad
+ \boldsymbol{b}=\begin{pmatrix}1\\0\\0\\0\\0\\0\\0\\0\\1\end{pmatrix}.
+\]
+The vector $\boldsymbol{b}$ contains the contribution of the two boundary
+values. You may assume that $A$ is invertible.
+Find the derivative of the value at the center of the interval with respect
+to $\alpha$, that is, compute \( \frac{\mathrm{d}u_5}{\mathrm{d}\alpha}. \)
+
+\begin{solutionbox}{10cm}
+    Let
+    \[
+        F(\boldsymbol{u},\alpha)
+        =A\boldsymbol{u}-h^2\alpha\boldsymbol{1}-\boldsymbol{b}.
+    \]
+    Since $F(\boldsymbol{u}(\alpha),\alpha)=\boldsymbol{0}$, implicit
+    differentiation gives
+    \[
+        A\frac{\mathrm{d}\boldsymbol{u}}{\mathrm{d}\alpha}
+        -h^2\boldsymbol{1}=\boldsymbol{0}.
+    \]
+    Hence the derivative vector $\boldsymbol{v}
+    =\mathrm{d}\boldsymbol{u}/\mathrm{d}\alpha$ is obtained by solving the
+    linear system $A\boldsymbol{v}=h^2\boldsymbol{1}$.
+
+    For this particular system, it is easy to obtain a closed-form solution,
+    even though this was not required to get the points. The entries
+    \[
+        v_i=\frac{x_i(1-x_i)}{2}
+        =\frac{i(10-i)}{200}, \qquad i=1,\ldots,9,
+    \]
+    satisfy this linear system. Indeed,
+    $2v_i-v_{i-1}-v_{i+1}=h^2$, with $v_0=v_{10}=0$.
+    Therefore
+    \[
+        \boxed{\frac{\mathrm{d}u_5}{\mathrm{d}\alpha}
+        =v_5=\frac{5(10-5)}{200}=\frac18.}
+    \]
+\end{solutionbox}
