@@ -740,13 +740,10 @@ begin
 		derivative::Float64
 	end
 	CGE.metadata(::Type{Adjoint}, ::Float64) = Adjoint(0.0)
-	CGE.metadata_rows(data::Adjoint) = ["adjoint" => (
-		iszero(data.derivative) ? "0" :
-		string(round(data.derivative; digits = 3))
-	)]
+	CGE.metadata_rows(data::Adjoint) = ["adjoint" => data.derivative]
 	CGE.seed_metadata!(data::Adjoint, is_output::Bool) =
 		data.derivative = is_output ? 1.0 : 0.0
-	const GraphNode = CGE.ExprNode{Float64,Adjoint}
+	const GraphNode = CGE.Node{Float64,Adjoint}
 end;
 
 # ╔═╡ f9a37c14-5b62-4e8d-96a0-2c41db73e65f
@@ -787,7 +784,7 @@ graph_example = let
 		v₄ => "v₄", v₅ => "v₅", v₆ => "v₆",
 		f => "f",
 	)
-	CGE.ExprGraph(f; names)
+	CGE.Graph(f; names)
 end;
 
 # ╔═╡ d492a165-3e70-4c18-b0d9-57fc2e8a1b96

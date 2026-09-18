@@ -1,5 +1,3 @@
-include(joinpath(@__DIR__, "flatten.jl"))
-
 # See details about these optimisers in the following course:
 # "LINMA2474 - High-Dimensional Data Analysis and Optimization"
 import Optimisers

@@ -11,9 +11,8 @@ function quad(x)
     return sum(I .* y.^2)
 end
 
-# WIP implementation of forward differentiation to be completed in this lab!
-include(joinpath(@__DIR__, "forward.jl"))
-include(joinpath(@__DIR__, "train.jl"))
+using Revise
+using LabAD
 
 # Let's take a 2D example so that it's easy to visualize
 using Plots
@@ -33,9 +32,6 @@ scatter!(getindex.(xs, 1), getindex.(xs, 2), label = "")
 
 # Let's now move to a neural network model but first
 # without any activation function
-
-include("data.jl")
-include("models.jl")
 
 # Number of data samples
 num_data = 100

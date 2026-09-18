@@ -2,25 +2,63 @@
 
 ########## Warm-up ############
 
+using Revise # This will allow the changes you make to LabAD to take effect even after executing `using LabAD`.`
+using LabAD
+import ComputationGraphExplorer as CGE
+
+x = rand(2)
+
+univariate(x) = x[1]^2 + x[1]
+
+∇f = @time Forward.gradient(univariate, x)
+
+# For the reverse mode, we will build the computation graph with `ComputationGraphExplorer`.
+# We can visualize the computation graph by looking at the REPL output when executing the following line:
+
+graph = univariate(map(Reverse.Node, x))
+
+# We can visualize the values of the reverse tangents after the backward pass:
+
+CGE.backward!(graph)
+
+# We can visualize the computation graph as an image in the VS Code plot pane as follows:
+
+CGE.visualize(graph)
+
+# Note that the node correspinding to `x` is used twice (as illustrated by the `↩` in the text representation of the graph),
+# so it's a DAG (Directed Acyclic Graph), not a tree!
+
+## Multivariate function
+
+
+# (x1 - 1)^2 + 2(x2 - 2)^2
 function quad(x)
     I = eachindex(x)
     y = x - I
     return sum(I .* y.^2)
 end
 
-# Implementation of forward differentiation from last week
-include(joinpath(@__DIR__, "forward.jl"))
-# WIP implementation of reverse differentiation to be completed in this lab!
-include(joinpath(@__DIR__, "reverse.jl"))
-
-x = rand(2)
 ∇f = @time Forward.gradient(quad, x)
+
+# For the reverse mode, we will build the computation graph with `ComputationGraphExplorer`.
+# We can visualize the computation graph as follows:
+
+graph = quad(map(Reverse.Node, x))
+
+# The backward pass is going to because we haven't `CGE.pullback!` backward pass for all operations yet.
+
+CGE.backward!(graph)
+
+# But we can still visualize
+
+CGE.visualize(graph)
+
+# The gradient computation also fails since it is using `CGE.backward!` internally
+
 ∇r = @time Reverse.gradient(quad, x)
 
 ########## Stretching ############
 
-include("data.jl")
-include("models.jl")
 using Test, LinearAlgebra
 
 num_data = 100
@@ -127,3 +165,27 @@ using BenchmarkTools
 # Then the backward pass would only consists of multiplying the local jacobians together, with no need to know the symbols.
 # The backward pass is therefore faster. Modify the code so as to implement this 'jacobian-storing' version of Reverse mode.
 # Is there any downside to this version?
+
+
+# ## Takeaway
+
+# Use ComputationGraphExplorer.jl to visualize the expression graph of the loss function.
+# We'll first need to reduce the size significantly:
+# You can do this by running
+
+num_data_tiny = 4
+X_tiny, y_tiny = random_moon(num_data_tiny)
+num_hidden_tiny = 2
+
+w_tiny = random_weights(X_tiny, y_tiny, num_hidden_tiny)
+L_tiny = loss(mse, identity_activation, X_tiny, y_tiny)
+
+graph = L_tiny(map(Reverse.Node, w_tiny))
+
+CGE.backward!(graph)
+
+CGE.visualize(graph)
+
+# You can observe that the number of nodes of the computation graph grows with `num_data_tiny` and
+# `num_hidden_tiny`. Is that an issue in terms of performance for computing the gradient ?
+# Think about it, it is a teaser for the project ;)
