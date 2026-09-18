@@ -2,8 +2,8 @@
 
 | Week  | Day        | Room   | File             |
 |-------|------------|--------|------------------|
-| S1    | 15/09/2025 | BARB02 | `lab_forward.jl` |
-| S2    | 22/09/2025 | BARB02 | `lab_reverse.jl` |
+| S1    | 14/09/2025 | BARB01 | `lab_forward.jl` |
+| S2    | 21/09/2025 | BARB01 | `lab_reverse.jl` |
 
 ## Setup
 
