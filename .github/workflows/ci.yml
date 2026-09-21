@@ -25,5 +25,4 @@ jobs:
         run: |
           julia --color=yes -e 'using Pkg
             Pkg.activate("LabAD")
-            Pkg.instantiate()
-            include("LabAD/test/runtests.jl")'
+            Pkg.test()'
