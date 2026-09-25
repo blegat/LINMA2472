@@ -1,0 +1,126 @@
+\titledquestion{Kernels (applications)}
+
+Suppose that you have $N$ datapoints $x_i \in \mathcal{X}$ with labels $y_i \in \{-1,1\}$ that you want to classify, where $1\leqslant i \leqslant N$. To do so, you will try two different classical methods, enhanced with the kernel trick. For the whole exercise, we introduce the following kernel-related definitions:
+\begin{itemize}
+    \item $\mathcal{H}$ is an RKHS,
+    \item $\langle \cdot, \cdot \rangle_{\mathcal{H}} : \mathcal{H} \times \mathcal{H} \to \mathbb{R}$ is the inner product associated with $\mathcal{H}$,
+    \item $\| \cdot \|_{\mathcal{H}} : \mathcal{H} \to \mathbb{R}^+$ is the induced norm in $\mathcal{H}$ such that $ \| f \|_{\mathcal{H}} = \sqrt{\langle f, f \rangle_{\mathcal{H}}}$ for any $f\in \mathcal{H}$,
+    \item $k: \mathcal{X} \times \mathcal{X} \to \mathbb{R}$ is the (symmetric positive-definite) kernel,
+    \item $\phi: \mathcal{X} \to \mathcal{H}$ is a feature map such that $k(x,y) = \langle \phi(x), \phi(y) \rangle_{\mathcal{H}}$ for any $x,y \in \mathcal{X}$,
+    \item $K \in \mathbb{R}^{N \times N}$ is the kernel matrix such that $K_{ij} = k(x_i,x_j) = \langle \phi(x_i), \phi(x_j) \rangle_{\mathcal{H}}$.
+\end{itemize}
+
+\textbf{A) Method I: hard-margin kernel support-vector machine ($k$-SVM).} $k$-SVM tries to maximize the \textit{margin} of the hyperplane which would separate the data embedded in the feature space. The decision function for any new input $x \in \mathcal{X}$ thus reads $d_I(x) = \langle v^*, \phi(x) \rangle_{\mathcal{H}} + b^*$, where the direction vector of the hyperplane $v^* \in \mathcal{H}$ and the bias $b^*\in\mathbb{R}$ are found through the $k$-SVM optimization problem. Let $\hat{y}_{I}(x)$ be the class predicted by the model $x$. This decision rule satisfies $\hat{y}_{I}(x) = \sign(d_{I}(x))$, where the sign function is defined as $\sign(t) = -1$ if $t<0$, $\sign(0) = 0$ and $\sign(t) = 1$ if $t>0$.
+\begin{enumerate}
+    \item A famous theorem allows to decompose $v^* = \sum_{i=1}^N \phi(x_i) \gamma_i^*$, with $\gamma^* \in \mathbb{R}^N$. What is the name of this theorem?
+    \begin{solutionbox}{1cm}
+    The \textbf{Representer Theorem}.
+    \end{solutionbox}
+    \item Write down the (primal) $k$-SVM optimization problem in terms of $\gamma \in \mathbb{R}^N$ and $b\in \mathbb{R}$, using only $K$, $y_i$ and $N$. 
+    \begin{solutionbox}{7.5cm}
+    \begin{align*}
+    \min_{\gamma \in \mathbb{R}^N, b \in \mathbb{R}} \quad & \frac{1}{2} \gamma^\top K \gamma \\
+    \text{s.t.} \quad & y_i \left( \sum_{j=1}^N K_{ij} \gamma_j + b \right) \geq 1, \quad \forall i \in \{1,\ldots,N\}
+    \end{align*}
+    or equivalently, $y_i((K\gamma)_i + b) \geq 1$ for all $i$.
+    \end{solutionbox}
+    \item Let $\gamma^* \in \mathbb{R}^N$ and $b^* \in \mathbb{R}$ be the solutions of the $k$-SVM problem (we assume that they exist and that they are bounded). Give the expression for $d_I(x)$ in terms of $x$, $\gamma^*$, $b^*$, $k$ and $x_i$. 
+    
+    Moreover, give the expression for $\hat{y}_{I}(x)$.
+    \begin{solutionbox}{9cm}
+    \begin{align*}
+    d_I(x) &= \sum_{i=1}^N \gamma_i^* k(x_i, x) + b^*, \\
+    \hat{y}_I(x) &= \sign(d_I(x)) = \sign\left(\sum_{i=1}^N \gamma_i^* k(x_i, x) + b^*\right).
+    \end{align*}
+    \end{solutionbox}
+\end{enumerate}
+
+\newpage
+\textbf{B) Method II: (squared) distance to the (lifted) mean.}
+We define the centers of each class as
+\[
+\mu_+ = \frac{1}{n_+} \sum_{i = 1 \atop y_i = 1}^N \phi(x_i),
+\qquad
+\mu_- = \frac{1}{n_-} \sum_{i = 1 \atop y_i = -1}^N \phi(x_i),
+\]
+where $n_+$ (resp. $n_-$) is the number of points labeled $+1$ (resp. $-1$). We call $\hat{y}_{II}(x)$ the class predicted for a new point $x$ by the method of closest mean. The decision rule reads:
+\begin{align*}
+    \hat{y}_{II}(x) &= \begin{cases} 1 & \textnormal{ if } \hspace{0.5cm} \|\phi(x) - \mu_+\|_{\mathcal{H}}^2 < \|\phi(x) - \mu_-\|_{\mathcal{H}}^2, \\
+    0 & \textnormal{ if } \hspace{0.5cm} \|\phi(x) - \mu_+\|_{\mathcal{H}}^2 = \|\phi(x) - \mu_-\|_{\mathcal{H}}^2, \\
+    -1 & \textnormal{ if } \hspace{0.5cm} \|\phi(x) - \mu_+\|_{\mathcal{H}}^2 > \|\phi(x) - \mu_-\|_{\mathcal{H}}^2. \end{cases}
+\end{align*}
+\begin{enumerate}
+    \item Propose and motivate an expression for the decision function $d_{II}(x)$ which would satisfy the equation $\hat{y}_{II}(x) = \sign(d_{II}(x))$, using only $\phi(x)$, $\mu_-$, $\mu_+$, $\langle \cdot , \cdot \rangle_{\mathcal{H}}$ and $\| \cdot \|_{\mathcal{H}}^2$. 
+    
+    Simplify the expression as much as possible.
+    \begin{solutionbox}{5.5cm}
+    We need to satisfy the condition on $\sign(d_{II}(x))$. A solution is
+    \begin{align*}
+    d_{II}(x) &= \|\phi(x) - \mu_-\|_{\mathcal{H}}^2 - \|\phi(x) - \mu_+\|_{\mathcal{H}}^2 \\
+    &= \|\phi(x)\|_{\mathcal{H}}^2 - 2\langle \phi(x), \mu_- \rangle_{\mathcal{H}} + \|\mu_-\|_{\mathcal{H}}^2 - \|\phi(x)\|_{\mathcal{H}}^2 + 2\langle \phi(x), \mu_+ \rangle_{\mathcal{H}} - \|\mu_+\|_{\mathcal{H}}^2 \\
+    &= 2\langle \phi(x), \mu_+ - \mu_- \rangle_{\mathcal{H}} + \|\mu_-\|_{\mathcal{H}}^2 - \|\mu_+\|_{\mathcal{H}}^2.
+    \end{align*}
+    This choice of $d_{II}(x)$ is great because it simplifies to an affine function, because it is easy to differentiate (ex: for optimization purposes), because it is easy to compute, because it naturally comes from the conditions, because it is natural to look at squared norms (ex: least squares methods),...
+    \end{solutionbox}
+    
+    \item Express the squared distances $\|\phi(x)-\mu_+\|_{\mathcal{H}}^2$ and $\|\phi(x)-\mu_-\|_{\mathcal{H}}^2$ using only $x$, $k$, $x_i$, $y_i$, $N$, $n_+$ and $n_-$.
+    \begin{solutionbox}{5.5cm}
+    \begin{align*}
+    \|\phi(x)-\mu_+\|_{\mathcal{H}}^2 &= \|\phi(x)\|_{\mathcal{H}}^2 - 2\langle \phi(x), \mu_+ \rangle_{\mathcal{H}} + \|\mu_+\|_{\mathcal{H}}^2 \\
+    &= k(x,x) - \frac{2}{n_+} \sum_{i: y_i = 1} k(x, x_i) + \frac{1}{n_+^2} \sum_{i: y_i = 1} \sum_{j: y_j = 1} k(x_i, x_j), \\
+    \|\phi(x)-\mu_-\|_{\mathcal{H}}^2 &= k(x,x) - \frac{2}{n_-} \sum_{i: y_i = -1} k(x, x_i) + \frac{1}{n_-^2} \sum_{i: y_i = -1} \sum_{j: y_j = -1} k(x_i, x_j).
+    \end{align*}
+    \end{solutionbox}
+
+    \item Just for this subquestion, assume that $n_+ = n_-$ (classes are balanced) and that $\|\mu_+\|_{\mathcal{H}} = \|\mu_-\|_{\mathcal{H}}$. Simplify the rule $\hat{y}_{II}(x)$ to express it only in terms of $x$, $N$, $k$, $x_i$ and $y_i$.
+
+    \textit{Hint:} What is the relation between $N$, $n_+$ and $n_-$?
+    \begin{solutionbox}{8cm}
+    Since $n_+ = n_- = N/2$ and $\|\mu_+\|_{\mathcal{H}} = \|\mu_-\|_{\mathcal{H}}$, we have:
+    \begin{align*}
+    d_{II}(x) &= 2\langle \phi(x), \mu_+ - \mu_- \rangle_{\mathcal{H}} \\
+    &= \frac{2}{n_+} \sum_{i: y_i = 1} k(x, x_i) - \frac{2}{n_-} \sum_{i: y_i = -1} k(x, x_i) \\
+    &= \frac{4}{N} \sum_{i=1}^N y_i k(x, x_i).
+    \end{align*}
+    Therefore, $\hat{y}_{II}(x) = \sign\left(\frac{4}{N}\sum_{i=1}^N y_i k(x, x_i)\right)=\sign\left(\sum_{i=1}^N y_i k(x, x_i)\right)$.
+    \end{solutionbox}
+\end{enumerate}
+
+\newpage
+\textbf{C) Methods comparison.}
+\begin{enumerate}
+    \item Are the decision functions $d_{I}(x)$ and $d_{II}(x)$ affine functions of $\phi(x)$ in $\mathcal{H}$? Justify briefly.
+    \begin{solutionbox}{8.5cm}
+    Yes, both are affine functions of $\phi(x)$:
+    \begin{itemize}
+        \item $d_I(x) = \langle v^*, \phi(x) \rangle_{\mathcal{H}} + b^*$ is affine (linear plus constant).
+        \item $d_{II}(x) = \langle 2( \mu_+ - \mu_- ),\phi(x)\rangle_{\mathcal{H}} + \|\mu_-\|_{\mathcal{H}}^2 - \|\mu_+\|_{\mathcal{H}}^2$ is also affine (linear plus constant).
+    \end{itemize}
+    Both have the form $\langle w, \phi(x) \rangle_{\mathcal{H}} + c$ for some $w \in \mathcal{H}$ and $c \in \mathbb{R}$.
+    \end{solutionbox}
+    \item If possible, give simple conditions under which both methods would be equivalent, meaning that for any new datapoint $x\in \mathcal{X}$, they would always predict the same class.
+    \begin{solutionbox}{9cm}
+    The methods would be equivalent iff $d_I(x)$ and $d_{II}(x)$ have the same sign for all $x$, i.e. $d_I(x) = c d_{II}(x)$ for $c>0$. A simple choice is $c=1$ so $d_{I}(x)=d_{II}(x)$.
+
+    This gives the conditions $v^* = 2(\mu_+-\mu_-)$ and $b^* = \|\mu_-\|_{\mathcal{H}}^2 - \|\mu_+\|_{\mathcal{H}}^2$.
+    
+    \end{solutionbox}
+    \item What method would you prefer to use for your classification task? Choose a method and give at least two arguments in favor of it.
+    \begin{solutionbox}{10cm}
+    I would prefer \textbf{Method I ($k$-SVM)} for the following reasons:
+    \begin{enumerate}
+        \item \textbf{Maximum margin:} Intelligent choice of separating hyperplane.
+        \item \textbf{Sparse and scalable:} The solution typically uses only a subset of training points (support vectors), making predictions (inference) more efficient. This makes the method scalable to larger of more complex datasets at inference.
+        \item \textbf{Theoretical guarantees:} SVMs have strong theoretical foundations with bounds on generalization error based on margin maximization.
+        \item \textbf{Improvable:} Extension to soft-margin $k$-SVM for more robustness to outliers and better generalization.
+    \end{enumerate}
+    I would prefer \textbf{Method II (nearest mean)} for the following reasons:
+    \begin{enumerate}
+        \item \textbf{Simple and interpretable:} Simple and intuitive motivation, easy to understand and to interpret.
+        \item \textbf{No pre-compute:} No need to solve an optimization problem to get the coefficients.
+        \item \textbf{Non-separable data:} Works despite non-linearly separable data in $\mathcal{H}$
+        \item \textbf{Adaptable:} Easily adaptable to new datapoints.
+    \end{enumerate}
+    \end{solutionbox}
+\end{enumerate}
+\clearpage
