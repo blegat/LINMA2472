@@ -13,11 +13,11 @@ See the README in each subfolder for more details and troubleshooting:
 
 ## Schedule
 
-| Week  | Monday     | Lecture Topic | Lecturer |       Practice         |
-|-------|------------|---------------|----------|------------------------|
-| S1    | 14/09/2025 | Scalar AD     | Legat    | ⚗️ Forward Lab         |
-| S2    | 21/09/2025 | Tensor AD     | Legat    | 🚀 HW1 + ️⚗ Reverse Lab |
-| S3    | 28/09/2025 | Tensor AD     | Legat    |                        |
+| Week  | Monday     | Lecture Topic | Lecturer |         Practice          |
+|-------|------------|---------------|----------|---------------------------|
+| S1    | 14/09/2025 | Scalar AD     | Legat    | ⚗️ Forward Lab            |
+| S2    | 21/09/2025 | Tensor AD     | Legat    | ⚗ Reverse Lab             |
+| S3    | 28/09/2025 | Tensor AD     | Legat    | 🏁 ⚗ Reverse Lab → 🚀 HW1 |
 | S4    | 05/10/2025 | Second order  | Legat    |                        |
 | S5    | 12/10/2025 | Transformers  | Legat    |                        |
 | S6    | 19/10/2025 | Transformers  | Legat    | 💬 Midterm HW1         |
