@@ -208,6 +208,13 @@ of each node ``v_i``, then accumulates the adjoints
 # ╔═╡ 1d56075c-e28d-46c9-9a0a-210079172388
 md"## Reverse mode in action"
 
+# ╔═╡ 19578219-c6dd-4322-a2f4-44088ef640af
+md"""
+```math
+f(x_1, x_2) = x_2 e^{x_1} \sqrt{x_1 + x_2 e^{x_2}}
+```
+"""
+
 # ╔═╡ 7f75e3f3-c4e2-402d-be7b-336a4f65042a
 md"""# Comparison
 
@@ -289,7 +296,14 @@ md"## Evaluation"
 # ╔═╡ 29287c62-e892-448f-a9d5-12785ae4a02f
 md"""## Matrix multiplication (Vectorized way)
 
-Useful: ``\text{vec}(AXB) = (B^\top \otimes A) \text{vec}(X)``
+[Kronecker product properties:](https://en.wikipedia.org/wiki/Kronecker_product)
+```math
+\begin{align}
+\text{vec}(AXB) & = (B^\top \otimes A) \text{vec}(X) &
+(A \otimes B)^\top & = A^\top \otimes B^\top
+\end{align}
+```
+Deriving VJP and JVP for matrix product:
 ```math
 \begin{align}
 F(X) & = AX\\
@@ -967,7 +981,7 @@ There is no valid gradient!")
 qa(md"What about returning a convex combination of the derivative from the left and right ?", md"Any number between ``-1`` and ``1`` is a valid **subgradient**!
 Whereas the gradient is the normal to the **unique** tangent, the subgradient is an element of the **tangent cone**, depicted below. For convex functions, the notion of subgradient appropriately generalizes the notion of gradient for nonsmooth functions.
 
-Note that the notion of subgradient is not defined for nonconvex functions. So we may say that we compute the local subgradient of some local nonsmooth ``f_i`` but we cannot deduce from it that the resulting vector is a subgradient of ``f`` if ``f`` is nonconvex.")
+Note that the notion of subgradient is not defined for nonconvex functions. So instead we use [Clarke differential](https://en.wikipedia.org/wiki/Clarke_generalized_derivative) but this is out of the scope of this course.")
 
 # ╔═╡ c733ca7e-b57e-4218-9bd4-238ab5749143
 qa(md"How should we store the Jacobian in the forward pass to save it for the backward pass ?",
@@ -3302,8 +3316,9 @@ uuid = "23338594-aafe-5451-b93e-139f81909106"
 # ╟─626abc7c-87ef-4838-9f0a-294cf0a4be6a
 # ╟─6c60f9ca-ba04-41e2-9625-c9e10f1a853b
 # ╟─1d56075c-e28d-46c9-9a0a-210079172388
+# ╟─19578219-c6dd-4322-a2f4-44088ef640af
 # ╟─d18fb5c2-6e47-4a90-b3d1-90c7af4e2b16
-# ╠═e52c7a3b-8d19-4c60-a7f2-31b6ec9d5a08
+# ╟─e52c7a3b-8d19-4c60-a7f2-31b6ec9d5a08
 # ╟─f9a37c14-5b62-4e8d-96a0-2c41db73e65f
 # ╟─7f75e3f3-c4e2-402d-be7b-336a4f65042a
 # ╟─bab3a3cb-0ad2-4ea5-a15c-6593fc22e496
