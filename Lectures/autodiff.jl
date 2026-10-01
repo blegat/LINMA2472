@@ -254,12 +254,21 @@ abs(Dual(0, 1))
 # ╔═╡ 9862c791-31e8-4d59-8610-a929d72ea9c3
 abs_bis(Dual(0, 1))
 
+# ╔═╡ 6bd5ea51-54c4-46ba-8eb3-6427225e5249
+md"## Issues with scalar AD"
+
 # ╔═╡ e121f72b-fe6d-491a-ab03-ef92154c61ca
 md"""
 # Neural network
 
 Two equivalent approaches, ``b_k`` is a **column** vector, ``S_i, X, W_i, Y`` are matrices.
 """
+
+# ╔═╡ 2c7e75ca-bd85-4cf7-b762-bb80afc9e465
+
+
+# ╔═╡ 142fc47a-5774-4a5c-a2ba-942524986e7c
+
 
 # ╔═╡ b92d17a9-8481-458a-bc0a-efb7333cbc6e
 hbox([md"""
@@ -401,7 +410,10 @@ function normalise(x)
 end
 
 # ╔═╡ 0bcadb3a-4880-4e6c-bccb-b09df8ad8fa3
+# ╠═╡ disabled = true
+#=╠═╡
 X = Float32.(normalise(wine.features))
+  ╠═╡ =#
 
 # ╔═╡ 2fcf25d2-fd51-4c13-b57c-86236aceead2
 y = Float32.(wine.targets .- 2)
@@ -726,26 +738,36 @@ h_slider = @bind h Slider(10:1000, default = 16, show_value = true);
 md"`h` = $(h_slider)"
 
 # ╔═╡ b5c3e2ef-3d47-4f44-b968-d04734be2f16
+#=╠═╡
 W = [rand(Float32, h, size(X, 1)), rand(Float32, size(y, 1), h)]
+  ╠═╡ =#
 
 # ╔═╡ a580ef44-234a-4ed1-b007-920651415427
+#=╠═╡
 sum((W[2] * tanh.(W[1] * X) - y).^2) / size(y, 2)
+  ╠═╡ =#
 
 # ╔═╡ 87c6a5bc-82bf-44a5-b4d6-6d50285348c0
+#=╠═╡
 @time reverse_diff(W, X, y)
+  ╠═╡ =#
 
 # ╔═╡ 85303791-bdc4-468a-bc40-48ef2a186282
+#=╠═╡
 if CUDA.functional()
 	X_gpu = CUDA.CuArray(X)
 	y_gpu = CUDA.CuArray(y)
 	W_gpu = CUDA.CuArray.(W)
 	@time reverse_diff(W_gpu, X_gpu, y_gpu)
 end
+  ╠═╡ =#
 
 # ╔═╡ 9b4a78d8-e6da-41dd-b922-b35c895eee1a
+#=╠═╡
 if h < 200 # Forward Diff start being too slow for `h > 200`
 	@time forward_diff(W, X, y)
 end
+  ╠═╡ =#
 
 # ╔═╡ b3c8d70e-9a41-4d26-85fb-6e02f19ca4d3
 begin
@@ -780,6 +802,19 @@ begin
 		x.metadata.derivative += node.metadata.derivative / (2 * node.value)
 	end
 end;
+
+# ╔═╡ ee3299e2-3367-4c68-a050-c26650a97c8c
+let
+	x = GraphNode.(rand(2))
+	y = GraphNode.(rand(2))
+	names = IdDict()
+	for i in eachindex(x)
+		names[x[i]] = "x[$i]"
+		names[y[i]] = "y[$i]"
+	end
+	graph = CGE.Graph(x' * y; names)
+	HTML(CGE.render_svg(graph, CGE.capture_frame(graph, "x' * y"), responsive = true))
+end
 
 # ╔═╡ c71e4f82-0d35-49ba-97c6-84a1bd50e739
 graph_example = let
@@ -971,6 +1006,9 @@ For this JVP, we need to evaluate ``f`` twice. On the other hand, forward mode e
 
 Numerical differentiation may however need to increase its number of evaluations in order to improve its accuracy while forward is accurate (up to floating point rounding errors).
 """)
+
+# ╔═╡ 11eadcc1-68bf-4ca7-9603-ef46468b4779
+qa(md"Why don't we show the local Jacobian ``\partial J_k`` in the memory usage ?", md"For a scalar AD, it is best to compute the local Jacobian ``\partial J_k`` and ``s_k`` from ``s_{k-1}`` during the forward pass at the same time because part of the computation for one can be reused for the other one. For instance, if ``f_k(x) = sin(x)``, it is more efficient to compute ``sin(x)`` and ``cos(x)`` at the same time with the Julia function `sincos`. However, as we will see, for a vectorized AD, we usually don't compute a local Jacobian and just use ``s_{k-1}`` to do the backward propagation of ``r_k`` towards ``r_{k-1}``. This is why this picture, which is taken from the book which focuses on vectorized AD doesn't show a memory usage for the local Jacobian.")
 
 # ╔═╡ 74063eb5-be06-466a-a2f1-e266c35295ea
 qa(md"Is the function ``|x|`` is differentiable at ``x = 0`` ?.", md"No, if we approach from the left (that is, ``x < 0``, the function is ``-x``), then the derivative is ``-1``.
@@ -3328,6 +3366,7 @@ uuid = "23338594-aafe-5451-b93e-139f81909106"
 # ╟─e8c60922-5bbf-45b5-8311-18c8f8525623
 # ╟─73ba544c-616a-4db1-b91d-0b20a7b8924b
 # ╟─2f8baccc-19d1-44d6-b71f-0243fd8696ba
+# ╟─11eadcc1-68bf-4ca7-9603-ef46468b4779
 # ╟─dc4feb58-d2cf-4a97-aaed-7f4593fc9732
 # ╟─74063eb5-be06-466a-a2f1-e266c35295ea
 # ╟─607000ef-fb7f-4204-b543-3cb6bb75ed71
@@ -3339,7 +3378,11 @@ uuid = "23338594-aafe-5451-b93e-139f81909106"
 # ╠═69ae57b4-4e4c-44a2-aca7-d0fff89b9566
 # ╠═e50f8f52-a73f-4186-af5e-b4ca2c021142
 # ╠═9862c791-31e8-4d59-8610-a929d72ea9c3
+# ╟─6bd5ea51-54c4-46ba-8eb3-6427225e5249
+# ╠═ee3299e2-3367-4c68-a050-c26650a97c8c
 # ╟─e121f72b-fe6d-491a-ab03-ef92154c61ca
+# ╠═2c7e75ca-bd85-4cf7-b762-bb80afc9e465
+# ╠═142fc47a-5774-4a5c-a2ba-942524986e7c
 # ╟─b92d17a9-8481-458a-bc0a-efb7333cbc6e
 # ╟─9527686f-24e1-40bb-9a5d-22575aafec9b
 # ╟─cd6d807d-6238-44ce-9267-1614679f527a
