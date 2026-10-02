@@ -13,19 +13,19 @@ See the README in each subfolder for more details and troubleshooting:
 
 ## Schedule
 
-| Week  | Monday     | Lecture Topic | Lecturer |         Practice          |
-|-------|------------|---------------|----------|---------------------------|
-| S1    | 14/09/2025 | Forward AD    | Legat    | ⚗️ Forward Lab            |
-| S2    | 21/09/2025 | Reverse AD    | Legat    | ⚗ Reverse Lab             |
-| S3    | 28/09/2025 | Tensor AD     | Legat    | 🏁 ⚗ Reverse Lab → 🚀 HW1 |
-| S4    | 05/10/2025 | Tensor AD     | Legat    |                        |
-| S5    | 12/10/2025 | Second order  | Legat    |                        |
-| S6    | 19/10/2025 | Transformers  | Legat    | 💬 Midterm HW1         |
-|       | 26/10/2025 | 🎃            |          |                        |
-| S7    | 02/11/2025 | Transformers  | Legat    |                        |
-| S8    | 09/11/2025 | Armistice     |          |                        |
-| S9    | 16/11/2025 | TBA           | Blondel  |                        |
-| S10   | 23/11/2025 | TBA           | Blondel  | 🏁 HW1                 |
-| S11   | 30/11/2025 | TBA           | Blondel  | 💬 Oral HW1            |
-| S12   | 07/12/2025 | Implicit Diff | Legat    | 💬 Oral HW1            |
-| S13   | 14/12/2025 | Sparse AD     |          | 💬 Oral HW1            |
+| Week  | Monday     | Lecture Topic | Lecturer  |         Practice          |  Project   |
+|-------|------------|---------------|-----------|---------------------------|------------|
+| S1    | 14/09/2025 | Forward AD    | Legat     | ⚗️ Forward Lab            |            |
+| S2    | 21/09/2025 | Reverse AD    | Legat     | ⚗ Reverse Lab             |            |
+| S3    | 28/09/2025 | Tensor AD     | Legat     | ⚗ Reverse Lab             | 🚀 Start   |
+| S4    | 05/10/2025 | Tensor AD     | Legat     |                           |            |
+| S5    | 12/10/2025 | Second order  | Legat     |                           |            |
+| S6    | 19/10/2025 | Transformers  | Legat     |                           | 💬 Midterm |
+|       | 26/10/2025 | 🎃            |           |                           |            |
+| S7    | 02/11/2025 | Transformers  | Legat     |                           |            |
+| S8    | 09/11/2025 | Armistice     |           |                           |            |
+| S9    | 16/11/2025 | TBA           | Blondel   |                           |            |
+| S10   | 23/11/2025 | TBA           | Blondel   |                           | 🏁 End     |
+| S11   | 30/11/2025 | TBA           | Blondel   |                           | 💬 Oral    |
+| S12   | 07/12/2025 | Implicit Diff | Legat     |                           | 💬 Oral    |
+| S13   | 14/12/2025 | Sparse AD     | Montoison |                           | 💬 Oral    |
