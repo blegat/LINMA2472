@@ -257,21 +257,63 @@ abs_bis(Dual(0, 1))
 # ╔═╡ 6bd5ea51-54c4-46ba-8eb3-6427225e5249
 md"## Issues with scalar AD"
 
+# ╔═╡ 4d4e11a2-b6a1-490f-9c7b-ad617dbb395b
+begin
+	struct DummyMetadata end
+	DummyMetadata(value) = DummyMetadata()
+end;
+
+# ╔═╡ 533bf4bc-494b-47c2-91b6-7b30221765f5
+md"## Nodes with vector value"
+
 # ╔═╡ e121f72b-fe6d-491a-ab03-ef92154c61ca
 md"""
 # Neural network
-
-Two equivalent approaches, ``b_k`` is a **column** vector, ``S_i, X, W_i, Y`` are matrices.
 """
 
-# ╔═╡ 2c7e75ca-bd85-4cf7-b762-bb80afc9e465
+# ╔═╡ 54457653-f029-4368-8bc0-15d69f22bfcd
+md"""
+1. Start with an input vector ``x``.
+2. Apply a matrix product ``z = W_1 x``.
+3. Apply an activation function, say `tanh`, independently to each entry.
+   Using the broadcasting syntax of Julia, ``\sigma(x)`` is `tanh.(z)`.
+4. Repeat with ``W_2``, ...
+"""
 
+# ╔═╡ 8194cce9-115f-44b4-9f28-caa88b764185
+md"""
+## Batching
 
-# ╔═╡ 142fc47a-5774-4a5c-a2ba-942524986e7c
+Applying a neural network two 2 inputs can be done simultaneously so that
+matrix-vector products become matrix-matrix product, which better exploit the parallelization capabilities of GPUs.
+Let ``X = \begin{bmatrix}x^{(1)}x^{(2)}\end{bmatrix}``.
+```math
+\begin{align}
+\begin{bmatrix}
+\sigma(W_1 x^{(1)}) & \sigma(W_1 x^{(2)})
+\end{bmatrix}
+&=
+\sigma(\begin{bmatrix}
+W_1 x^{(1)} & W_1 x^{(2)}
+\end{bmatrix})\\
+& =
+\sigma(W_1 \begin{bmatrix}
+x^{(1)} & x^{(2)}
+\end{bmatrix})\\
+& =
+\sigma(W_1X)
+\end{align}
+```
+"""
 
+# ╔═╡ 292b182f-b8a4-4ac6-89ad-ef71d40eca1f
+md"## Two equivalent approaches"
+
+# ╔═╡ e9c14738-2c1f-43d8-94f9-fb5440d74092
+md"``b_k`` is a **column** vector, ``S_i, X, W_i, Y`` are matrices."
 
 # ╔═╡ b92d17a9-8481-458a-bc0a-efb7333cbc6e
-hbox([md"""
+TwoColumn(md"""
 ### Right-to-left
 
 ```math
@@ -284,7 +326,6 @@ S_{2H+2} & = \ell(S_{2H+1}; Y)\\
 \end{align*}
 ```
 """,
-	Div(html" ", style = Dict("flex-grow" => "1")),
 	 md"""
 ### Left-to-right
 
@@ -297,7 +338,7 @@ S_{2H+1} & = S_{2H} W_{k+1}\\
 S_{2H+2} & = \ell(S_{2H+1}; Y)\\
 \end{align*}
 ```
-"""])
+""")
 
 # ╔═╡ 9527686f-24e1-40bb-9a5d-22575aafec9b
 md"## Evaluation"
@@ -410,10 +451,7 @@ function normalise(x)
 end
 
 # ╔═╡ 0bcadb3a-4880-4e6c-bccb-b09df8ad8fa3
-# ╠═╡ disabled = true
-#=╠═╡
 X = Float32.(normalise(wine.features))
-  ╠═╡ =#
 
 # ╔═╡ 2fcf25d2-fd51-4c13-b57c-86236aceead2
 y = Float32.(wine.targets .- 2)
@@ -663,6 +701,23 @@ end
 # ╔═╡ a06be2d9-73c1-4f85-b2e7-18d3c5a90f47
 import ComputationGraphExplorer as CGE
 
+# ╔═╡ df1f29ce-026d-4935-83aa-0d597cb166dd
+ScalarNode = CGE.Node{Int,DummyMetadata};
+
+# ╔═╡ 7f459370-eb6f-4d82-bf99-1528e136ca5c
+import LinearAlgebra
+
+# ╔═╡ 895f4b81-51fe-4a1c-b958-1294743e3a9b
+VectNode = let
+	T = Int
+	Value = Union{
+		T,
+		Vector{T},
+		LinearAlgebra.Adjoint{T,Vector{T}},
+	}
+	CGE.Node{Value,DummyMetadata}
+end;
+
 # ╔═╡ e8b1c40d-27a6-4f39-b95e-6d3a0f81c72b
 begin
 	"""
@@ -730,6 +785,34 @@ begin
 
 	StepSlider
 end;
+
+# ╔═╡ 2e8dd18a-b784-4f7d-ac7d-e1f88ba2ca56
+md"`n` = $(@bind scalar_n Slider(1:4, default = 2, show_value = true))"
+
+# ╔═╡ ee3299e2-3367-4c68-a050-c26650a97c8c
+let
+	x = ScalarNode.(rand(-9:9, scalar_n))
+	y = ScalarNode.(rand(-9:9, scalar_n))
+	names = IdDict()
+	for i in eachindex(x)
+		names[x[i]] = "x[$i]"
+		names[y[i]] = "y[$i]"
+	end
+	graph = CGE.Graph(x' * y; names)
+	HTML(CGE.render_svg(graph, CGE.capture_frame(graph, "x' * y"), responsive = true))
+end
+
+# ╔═╡ 9a07a949-4ade-4325-8ae6-b05bdbbfae00
+md"`n` = $(@bind vector_n Slider(1:4, default = 2, show_value = true))"
+
+# ╔═╡ 9661a3b9-ae42-466e-967d-69230b9769b3
+let
+	x = VectNode(rand(-9:9, vector_n))
+	y = VectNode(rand(-9:9, vector_n))
+	names = IdDict(x => "x", y => "y")
+	graph = CGE.Graph(x' * y; names)
+	HTML(CGE.render_svg(graph, CGE.capture_frame(graph, "x' * y"), responsive = true, typeset_arrays = false))
+end
 
 # ╔═╡ 2ca19ff6-ec22-4327-aea2-80bdca55ccef
 h_slider = @bind h Slider(10:1000, default = 16, show_value = true);
@@ -802,19 +885,6 @@ begin
 		x.metadata.derivative += node.metadata.derivative / (2 * node.value)
 	end
 end;
-
-# ╔═╡ ee3299e2-3367-4c68-a050-c26650a97c8c
-let
-	x = GraphNode.(rand(2))
-	y = GraphNode.(rand(2))
-	names = IdDict()
-	for i in eachindex(x)
-		names[x[i]] = "x[$i]"
-		names[y[i]] = "y[$i]"
-	end
-	graph = CGE.Graph(x' * y; names)
-	HTML(CGE.render_svg(graph, CGE.capture_frame(graph, "x' * y"), responsive = true))
-end
 
 # ╔═╡ c71e4f82-0d35-49ba-97c6-84a1bd50e739
 graph_example = let
@@ -1269,6 +1339,7 @@ CUDA = "052768ef-5323-5732-b1bb-66c8b64840ba"
 ComputationGraphExplorer = "c9fc7d07-15e8-4fd8-b152-23c2424d2de2"
 DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
 HypertextLiteral = "ac1192a8-f4b3-4bfe-ba22-af5b92cd3ab2"
+LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 MLDatasets = "eb30cadb-4394-5ae3-aed4-317e484a6458"
 OneHotArrays = "0b1bfda6-eb8a-41d2-88d8-f5af5cad476f"
 PlotlyLight = "ca7969ec-10b3-423e-8d99-40f33abb42bf"
@@ -3379,10 +3450,19 @@ uuid = "23338594-aafe-5451-b93e-139f81909106"
 # ╠═e50f8f52-a73f-4186-af5e-b4ca2c021142
 # ╠═9862c791-31e8-4d59-8610-a929d72ea9c3
 # ╟─6bd5ea51-54c4-46ba-8eb3-6427225e5249
-# ╠═ee3299e2-3367-4c68-a050-c26650a97c8c
+# ╟─2e8dd18a-b784-4f7d-ac7d-e1f88ba2ca56
+# ╟─ee3299e2-3367-4c68-a050-c26650a97c8c
+# ╟─4d4e11a2-b6a1-490f-9c7b-ad617dbb395b
+# ╟─df1f29ce-026d-4935-83aa-0d597cb166dd
+# ╟─533bf4bc-494b-47c2-91b6-7b30221765f5
+# ╟─9a07a949-4ade-4325-8ae6-b05bdbbfae00
+# ╠═9661a3b9-ae42-466e-967d-69230b9769b3
+# ╟─895f4b81-51fe-4a1c-b958-1294743e3a9b
 # ╟─e121f72b-fe6d-491a-ab03-ef92154c61ca
-# ╠═2c7e75ca-bd85-4cf7-b762-bb80afc9e465
-# ╠═142fc47a-5774-4a5c-a2ba-942524986e7c
+# ╟─54457653-f029-4368-8bc0-15d69f22bfcd
+# ╟─8194cce9-115f-44b4-9f28-caa88b764185
+# ╟─292b182f-b8a4-4ac6-89ad-ef71d40eca1f
+# ╟─e9c14738-2c1f-43d8-94f9-fb5440d74092
 # ╟─b92d17a9-8481-458a-bc0a-efb7333cbc6e
 # ╟─9527686f-24e1-40bb-9a5d-22575aafec9b
 # ╟─cd6d807d-6238-44ce-9267-1614679f527a
@@ -3446,6 +3526,7 @@ uuid = "23338594-aafe-5451-b93e-139f81909106"
 # ╠═f1ba3d3c-d0a5-4290-ab73-9ce34bd5e5f6
 # ╠═b7d4a91e-3c52-4f86-9a0d-5e8c1f2b6d47
 # ╠═a06be2d9-73c1-4f85-b2e7-18d3c5a90f47
+# ╠═7f459370-eb6f-4d82-bf99-1528e136ca5c
 # ╟─e8b1c40d-27a6-4f39-b95e-6d3a0f81c72b
 # ╟─b3c8d70e-9a41-4d26-85fb-6e02f19ca4d3
 # ╟─c71e4f82-0d35-49ba-97c6-84a1bd50e739
