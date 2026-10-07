@@ -1,0 +1,15 @@
+name = "LabADSolution"
+uuid = "928cf8d3-e1d9-4442-9946-9ad8b9b938c8"
+version = "0.1.0"
+
+[deps]
+ComputationGraphExplorer = "c9fc7d07-15e8-4fd8-b152-23c2424d2de2"
+LabAD = "34873843-21e9-4bf9-8a88-aa079393b445"
+
+[compat]
+ComputationGraphExplorer = "0.2"
+LabAD = "0.1"
+julia = "1.10"
+
+[sources]
+LabAD = {path = ".."}
