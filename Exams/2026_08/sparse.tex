@@ -1,0 +1,70 @@
+\titledquestion{Sparse Jacobian recovery}
+
+Let $n\geq 3$ and consider the function
+\[
+    F:\mathbb{R}^n\to\mathbb{R}^n,
+    \qquad
+    F(x)=
+    \begin{pmatrix}
+        x_1^2+\displaystyle\sum_{j=2}^n x_j^2\\
+        c_2\exp(x_1)\\
+        \vdots\\
+        c_n\exp(x_1)
+    \end{pmatrix},
+\]
+where $c_2,\ldots,c_n$ are nonzero constants.
+
+Assume that the sparsity pattern of the Jacobian is known and that
+$x_i\neq 0$ for every $i$. A Jacobian-vector product (JVP) with seed $v$ is
+$J_F(x)v$, and a vector-Jacobian product (VJP) with seed $w$ is
+$w^\top J_F(x)$. Each product may use an arbitrary seed vector.
+
+\begin{enumerate}
+    \item If only JVPs may be used, what is the minimum number of products
+    required to recover the complete Jacobian? Justify your answer.
+    \begin{solutionbox}{5.5cm}
+        Every pair of columns has a structural nonzero in the first row.
+        Hence no two columns are structurally orthogonal and they must have
+        different colors. Therefore, $\boxed{n}$ JVPs are required.
+    \end{solutionbox}
+
+    \item If only VJPs may be used, what is the minimum number of products
+    required to recover the complete Jacobian? Justify your answer.
+    \begin{solutionbox}{5.5cm}
+        Every pair of rows has a structural nonzero in the first column.
+        Hence no two rows are structurally orthogonal and they must have
+        different colors. Therefore, $\boxed{n}$ VJPs are required.
+    \end{solutionbox}
+
+    \item Can fewer Jacobian products be used if JVPs and VJPs are combined?
+    If so, give suitable seed vectors and explain how the complete Jacobian
+    is recovered.
+    \begin{solutionbox}{12cm}
+        Yes. Let $e_1=(1,0,\ldots,0)^\top$. One JVP gives
+        \[
+            J_F(x)e_1=J_F(x)_{:,1},
+        \]
+        which is the complete first column. One VJP gives
+        \[
+            e_1^\top J_F(x)=J_F(x)_{1,:},
+        \]
+        which is the complete first row. All entries outside this row and
+        column are known to be zero, so these two products recover the whole
+        Jacobian:
+        \[
+            \boxed{J_F(x)=
+            \begin{pmatrix}
+                2x_1&2x_2&\cdots&2x_n\\
+                c_2\exp(x_1)&0&\cdots&0\\
+                \vdots&\vdots&&\vdots\\
+                c_n\exp(x_1)&0&\cdots&0
+            \end{pmatrix}.}
+        \]
+        Thus only $\boxed{2}$ Jacobian products are needed: one JVP and one
+        VJP.
+
+        One product cannot suffice: a single JVP does not distinguish the
+        $n-1$ entries in the first row, while a single VJP does not
+        distinguish the $n-1$ entries in the first column.
+    \end{solutionbox}
+\end{enumerate}
