@@ -198,7 +198,7 @@ md"## Computation graph"
 md"""
 We build the graph of
 ```math
-f(x_1, x_2) = x_2 e^{x_1} \sqrt{x_1 + x_2 e^{x_2}}
+f(x_1, x_2) = x_2 e^{x_1} \sqrt{x_1 + x_2 e^{x_1}}
 ```
 at ``x_1 = 1``, ``x_2 = 2``. The slider first reveals the forward evaluation
 of each node ``v_i``, then accumulates the adjoints
