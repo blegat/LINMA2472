@@ -100,25 +100,6 @@ f_2(s1) = -s1
 # ╔═╡ 85fc455c-36cf-4a4c-aa64-84a827884693
 md"# Reverse Differentiation"
 
-# ╔═╡ 0980ef52-526d-421d-8c63-04272f16cbdd
-md"## Adjoint and scalar products"
-
-# ╔═╡ 191f33ab-b535-4cb1-96b3-6b2f10fd633a
-md"""
-Let ``(\mathcal{S}_k)_k`` be the spaces for which ``s_k, t_k, r_k \in \mathcal{S}_k`` and ``f_k : \mathcal{S}_{k-1} \to \mathcal{S}_{k}``.
-
-In the vectorized case, the Jacobian ``\partial f_k`` may be expressed more naturally as a linear map ``\partial f_k : \mathcal{S}_{k-1} \to \mathcal{S}_k`` and ``t_k = \partial f_k(t_{k-1})``. To obtain the matrix-form of the Jacobian, we need to fix a basis for ``\mathcal{S}_{k-1}`` and ``\mathcal{S}_k`` and vectorize ``t_k`` and ``t_{k-1}`` according to that basis which is often cumbersome.
-
-Instead, we choose a scalar products ``\langle \cdot, \cdot \rangle_k`` for ``\mathcal{S}_k`` and the **adjoint** of the Jacobians according to these bases in the backward pass.
-For instance, if ``\mathcal{S}_K = \mathcal{R}``, ``t_K = \langle t_K, 1 \rangle_K`` for the canonical scalar product of ``\mathcal{R}`` so we pick ``r_K = 1``. We then search for a way to obtain ``r_0(r_K)`` so that
-``\langle t_0, r_0(r_K) \rangle_0 = \langle \partial f_K(\cdots\partial f_1(t_0), r_K\rangle_K``.
-Then, for instance if ``\mathcal{S}_0 = \mathbb{R}^n``, with the canonical scalar product ``\langle x, y \rangle_0 = x^\top y``, we have
-``\partial_i f(s_0) = \langle e_i, r_0(r_K) \rangle_0 = (r_0(r_K))_i``.
-"""
-
-# ╔═╡ c1ae773e-0f2d-4c1c-bae2-25f45bb28fbb
-md"## Spaces and scalar products"
-
 # ╔═╡ 277bd2ce-fa7f-4288-be8a-0ddd8f23635c
 md"""
 ## Two different takes on the multivariate chain rule
@@ -387,6 +368,51 @@ S_{2H+2} & = \ell(S_{2H+1}; Y)\\
 # ╔═╡ 9527686f-24e1-40bb-9a5d-22575aafec9b
 md"## Evaluation"
 
+# ╔═╡ 0980ef52-526d-421d-8c63-04272f16cbdd
+md"## Spaces and scalar products"
+
+# ╔═╡ 191f33ab-b535-4cb1-96b3-6b2f10fd633a
+md"""
+Let ``(\mathcal{S}_k)_k`` be the spaces for which ``s_k, t_k, r_k \in \mathcal{S}_k`` and ``f_k : \mathcal{S}_{k-1} \to \mathcal{S}_{k}``.
+
+In the vectorized case, the Jacobian ``\partial f_k`` may be expressed more naturally as a linear map ``\partial f_k : \mathcal{S}_{k-1} \to \mathcal{S}_k`` and ``t_k = \partial f_k(t_{k-1})``. To obtain the matrix-form of the Jacobian, we need to fix a basis for ``\mathcal{S}_{k-1}`` and ``\mathcal{S}_k`` and vectorize ``t_k`` and ``t_{k-1}`` according to that basis which is often cumbersome.
+
+Instead, we choose a scalar products ``\langle \cdot, \cdot \rangle_k`` for ``\mathcal{S}_k`` and the **adjoint** of the Jacobians according to these bases in the backward pass.
+For instance, if ``\mathcal{S}_K = \mathcal{R}``, ``t_K = \langle t_K, 1 \rangle_K`` for the canonical scalar product of ``\mathcal{R}`` so we pick ``r_K = 1``. We then search for a way to obtain ``r_0(r_K)`` so that
+``\langle t_0, r_0(r_K) \rangle_0 = \langle \partial f_K(\cdots\partial f_1(t_0), r_K\rangle_K``.
+Then, for instance if ``\mathcal{S}_0 = \mathbb{R}^n``, with the canonical scalar product ``\langle x, y \rangle_0 = x^\top y``, we have
+``\partial_i f(s_0) = \langle e_i, r_0(r_K) \rangle_0 = (r_0(r_K))_i``.
+"""
+
+# ╔═╡ c1ae773e-0f2d-4c1c-bae2-25f45bb28fbb
+md"## Spaces and scalar products"
+
+# ╔═╡ 068ef840-04cb-4de4-9512-721f57e5750e
+md"## Adjoint"
+
+# ╔═╡ 7331c447-c0a6-4a47-af00-36efc449d9d9
+md"""
+The *adjoint* of a linear map ``A : \mathcal{S}_1 \to \mathcal{S}_2`` for scalar products ``\langle \cdot, \cdot \rangle_1`` for ``\mathcal{S}_1`` and ``\langle \cdot, \cdot \rangle_2`` for ``\mathcal{S}_2`` is the linear map ``A^*`` such that
+```math
+\forall x, y, \qquad \langle A(x), y \rangle_2 = \langle x, A^*(y) \rangle_1.
+```
+"""
+
+# ╔═╡ bebe2bb8-cf74-4eaa-85d1-712b990b5985
+md"""
+For our Jacobians:
+```math
+\begin{align}
+\langle t_k, r_k \rangle_k
+& =
+\langle \partial f_k(t_{k-1}), r_k \rangle_k\\
+& =
+\langle t_{k-1}, \partial f_k^*(r_k) \rangle_{k-1}
+\end{align}
+```
+so we define the backward pass with ``r_{k-1} = \partial f_k^*(r_k)``.
+"""
+
 # ╔═╡ 29287c62-e892-448f-a9d5-12785ae4a02f
 md"""## Matrix multiplication (Vectorized way)
 
@@ -412,15 +438,13 @@ J_G^\top \text{vec}(R) & = (I \otimes A^\top) \text{vec}(R)\\
 # ╔═╡ 5f6529a1-4ace-4dd0-a7e2-f51070eab695
 md"""## Matrix multiplication (Scalar product way)
 
-The adjoint of a linear map ``A`` for a given scalar product ``\langle \cdot, \cdot \rangle`` is the linear map ``A^*`` such that
-```math
-\forall x, y, \qquad \langle A(x), y \rangle_2 = \langle x, A^*(y) \rangle_1.
-```
 For the scalar product
 ```math
 \langle X, Y \rangle
 =
 \sum_{i,j} X_{ij} Y_{ij}
+=
+\sum_{i,j} (X \odot Y)_{ij}
 =
 \langle \text{vec}(X), \text{vec}(Y) \rangle
 =
@@ -745,6 +769,9 @@ end
 # ╔═╡ a06be2d9-73c1-4f85-b2e7-18d3c5a90f47
 import ComputationGraphExplorer as CGE
 
+# ╔═╡ df1f29ce-026d-4935-83aa-0d597cb166dd
+ScalarNode = CGE.Node{Int,DummyMetadata};
+
 # ╔═╡ c62eb6b6-aca2-4c27-ab7e-e3374515d9aa
 let
     box_width = 50
@@ -816,9 +843,6 @@ let
         end
 	end 640 360
 end
-
-# ╔═╡ df1f29ce-026d-4935-83aa-0d597cb166dd
-ScalarNode = CGE.Node{Int,DummyMetadata};
 
 # ╔═╡ 7f459370-eb6f-4d82-bf99-1528e136ca5c
 import LinearAlgebra, DelimitedFiles
@@ -1214,6 +1238,9 @@ qa(md"What about returning a convex combination of the derivative from the left 
 Whereas the gradient is the normal to the **unique** tangent, the subgradient is an element of the **tangent cone**, depicted below. For convex functions, the notion of subgradient appropriately generalizes the notion of gradient for nonsmooth functions.
 
 Note that the notion of subgradient is not defined for nonconvex functions. So instead we use [Clarke differential](https://en.wikipedia.org/wiki/Clarke_generalized_derivative) but this is out of the scope of this course.")
+
+# ╔═╡ 347a1500-43aa-4078-9ea3-480bc8a4c291
+qa(md"We are free to choose any scalar product ``\langle \cdot, \cdot \rangle", md"...")
 
 # ╔═╡ c733ca7e-b57e-4218-9bd4-238ab5749143
 qa(md"How should we store the Jacobian in the forward pass to save it for the backward pass ?",
@@ -2960,10 +2987,6 @@ uuid = "23338594-aafe-5451-b93e-139f81909106"
 # ╠═bc93fb96-1097-4b22-a077-558f5662efec
 # ╟─85fc455c-36cf-4a4c-aa64-84a827884693
 # ╟─cc2a09a1-c949-4b09-816b-b49ba7ca8983
-# ╟─0980ef52-526d-421d-8c63-04272f16cbdd
-# ╟─191f33ab-b535-4cb1-96b3-6b2f10fd633a
-# ╟─c1ae773e-0f2d-4c1c-bae2-25f45bb28fbb
-# ╟─c62eb6b6-aca2-4c27-ab7e-e3374515d9aa
 # ╟─277bd2ce-fa7f-4288-be8a-0ddd8f23635c
 # ╟─fa5dba01-a3f7-452c-877e-352d578ecf51
 # ╟─69c08fab-c317-462c-817c-3f841a8a0941
@@ -3023,6 +3046,14 @@ uuid = "23338594-aafe-5451-b93e-139f81909106"
 # ╟─b92d17a9-8481-458a-bc0a-efb7333cbc6e
 # ╟─9527686f-24e1-40bb-9a5d-22575aafec9b
 # ╟─cd6d807d-6238-44ce-9267-1614679f527a
+# ╟─0980ef52-526d-421d-8c63-04272f16cbdd
+# ╟─191f33ab-b535-4cb1-96b3-6b2f10fd633a
+# ╟─c1ae773e-0f2d-4c1c-bae2-25f45bb28fbb
+# ╟─c62eb6b6-aca2-4c27-ab7e-e3374515d9aa
+# ╟─068ef840-04cb-4de4-9512-721f57e5750e
+# ╟─7331c447-c0a6-4a47-af00-36efc449d9d9
+# ╟─bebe2bb8-cf74-4eaa-85d1-712b990b5985
+# ╠═347a1500-43aa-4078-9ea3-480bc8a4c291
 # ╟─29287c62-e892-448f-a9d5-12785ae4a02f
 # ╟─c733ca7e-b57e-4218-9bd4-238ab5749143
 # ╟─5f6529a1-4ace-4dd0-a7e2-f51070eab695
