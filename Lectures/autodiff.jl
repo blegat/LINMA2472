@@ -394,7 +394,7 @@ md"## Adjoint"
 md"""
 The *adjoint* of a linear map ``A : \mathcal{S}_1 \to \mathcal{S}_2`` for scalar products ``\langle \cdot, \cdot \rangle_1`` for ``\mathcal{S}_1`` and ``\langle \cdot, \cdot \rangle_2`` for ``\mathcal{S}_2`` is the linear map ``A^*`` such that
 ```math
-\forall x, y, \qquad \langle A(x), y \rangle_2 = \langle x, A^*(y) \rangle_1.
+\forall x \in \mathcal{S}_1, y \in \mathcal{S}_2, \qquad \langle A(x), y \rangle_2 = \langle x, A^*(y) \rangle_1.
 ```
 """
 
@@ -410,7 +410,14 @@ For our Jacobians:
 \langle t_{k-1}, \partial f_k^*(r_k) \rangle_{k-1}
 \end{align}
 ```
-so we define the backward pass with ``r_{k-1} = \partial f_k^*(r_k)``.
+so by defining the backward pass with ``r_{k-1} = \partial f_k^*(r_k)``, we get
+```math
+\langle t_k, r_k \rangle = \langle t_{k-1}, r_{k-1} \rangle
+```
+By induction, we get
+```math
+\langle t_0, r_0 \rangle = \langle t_K, r_K \rangle
+```
 """
 
 # ╔═╡ 29287c62-e892-448f-a9d5-12785ae4a02f
@@ -1226,7 +1233,7 @@ Numerical differentiation may however need to increase its number of evaluations
 """)
 
 # ╔═╡ 11eadcc1-68bf-4ca7-9603-ef46468b4779
-qa(md"Why don't we show the local Jacobian ``\partial J_k`` in the memory usage ?", md"For a scalar AD, it is best to compute the local Jacobian ``\partial J_k`` and ``s_k`` from ``s_{k-1}`` during the forward pass at the same time because part of the computation for one can be reused for the other one. For instance, if ``f_k(x) = sin(x)``, it is more efficient to compute ``sin(x)`` and ``cos(x)`` at the same time with the Julia function `sincos`. However, as we will see, for a vectorized AD, we usually don't compute a local Jacobian and just use ``s_{k-1}`` to do the backward propagation of ``r_k`` towards ``r_{k-1}``. This is why this picture, which is taken from the book which focuses on vectorized AD doesn't show a memory usage for the local Jacobian.")
+qa(md"Why don't we show the local Jacobian ``\partial J_k`` in the memory usage ?", md"For a scalar AD, it is best to compute the local Jacobian ``\partial J_k`` and ``s_k`` from ``s_{k-1}`` during the forward pass at the same time because part of the computation for one can be reused for the other one. For instance, if ``f_k(x) = \sin(x)``, it is more efficient to compute ``\sin(x)`` and ``\cos(x)`` at the same time with the Julia function `sincos`. However, as we will see, for a vectorized AD, we usually don't compute a local Jacobian and just use ``s_{k-1}`` to do the backward propagation of ``r_k`` towards ``r_{k-1}``. This is why this picture, which is taken from the book which focuses on vectorized AD doesn't show a memory usage for the local Jacobian.")
 
 # ╔═╡ 74063eb5-be06-466a-a2f1-e266c35295ea
 qa(md"Is the function ``|x|`` is differentiable at ``x = 0`` ?.", md"No, if we approach from the left (that is, ``x < 0``, the function is ``-x``), then the derivative is ``-1``.
@@ -1240,7 +1247,17 @@ Whereas the gradient is the normal to the **unique** tangent, the subgradient is
 Note that the notion of subgradient is not defined for nonconvex functions. So instead we use [Clarke differential](https://en.wikipedia.org/wiki/Clarke_generalized_derivative) but this is out of the scope of this course.")
 
 # ╔═╡ 347a1500-43aa-4078-9ea3-480bc8a4c291
-qa(md"We are free to choose any scalar product ``\langle \cdot, \cdot \rangle", md"...")
+qa(md"We are free to choose any scalar product ``\langle \cdot, \cdot \rangle_k``. Does this choice affect the Jacobian values as well as gradient of ``f`` ?",
+   md"""
+If we change the scalar product ``\langle \cdot, \cdot \rangle_k``, it changes both the adjoint ``\partial f^*_k`` and ``\partial f^*_{k+1}``. But it does not affect the gradient of ``f`` as the changes made to both these Jacobian cancel out. The composition ``(\partial f^*_k) \circ (\partial f^*_{k+1})`` is unaffected by the choice of the scalar product ``\langle \cdot, \cdot \rangle_k``.
+
+For example, suppose ``\mathcal{S}_0 = \mathcal{S}_1 = \mathcal{S}_2 = \mathbb{R}`` and ``f_1(x) = x^2`` and ``f_2(x) = \exp(x)``. For ``s_0 = 1``, we have ``s_1 = 2``, ``s_2  = e``, ``\partial f_1(1) = 2``, ``\partial f_2(1) = e``.
+So forward math computes ``(f_2 \circ f_1)'(1) = \partial f_1(1) \cdot \partial f_2(1) = 2e``.
+
+For ``\langle x, y \rangle_0 = \rangle x, y \rangle_1 = \rangle x, y \rangle_2 = xy``, we have ``\partial f_1^*(1) = 2``, ``\partial f_2^*(1) = e``. So the reverse mode computes ````(f_2 \circ f_1)'(1) = \partial f_1^*(1) \cdot \partial f_2^*(1) = 2e``.
+
+For ``\rangle x, y \rangle_1 = 2xy``, we have ``\partial f_1^*(1) = 1``, ``\partial f_2^*(1) = 2e``. So the reverse mode computes ````(f_2 \circ f_1)'(1) = \partial f_1^*(1) \cdot \partial f_2^*(1) = 2e``. As we can see, by scaling the scalar product by 2, one jacobian gets scaled by 2 and one by 1/2. When we multiply them together, they cancel out.
+""")
 
 # ╔═╡ c733ca7e-b57e-4218-9bd4-238ab5749143
 qa(md"How should we store the Jacobian in the forward pass to save it for the backward pass ?",
@@ -3049,11 +3066,11 @@ uuid = "23338594-aafe-5451-b93e-139f81909106"
 # ╟─0980ef52-526d-421d-8c63-04272f16cbdd
 # ╟─191f33ab-b535-4cb1-96b3-6b2f10fd633a
 # ╟─c1ae773e-0f2d-4c1c-bae2-25f45bb28fbb
-# ╟─c62eb6b6-aca2-4c27-ab7e-e3374515d9aa
+# ╠═c62eb6b6-aca2-4c27-ab7e-e3374515d9aa
 # ╟─068ef840-04cb-4de4-9512-721f57e5750e
 # ╟─7331c447-c0a6-4a47-af00-36efc449d9d9
 # ╟─bebe2bb8-cf74-4eaa-85d1-712b990b5985
-# ╠═347a1500-43aa-4078-9ea3-480bc8a4c291
+# ╟─347a1500-43aa-4078-9ea3-480bc8a4c291
 # ╟─29287c62-e892-448f-a9d5-12785ae4a02f
 # ╟─c733ca7e-b57e-4218-9bd4-238ab5749143
 # ╟─5f6529a1-4ace-4dd0-a7e2-f51070eab695
