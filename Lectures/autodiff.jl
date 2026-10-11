@@ -82,27 +82,6 @@ end
 # ╔═╡ 3803804a-f44d-4f56-bd59-fb1401d8fb9e
 Base.:-(x::Dual{T}) where {T} = Dual(-x.value, -x.derivative)
 
-# ╔═╡ d26cba1c-27d8-4ee7-99e5-6c0e0fc6b6e5
-begin
-	using LaTeXStrings
-	import MathTeXEngine
-	# Luxor asks Cairo for MathTeXEngine's fonts by name so we register them
-	# to avoid having to install them on the system
-	let fontconfig = Base.require(Base.PkgId(Base.UUID("a3f928ae-7b40-5064-980b-68af3947d34b"), "Fontconfig_jll"))
-		add_font = Base.Libc.Libdl.dlsym(fontconfig.libfontconfig_handle, :FcConfigAppFontAddFile)
-		dir = joinpath(pkgdir(MathTeXEngine), "assets", "fonts", "NewComputerModern")
-		for file in readdir(dir; join = true)
-			if endswith(file, ".otf")
-				ccall(add_font, Cint, (Ptr{Cvoid}, Cstring), C_NULL, file)
-			end
-		end
-	end
-	# Luxor draws the italic glyphs of letters with the upright font so we
-	# replace them with their Unicode mathematical italic counterpart
-	_math_italic(c) = c == 'h' ? 'ℎ' : islowercase(c) ? Char(0x1D44E + (c - 'a')) : Char(0x1D434 + (c - 'A'))
-	_latex(s) = latexstring(replace(s, r"\\[a-zA-Z]+|[a-zA-Z]" => m -> length(m) == 1 ? string(_math_italic(m[1])) : m))
-end
-
 # ╔═╡ 63bdc7f5-89a5-4061-9e42-6588e4cd96c6
 Base.:*(x::Dual{T}, y::Dual{T}) where {T} = Dual(x.value * y.value, x.value * y.derivative + x.derivative * y.value)
 
@@ -589,6 +568,9 @@ function reverse_diff(W, X, y)
     (J_1 .* (W[2]' * J_2)) * X'
 end
 
+# ╔═╡ 87c6a5bc-82bf-44a5-b4d6-6d50285348c0
+@time reverse_diff(W, X, y)
+
 # ╔═╡ 17c91ea8-acb7-4bbd-b0b0-0f8193f45303
 md"## 🚀 GPU acceleration ⚡"
 
@@ -800,10 +782,14 @@ import ComputationGraphExplorer as CGE
 # ╔═╡ df1f29ce-026d-4935-83aa-0d597cb166dd
 ScalarNode = CGE.Node{Int,DummyMetadata};
 
-# ╔═╡ c62eb6b6-aca2-4c27-ab7e-e3374515d9aa
+# ╔═╡ 310d6a10-b887-4dd0-ba93-f901726ddbbc
 let
+    width, height = 640, 360
     box_width = 45
     dy_up = 3box_width/8
+    # Luxor only draws the shapes, the labels are overlaid in HTML so that
+    # they are typeset by the MathJax of Pluto
+    labels = []
     function _arrow(start, finish; rev, color)
         if rev
             start, finish = finish, start
@@ -812,14 +798,7 @@ let
         Luxor.arrow(start, finish; linewidth = 1.5, arrowheadlength = 10)
     end
     function _text(text, x, y; color = "black", fontsize = 14)
-        Luxor.sethue(color)
-        Luxor.fontsize(fontsize)
-        Luxor.text(
-            _latex(text),
-            Luxor.Point(x, y);
-            halign = :center,
-            valign = :middle,
-        )
+        push!(labels, @htl("""<span class="tex" style="position: absolute; left: $(x + width / 2)px; top: $(y + height / 2)px; transform: translate(-50%, -50%); white-space: nowrap; color: $color; font-size: $(fontsize)px;">\$$text\$</span>"""))
     end
     function draw_node(text, x, y; fill_color = "white", stroke_color = "#f79009", linewidth = 2, width = box_width, height = box_width)
         center = Luxor.Point(x, y)
@@ -853,24 +832,30 @@ let
     Luxor = CGE.Luxor
     Δx = 90
     Δy = 90
-	@time CGE.Luxor.@drawsvg begin
-	    Luxor.background("white")
-        draw_line("f", "s", -Δy, rev = false, color = "#7ea6e0", stroke_color = "#546b8c")
-        draw_line("\\partial f", "t", 0, rev = false; color = "#67ab9f", stroke_color = "#40635c")
-        draw_line("\\partial f^*", "r", Δy, rev = true; color = "#ffb570", stroke_color = "#b58b63")
-        ks = ["0", "1", "k-1", "k", "K-1", "K"]
-        xs = [-3Δx, -2Δx + box_width/2 + dy_up, -box_width/2 - dy_up, box_width/2 + dy_up, 2Δx - box_width/2 - dy_up, 3Δx]
-        for i in eachindex(ks)
-            k = ks[i]
-            x = xs[i]
-            _text("\\mathcal{S}_{$k}", x, -3Δy/2)
-            fontsize = 12
-            _text("\\langle t_{$k}, r_{$k} \\rangle_{$k}", x, 3Δy/2; fontsize)
-            if i != 1
-                _text("=", (xs[i-1] + xs[i]) / 2, 3Δy/2; fontsize)
-            end
+    Luxor.Drawing(width, height, :svg)
+    Luxor.origin()
+    Luxor.background("white")
+    draw_line("f", "s", -Δy, rev = false, color = "#7ea6e0", stroke_color = "#546b8c")
+    draw_line("\\partial f", "t", 0, rev = false; color = "#67ab9f", stroke_color = "#40635c")
+    draw_line("\\partial f^*", "r", Δy, rev = true; color = "#ffb570", stroke_color = "#b58b63")
+    ks = ["0", "1", "k-1", "k", "K-1", "K"]
+    xs = [-3Δx, -2Δx + box_width/2 + dy_up, -box_width/2 - dy_up, box_width/2 + dy_up, 2Δx - box_width/2 - dy_up, 3Δx]
+    for i in eachindex(ks)
+        k = ks[i]
+        x = xs[i]
+        _text("\\mathcal{S}_{$k}", x, -3Δy/2)
+        fontsize = 12
+        _text("\\langle t_{$k}, r_{$k} \\rangle_{$k}", x, 3Δy/2; fontsize)
+        if i != 1
+            _text("=", (xs[i-1] + xs[i]) / 2, 3Δy/2; fontsize)
         end
-	end 640 360
+    end
+    Luxor.finish()
+    svg = Luxor.svgstring()
+    @htl("""<div style="position: relative; width: $(width)px; height: $(height)px;">
+    <div style="position: absolute; inset: 0;">$(HTML(svg))</div>
+    $labels
+    </div>""")
 end
 
 # ╔═╡ 7f459370-eb6f-4d82-bf99-1528e136ca5c
@@ -1084,9 +1069,6 @@ W = [rand(Float32, h, size(X, 1)), rand(Float32, size(y, 1), h)]
 # ╔═╡ a580ef44-234a-4ed1-b007-920651415427
 sum((W[2] * tanh.(W[1] * X) - y).^2) / size(y, 2)
 
-# ╔═╡ 87c6a5bc-82bf-44a5-b4d6-6d50285348c0
-@time reverse_diff(W, X, y)
-
 # ╔═╡ 85303791-bdc4-468a-bc40-48ef2a186282
 if CUDA.functional()
 	X_gpu = CUDA.CuArray(X)
@@ -1098,6 +1080,108 @@ end
 # ╔═╡ 9b4a78d8-e6da-41dd-b922-b35c895eee1a
 if h < 200 # Forward Diff start being too slow for `h > 200`
 	@time forward_diff(W, X, y)
+end
+
+# ╔═╡ d26cba1c-27d8-4ee7-99e5-6c0e0fc6b6e5
+begin
+	using LaTeXStrings
+	import MathTeXEngine
+	# Luxor asks Cairo for MathTeXEngine's fonts by name so we register them
+	# to avoid having to install them on the system
+	let fontconfig = Base.require(Base.PkgId(Base.UUID("a3f928ae-7b40-5064-980b-68af3947d34b"), "Fontconfig_jll"))
+		add_font = Base.Libc.Libdl.dlsym(fontconfig.libfontconfig_handle, :FcConfigAppFontAddFile)
+		dir = joinpath(pkgdir(MathTeXEngine), "assets", "fonts", "NewComputerModern")
+		for file in readdir(dir; join = true)
+			if endswith(file, ".otf")
+				ccall(add_font, Cint, (Ptr{Cvoid}, Cstring), C_NULL, file)
+			end
+		end
+	end
+	# Luxor draws the italic glyphs of letters with the upright font so we
+	# replace them with their Unicode mathematical italic counterpart.
+	# The arguments of font commands such as `\mathrm{...}` are left untouched
+	# and `\mathcal{X}` is replaced by the Unicode script letter since
+	# MathTeXEngine would use the bold script one.
+	_math_italic(c) = c == 'h' ? 'ℎ' : islowercase(c) ? Char(0x1D44E + (c - 'a')) : Char(0x1D434 + (c - 'A'))
+	_math_script(c) = get(Dict('B' => 'ℬ', 'E' => 'ℰ', 'F' => 'ℱ', 'H' => 'ℋ', 'I' => 'ℐ', 'L' => 'ℒ', 'M' => 'ℳ', 'R' => 'ℛ'), c, Char(0x1D49C + (c - 'A')))
+	function _latex(s)
+		s = replace(s, r"\\mathcal\{([A-Z])\}" => m -> string(_math_script(m[end-1])))
+		s = replace(s, r"\\(math[a-z]+|text[a-z]*|operatorname)\{[^}]*\}|\\[a-zA-Z]+|[a-zA-Z]" => m -> length(m) == 1 ? string(_math_italic(m[1])) : m)
+		return latexstring(s)
+	end
+end
+
+# ╔═╡ c62eb6b6-aca2-4c27-ab7e-e3374515d9aa
+let
+    box_width = 45
+    dy_up = 3box_width/8
+    function _arrow(start, finish; rev, color)
+        if rev
+            start, finish = finish, start
+        end
+        Luxor.sethue(color)
+        Luxor.arrow(start, finish; linewidth = 1.5, arrowheadlength = 10)
+    end
+    function _text(text, x, y; color = "black", fontsize = 14)
+        Luxor.sethue(color)
+        Luxor.fontsize(fontsize)
+        Luxor.text(
+            _latex(text),
+            Luxor.Point(x, y);
+            halign = :center,
+            valign = :middle,
+        )
+    end
+    function draw_node(text, x, y; fill_color = "white", stroke_color = "#f79009", linewidth = 2, width = box_width, height = box_width)
+        center = Luxor.Point(x, y)
+        Luxor.sethue(fill_color)
+        Luxor.box(center, width, height, 12, :fill)
+        Luxor.sethue(stroke_color)
+        Luxor.setline(linewidth)
+        Luxor.box(center, width, height, 12, :stroke)
+        _text(text, x, y)
+    end
+    function draw_line(f, v, y; rev, color = "black", stroke_color)
+        dx_dots = box_width/4
+        _text("$(v)_0", -3Δx, y; color)
+        _arrow(Luxor.Point(-3Δx + box_width/2, y), Luxor.Point(-2Δx - box_width/2, y); rev, color)
+        draw_node("$(f)_1", -2Δx, y; stroke_color)
+        _arrow(Luxor.Point(-2Δx + box_width/2, y), Luxor.Point(-Δx - dx_dots, y); rev, color)
+        _text("$(v)_1", -2Δx + box_width/2 + dy_up, y - dy_up; color)
+        _text("\\cdots", -Δx, y)
+        _arrow(Luxor.Point(-Δx + dx_dots, y), Luxor.Point(-box_width/2, y); rev, color)
+        _text("$(v)_{k-1}", -box_width/2 - dy_up, y - dy_up; color)
+        draw_node("$(f)_k", 0, y; stroke_color)
+        _text("$(v)_k", box_width/2 + dy_up, y - dy_up; color)
+        _arrow(Luxor.Point(box_width/2, y), Luxor.Point(Δx - dx_dots, y); rev, color)
+        _text("\\cdots", Δx, y)
+        _arrow(Luxor.Point(Δx + dx_dots, y), Luxor.Point(2Δx - box_width/2, y); rev, color)
+        _text("$(v)_{K-1}", 2Δx - box_width/2 - dy_up, y - dy_up; color)
+        draw_node("$(f)_K", 2Δx, y; stroke_color)
+        _text("$(v)_K", 3Δx, y; color)
+        _arrow(Luxor.Point(2Δx + box_width/2, y), Luxor.Point(3Δx - box_width/2, y); rev, color)
+    end
+    Luxor = CGE.Luxor
+    Δx = 90
+    Δy = 90
+	@time CGE.Luxor.@drawsvg begin
+	    Luxor.background("white")
+        draw_line("f", "s", -Δy, rev = false, color = "#7ea6e0", stroke_color = "#546b8c")
+        draw_line("\\partial f", "t", 0, rev = false; color = "#67ab9f", stroke_color = "#40635c")
+        draw_line("\\partial f^*", "r", Δy, rev = true; color = "#ffb570", stroke_color = "#b58b63")
+        ks = ["0", "1", "k-1", "k", "K-1", "K"]
+        xs = [-3Δx, -2Δx + box_width/2 + dy_up, -box_width/2 - dy_up, box_width/2 + dy_up, 2Δx - box_width/2 - dy_up, 3Δx]
+        for i in eachindex(ks)
+            k = ks[i]
+            x = xs[i]
+            _text("\\mathcal{S}_{$k}", x, -3Δy/2)
+            fontsize = 12
+            _text("\\langle t_{$k}, r_{$k} \\rangle_{$k}", x, 3Δy/2; fontsize)
+            if i != 1
+                _text("=", (xs[i-1] + xs[i]) / 2, 3Δy/2; fontsize)
+            end
+        end
+	end 640 360
 end
 
 # ╔═╡ b3c8d70e-9a41-4d26-85fb-6e02f19ca4d3
@@ -3291,6 +3375,7 @@ uuid = "23338594-aafe-5451-b93e-139f81909106"
 # ╟─191f33ab-b535-4cb1-96b3-6b2f10fd633a
 # ╟─c1ae773e-0f2d-4c1c-bae2-25f45bb28fbb
 # ╠═c62eb6b6-aca2-4c27-ab7e-e3374515d9aa
+# ╠═310d6a10-b887-4dd0-ba93-f901726ddbbc
 # ╠═c616136c-f29f-41c2-bef0-516c05831748
 # ╟─068ef840-04cb-4de4-9512-721f57e5750e
 # ╟─7331c447-c0a6-4a47-af00-36efc449d9d9
