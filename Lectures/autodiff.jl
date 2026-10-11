@@ -589,9 +589,6 @@ function reverse_diff(W, X, y)
     (J_1 .* (W[2]' * J_2)) * X'
 end
 
-# ╔═╡ 87c6a5bc-82bf-44a5-b4d6-6d50285348c0
-@time reverse_diff(W, X, y)
-
 # ╔═╡ 17c91ea8-acb7-4bbd-b0b0-0f8193f45303
 md"## 🚀 GPU acceleration ⚡"
 
@@ -805,17 +802,18 @@ ScalarNode = CGE.Node{Int,DummyMetadata};
 
 # ╔═╡ c62eb6b6-aca2-4c27-ab7e-e3374515d9aa
 let
-    box_width = 50
+    box_width = 45
     dy_up = 3box_width/8
-    function _arrow(start, finish; rev)
+    function _arrow(start, finish; rev, color)
         if rev
             start, finish = finish, start
         end
+        Luxor.sethue(color)
         Luxor.arrow(start, finish; linewidth = 1.5, arrowheadlength = 10)
     end
-    function _text(text, x, y)
-        Luxor.sethue("black")
-        Luxor.fontsize(18)
+    function _text(text, x, y; color = "black", fontsize = 14)
+        Luxor.sethue(color)
+        Luxor.fontsize(fontsize)
         Luxor.text(
             _latex(text),
             Luxor.Point(x, y);
@@ -823,7 +821,7 @@ let
             valign = :middle,
         )
     end
-    function draw_node(text, x, y; fill_color = "#fef0c7", stroke_color = "#f79009", linewidth = 2, width = box_width, height = box_width)
+    function draw_node(text, x, y; fill_color = "white", stroke_color = "#f79009", linewidth = 2, width = box_width, height = box_width)
         center = Luxor.Point(x, y)
         Luxor.sethue(fill_color)
         Luxor.box(center, width, height, 12, :fill)
@@ -832,43 +830,44 @@ let
         Luxor.box(center, width, height, 12, :stroke)
         _text(text, x, y)
     end
-    function draw_line(f, v, y; rev)
+    function draw_line(f, v, y; rev, color = "black", stroke_color)
         dx_dots = box_width/4
-        _text("$(v)_0", -3Δx, y)
-        _arrow(Luxor.Point(-3Δx + box_width/2, y), Luxor.Point(-2Δx - box_width/2, y); rev)
-        draw_node("$(f)_1", -2Δx, y)
-        _arrow(Luxor.Point(-2Δx + box_width/2, y), Luxor.Point(-Δx - dx_dots, y); rev)
-        _text("$(v)_1", -2Δx + box_width/2 + dy_up, y - dy_up)
+        _text("$(v)_0", -3Δx, y; color)
+        _arrow(Luxor.Point(-3Δx + box_width/2, y), Luxor.Point(-2Δx - box_width/2, y); rev, color)
+        draw_node("$(f)_1", -2Δx, y; stroke_color)
+        _arrow(Luxor.Point(-2Δx + box_width/2, y), Luxor.Point(-Δx - dx_dots, y); rev, color)
+        _text("$(v)_1", -2Δx + box_width/2 + dy_up, y - dy_up; color)
         _text("\\cdots", -Δx, y)
-        _arrow(Luxor.Point(-Δx + dx_dots, y), Luxor.Point(-box_width/2, y); rev)
-        _text("$(v)_{k-1}", -box_width/2 - dy_up, y - dy_up)
-        draw_node("$(f)_k", 0, y)
-        _text("$(v)_k", box_width/2 + dy_up, y - dy_up)
-        _arrow(Luxor.Point(box_width/2, y), Luxor.Point(Δx - dx_dots, y); rev)
+        _arrow(Luxor.Point(-Δx + dx_dots, y), Luxor.Point(-box_width/2, y); rev, color)
+        _text("$(v)_{k-1}", -box_width/2 - dy_up, y - dy_up; color)
+        draw_node("$(f)_k", 0, y; stroke_color)
+        _text("$(v)_k", box_width/2 + dy_up, y - dy_up; color)
+        _arrow(Luxor.Point(box_width/2, y), Luxor.Point(Δx - dx_dots, y); rev, color)
         _text("\\cdots", Δx, y)
-        _arrow(Luxor.Point(Δx + dx_dots, y), Luxor.Point(2Δx - box_width/2, y); rev)
-        _text("$(v)_{K-1}", 2Δx - box_width/2 - dy_up, y - dy_up)
-        draw_node("$(f)_K", 2Δx, y)
-        _text("$(v)_K", 3Δx, y)
-        _arrow(Luxor.Point(2Δx + box_width/2, y), Luxor.Point(3Δx - box_width/2, y); rev)
+        _arrow(Luxor.Point(Δx + dx_dots, y), Luxor.Point(2Δx - box_width/2, y); rev, color)
+        _text("$(v)_{K-1}", 2Δx - box_width/2 - dy_up, y - dy_up; color)
+        draw_node("$(f)_K", 2Δx, y; stroke_color)
+        _text("$(v)_K", 3Δx, y; color)
+        _arrow(Luxor.Point(2Δx + box_width/2, y), Luxor.Point(3Δx - box_width/2, y); rev, color)
     end
     Luxor = CGE.Luxor
     Δx = 90
     Δy = 90
-	CGE.Luxor.@draw begin
+	@time CGE.Luxor.@drawsvg begin
 	    Luxor.background("white")
-        draw_line("f", "s", -Δy, rev = false)
-        draw_line("\\partial f", "t", 0, rev = false)
-        draw_line("\\partial f^*", "r", Δy, rev = true)
+        draw_line("f", "s", -Δy, rev = false, color = "#7ea6e0", stroke_color = "#546b8c")
+        draw_line("\\partial f", "t", 0, rev = false; color = "#67ab9f", stroke_color = "#40635c")
+        draw_line("\\partial f^*", "r", Δy, rev = true; color = "#ffb570", stroke_color = "#b58b63")
         ks = ["0", "1", "k-1", "k", "K-1", "K"]
         xs = [-3Δx, -2Δx + box_width/2 + dy_up, -box_width/2 - dy_up, box_width/2 + dy_up, 2Δx - box_width/2 - dy_up, 3Δx]
         for i in eachindex(ks)
             k = ks[i]
             x = xs[i]
-            _text("S_{$k}", x, -3Δy/2)
-            _text("\\langle t_{$k}, r_{$k} \\rangle_{$k}", x, 3Δy/2)
+            _text("\\mathcal{S}_{$k}", x, -3Δy/2)
+            fontsize = 12
+            _text("\\langle t_{$k}, r_{$k} \\rangle_{$k}", x, 3Δy/2; fontsize)
             if i != 1
-                _text("=", (xs[i-1] + xs[i]) / 2, 3Δy/2)
+                _text("=", (xs[i-1] + xs[i]) / 2, 3Δy/2; fontsize)
             end
         end
 	end 640 360
@@ -1054,7 +1053,7 @@ let
     Luxor = CGE.Luxor
     Δx = 90
     Δy = 90
-	CGE.Luxor.@drawsvg begin
+	@time CGE.Luxor.@drawsvg begin
 	    Luxor.background("white")
         draw_line("f", "s", -Δy, rev = false)
         draw_line("partial f", "t", 0, rev = false)
@@ -1084,6 +1083,9 @@ W = [rand(Float32, h, size(X, 1)), rand(Float32, size(y, 1), h)]
 
 # ╔═╡ a580ef44-234a-4ed1-b007-920651415427
 sum((W[2] * tanh.(W[1] * X) - y).^2) / size(y, 2)
+
+# ╔═╡ 87c6a5bc-82bf-44a5-b4d6-6d50285348c0
+@time reverse_diff(W, X, y)
 
 # ╔═╡ 85303791-bdc4-468a-bc40-48ef2a186282
 if CUDA.functional()
@@ -3288,7 +3290,7 @@ uuid = "23338594-aafe-5451-b93e-139f81909106"
 # ╟─0980ef52-526d-421d-8c63-04272f16cbdd
 # ╟─191f33ab-b535-4cb1-96b3-6b2f10fd633a
 # ╟─c1ae773e-0f2d-4c1c-bae2-25f45bb28fbb
-# ╟─c62eb6b6-aca2-4c27-ab7e-e3374515d9aa
+# ╠═c62eb6b6-aca2-4c27-ab7e-e3374515d9aa
 # ╠═c616136c-f29f-41c2-bef0-516c05831748
 # ╟─068ef840-04cb-4de4-9512-721f57e5750e
 # ╟─7331c447-c0a6-4a47-af00-36efc449d9d9
