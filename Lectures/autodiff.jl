@@ -794,8 +794,8 @@ let
         Luxor.sethue(color)
         Luxor.arrow(start, finish; linewidth = 1.5, arrowheadlength = 10)
     end
-    function _text(text, x, y; color = "black", fontsize = 14)
-        push!(labels, @htl("""<span class="tex" style="position: absolute; left: $(x + width / 2)px; top: $(y + height / 2)px; transform: translate(-50%, -50%); white-space: nowrap; color: $color; font-size: $(fontsize)px;">\$$text\$</span>"""))
+    function _text(text, x, y; color = "black", fontsize = 14, class = "")
+        push!(labels, @htl("""<span class="tex $class" style="position: absolute; left: $(x + width / 2)px; top: $(y + height / 2)px; transform: translate(-50%, -50%); white-space: nowrap; color: $color; font-size: $(fontsize)px;">\$$text\$</span>"""))
     end
     function draw_node(text, x, y; fill_color = "white", stroke_color = "#f79009", linewidth = 2, width = box_width, height = box_width)
         center = Luxor.Point(x, y)
@@ -842,9 +842,9 @@ let
         x = xs[i]
         _text("\\mathcal{S}_{$k}", x, -3Δy/2)
         fontsize = 12
-        _text("\\langle t_{$k}, r_{$k} \\rangle_{$k}", x, 3Δy/2; fontsize)
+        _text("\\langle t_{$k}, r_{$k} \\rangle_{$k}", x, 3Δy/2; fontsize, class = "inner-product")
         if i != 1
-            _text("=", (xs[i-1] + xs[i]) / 2, 3Δy/2; fontsize)
+            _text("=", (xs[i-1] + xs[i]) / 2, 3Δy/2; fontsize, class = "equal")
         end
     end
     Luxor.finish()
@@ -852,6 +852,24 @@ let
     @htl("""<div style="position: relative; width: $(width)px; height: $(height)px;">
     <div style="position: absolute; inset: 0;">$(HTML(svg))</div>
     $labels
+    <script>
+    // Center each `=` between the inner products once MathJax has set their width
+    const root = currentScript.parentElement
+    const products = [...root.querySelectorAll(".inner-product")]
+    const equals = [...root.querySelectorAll(".equal")]
+    const place = () => {
+        const box = root.getBoundingClientRect()
+        const scale = root.offsetWidth / box.width
+        equals.forEach((equal, i) => {
+            const left = products[i].getBoundingClientRect()
+            const right = products[i + 1].getBoundingClientRect()
+            equal.style.left = `\${((left.right + right.left) / 2 - box.left) * scale}px`
+        })
+    }
+    const observer = new ResizeObserver(place)
+    products.forEach(product => observer.observe(product))
+    invalidation.then(() => observer.disconnect())
+    </script>
     </div>""")
 end
 
@@ -983,77 +1001,6 @@ let
 	HTML(CGE.render_svg(graph, CGE.capture_frame(graph, "x' * y"), responsive = true, typeset_arrays = false))
 end
 
-# ╔═╡ c616136c-f29f-41c2-bef0-516c05831748
-let
-    box_width = 50
-    dy_up = 3box_width/8
-    function _arrow(start, finish; rev)
-        if rev
-            start, finish = finish, start
-        end
-        Luxor.arrow(start, finish; linewidth = 1.5, arrowheadlength = 10)
-    end
-    Typ = CGE.Typstry
-    preamble = Typ.TypstString(Typ.TypstText("#set page(width: auto, height: auto, margin: 0pt, fill: none); #set text(size: 13.5pt);"))
-    function _text(text, x, y)
-        Luxor.sethue("black")
-        io = IOBuffer()
-        show(IOContext(io, :preamble => preamble), "image/svg+xml", Typ.TypstString(Typ.TypstText("\$$text\$")))
-        # Typst exports its page as an opaque white path even with `fill: none`
-        svg = replace(String(take!(io)), r"\n\s*<path class=\"typst-shape\" fill=\"#ffffff\"[^>]*/>" => ""; count = 1)
-        Luxor.placeimage(Luxor.readsvg(svg), Luxor.Point(x, y); centered = true)
-    end
-    function draw_node(text, x, y; fill_color = "#fef0c7", stroke_color = "#f79009", linewidth = 2, width = box_width, height = box_width)
-        center = Luxor.Point(x, y)
-        Luxor.sethue(fill_color)
-        Luxor.box(center, width, height, 12, :fill)
-        Luxor.sethue(stroke_color)
-        Luxor.setline(linewidth)
-        Luxor.box(center, width, height, 12, :stroke)
-        _text(text, x, y)
-    end
-    function draw_line(f, v, y; rev)
-        dx_dots = box_width/4
-        _text("$(v)_0", -3Δx, y)
-        _arrow(Luxor.Point(-3Δx + box_width/2, y), Luxor.Point(-2Δx - box_width/2, y); rev)
-        draw_node("$(f)_1", -2Δx, y)
-        _arrow(Luxor.Point(-2Δx + box_width/2, y), Luxor.Point(-Δx - dx_dots, y); rev)
-        _text("$(v)_1", -2Δx + box_width/2 + dy_up, y - dy_up)
-        _text("dots.c", -Δx, y)
-        _arrow(Luxor.Point(-Δx + dx_dots, y), Luxor.Point(-box_width/2, y); rev)
-        _text("$(v)_(k-1)", -box_width/2 - dy_up, y - dy_up)
-        draw_node("$(f)_k", 0, y)
-        _text("$(v)_k", box_width/2 + dy_up, y - dy_up)
-        _arrow(Luxor.Point(box_width/2, y), Luxor.Point(Δx - dx_dots, y); rev)
-        _text("dots.c", Δx, y)
-        _arrow(Luxor.Point(Δx + dx_dots, y), Luxor.Point(2Δx - box_width/2, y); rev)
-        _text("$(v)_(K-1)", 2Δx - box_width/2 - dy_up, y - dy_up)
-        draw_node("$(f)_K", 2Δx, y)
-        _text("$(v)_K", 3Δx, y)
-        _arrow(Luxor.Point(2Δx + box_width/2, y), Luxor.Point(3Δx - box_width/2, y); rev)
-    end
-    Luxor = CGE.Luxor
-    Δx = 90
-    Δy = 90
-	@time CGE.Luxor.@drawsvg begin
-	    Luxor.background("white")
-        draw_line("f", "s", -Δy, rev = false)
-        draw_line("partial f", "t", 0, rev = false)
-        draw_line("partial f^*", "r", Δy, rev = true)
-        ks = ["0", "1", "k-1", "k", "K-1", "K"]
-        xs = [-3Δx, -2Δx + box_width/2 + dy_up, -box_width/2 - dy_up, box_width/2 + dy_up, 2Δx - box_width/2 - dy_up, 3Δx]
-        for i in eachindex(ks)
-            k = ks[i]
-            x = xs[i]
-            _text("S_($k)", x, -3Δy/2)
-            _text("⟨t_($k), r_($k)⟩_($k)", x, 3Δy/2)
-            if i != 1
-                _text("=", (xs[i-1] + xs[i]) / 2, 3Δy/2)
-            end
-        end
-	end 640 360
-end
-
 # ╔═╡ 2ca19ff6-ec22-4327-aea2-80bdca55ccef
 h_slider = @bind h Slider(10:1000, default = 16, show_value = true);
 
@@ -1109,79 +1056,6 @@ begin
 		s = replace(s, r"\\(math[a-z]+|text[a-z]*|operatorname)\{[^}]*\}|\\[a-zA-Z]+|[a-zA-Z]" => m -> length(m) == 1 ? string(_math_italic(m[1])) : m)
 		return latexstring(s)
 	end
-end
-
-# ╔═╡ c62eb6b6-aca2-4c27-ab7e-e3374515d9aa
-let
-    box_width = 45
-    dy_up = 3box_width/8
-    function _arrow(start, finish; rev, color)
-        if rev
-            start, finish = finish, start
-        end
-        Luxor.sethue(color)
-        Luxor.arrow(start, finish; linewidth = 1.5, arrowheadlength = 10)
-    end
-    function _text(text, x, y; color = "black", fontsize = 14)
-        Luxor.sethue(color)
-        Luxor.fontsize(fontsize)
-        Luxor.text(
-            _latex(text),
-            Luxor.Point(x, y);
-            halign = :center,
-            valign = :middle,
-        )
-    end
-    function draw_node(text, x, y; fill_color = "white", stroke_color = "#f79009", linewidth = 2, width = box_width, height = box_width)
-        center = Luxor.Point(x, y)
-        Luxor.sethue(fill_color)
-        Luxor.box(center, width, height, 12, :fill)
-        Luxor.sethue(stroke_color)
-        Luxor.setline(linewidth)
-        Luxor.box(center, width, height, 12, :stroke)
-        _text(text, x, y)
-    end
-    function draw_line(f, v, y; rev, color = "black", stroke_color)
-        dx_dots = box_width/4
-        _text("$(v)_0", -3Δx, y; color)
-        _arrow(Luxor.Point(-3Δx + box_width/2, y), Luxor.Point(-2Δx - box_width/2, y); rev, color)
-        draw_node("$(f)_1", -2Δx, y; stroke_color)
-        _arrow(Luxor.Point(-2Δx + box_width/2, y), Luxor.Point(-Δx - dx_dots, y); rev, color)
-        _text("$(v)_1", -2Δx + box_width/2 + dy_up, y - dy_up; color)
-        _text("\\cdots", -Δx, y)
-        _arrow(Luxor.Point(-Δx + dx_dots, y), Luxor.Point(-box_width/2, y); rev, color)
-        _text("$(v)_{k-1}", -box_width/2 - dy_up, y - dy_up; color)
-        draw_node("$(f)_k", 0, y; stroke_color)
-        _text("$(v)_k", box_width/2 + dy_up, y - dy_up; color)
-        _arrow(Luxor.Point(box_width/2, y), Luxor.Point(Δx - dx_dots, y); rev, color)
-        _text("\\cdots", Δx, y)
-        _arrow(Luxor.Point(Δx + dx_dots, y), Luxor.Point(2Δx - box_width/2, y); rev, color)
-        _text("$(v)_{K-1}", 2Δx - box_width/2 - dy_up, y - dy_up; color)
-        draw_node("$(f)_K", 2Δx, y; stroke_color)
-        _text("$(v)_K", 3Δx, y; color)
-        _arrow(Luxor.Point(2Δx + box_width/2, y), Luxor.Point(3Δx - box_width/2, y); rev, color)
-    end
-    Luxor = CGE.Luxor
-    Δx = 90
-    Δy = 90
-	@time CGE.Luxor.@drawsvg begin
-	    Luxor.background("white")
-        draw_line("f", "s", -Δy, rev = false, color = "#7ea6e0", stroke_color = "#546b8c")
-        draw_line("\\partial f", "t", 0, rev = false; color = "#67ab9f", stroke_color = "#40635c")
-        draw_line("\\partial f^*", "r", Δy, rev = true; color = "#ffb570", stroke_color = "#b58b63")
-        ks = ["0", "1", "k-1", "k", "K-1", "K"]
-        xs = [-3Δx, -2Δx + box_width/2 + dy_up, -box_width/2 - dy_up, box_width/2 + dy_up, 2Δx - box_width/2 - dy_up, 3Δx]
-        for i in eachindex(ks)
-            k = ks[i]
-            x = xs[i]
-            _text("\\mathcal{S}_{$k}", x, -3Δy/2)
-            fontsize = 12
-            _text("\\langle t_{$k}, r_{$k} \\rangle_{$k}", x, 3Δy/2; fontsize)
-            if i != 1
-                _text("=", (xs[i-1] + xs[i]) / 2, 3Δy/2; fontsize)
-            end
-        end
-	end 640 360
 end
 
 # ╔═╡ b3c8d70e-9a41-4d26-85fb-6e02f19ca4d3
@@ -3374,9 +3248,7 @@ uuid = "23338594-aafe-5451-b93e-139f81909106"
 # ╟─0980ef52-526d-421d-8c63-04272f16cbdd
 # ╟─191f33ab-b535-4cb1-96b3-6b2f10fd633a
 # ╟─c1ae773e-0f2d-4c1c-bae2-25f45bb28fbb
-# ╟─c62eb6b6-aca2-4c27-ab7e-e3374515d9aa
-# ╠═310d6a10-b887-4dd0-ba93-f901726ddbbc
-# ╠═c616136c-f29f-41c2-bef0-516c05831748
+# ╟─310d6a10-b887-4dd0-ba93-f901726ddbbc
 # ╟─068ef840-04cb-4de4-9512-721f57e5750e
 # ╟─7331c447-c0a6-4a47-af00-36efc449d9d9
 # ╟─bebe2bb8-cf74-4eaa-85d1-712b990b5985
