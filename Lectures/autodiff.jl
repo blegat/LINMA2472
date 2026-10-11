@@ -568,9 +568,6 @@ function reverse_diff(W, X, y)
     (J_1 .* (W[2]' * J_2)) * X'
 end
 
-# ╔═╡ 87c6a5bc-82bf-44a5-b4d6-6d50285348c0
-@time reverse_diff(W, X, y)
-
 # ╔═╡ 17c91ea8-acb7-4bbd-b0b0-0f8193f45303
 md"## 🚀 GPU acceleration ⚡"
 
@@ -1068,6 +1065,9 @@ W = [rand(Float32, h, size(X, 1)), rand(Float32, size(y, 1), h)]
 
 # ╔═╡ a580ef44-234a-4ed1-b007-920651415427
 sum((W[2] * tanh.(W[1] * X) - y).^2) / size(y, 2)
+
+# ╔═╡ 87c6a5bc-82bf-44a5-b4d6-6d50285348c0
+@time reverse_diff(W, X, y)
 
 # ╔═╡ 85303791-bdc4-468a-bc40-48ef2a186282
 if CUDA.functional()
@@ -3374,7 +3374,7 @@ uuid = "23338594-aafe-5451-b93e-139f81909106"
 # ╟─0980ef52-526d-421d-8c63-04272f16cbdd
 # ╟─191f33ab-b535-4cb1-96b3-6b2f10fd633a
 # ╟─c1ae773e-0f2d-4c1c-bae2-25f45bb28fbb
-# ╠═c62eb6b6-aca2-4c27-ab7e-e3374515d9aa
+# ╟─c62eb6b6-aca2-4c27-ab7e-e3374515d9aa
 # ╠═310d6a10-b887-4dd0-ba93-f901726ddbbc
 # ╠═c616136c-f29f-41c2-bef0-516c05831748
 # ╟─068ef840-04cb-4de4-9512-721f57e5750e
