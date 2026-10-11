@@ -82,6 +82,27 @@ end
 # ╔═╡ 3803804a-f44d-4f56-bd59-fb1401d8fb9e
 Base.:-(x::Dual{T}) where {T} = Dual(-x.value, -x.derivative)
 
+# ╔═╡ d26cba1c-27d8-4ee7-99e5-6c0e0fc6b6e5
+begin
+	using LaTeXStrings
+	import MathTeXEngine
+	# Luxor asks Cairo for MathTeXEngine's fonts by name so we register them
+	# to avoid having to install them on the system
+	let fontconfig = Base.require(Base.PkgId(Base.UUID("a3f928ae-7b40-5064-980b-68af3947d34b"), "Fontconfig_jll"))
+		add_font = Base.Libc.Libdl.dlsym(fontconfig.libfontconfig_handle, :FcConfigAppFontAddFile)
+		dir = joinpath(pkgdir(MathTeXEngine), "assets", "fonts", "NewComputerModern")
+		for file in readdir(dir; join = true)
+			if endswith(file, ".otf")
+				ccall(add_font, Cint, (Ptr{Cvoid}, Cstring), C_NULL, file)
+			end
+		end
+	end
+	# Luxor draws the italic glyphs of letters with the upright font so we
+	# replace them with their Unicode mathematical italic counterpart
+	_math_italic(c) = c == 'h' ? 'ℎ' : islowercase(c) ? Char(0x1D44E + (c - 'a')) : Char(0x1D434 + (c - 'A'))
+	_latex(s) = latexstring(replace(s, r"\\[a-zA-Z]+|[a-zA-Z]" => m -> length(m) == 1 ? string(_math_italic(m[1])) : m))
+end
+
 # ╔═╡ 63bdc7f5-89a5-4061-9e42-6588e4cd96c6
 Base.:*(x::Dual{T}, y::Dual{T}) where {T} = Dual(x.value * y.value, x.value * y.derivative + x.derivative * y.value)
 
@@ -791,10 +812,9 @@ let
     end
     function _text(text, x, y)
         Luxor.sethue("black")
-        Luxor.fontface("DejaVu Sans Bold")
-        Luxor.fontsize(16)
+        Luxor.fontsize(18)
         Luxor.text(
-            text,
+            _latex(text),
             Luxor.Point(x, y);
             halign = :center,
             valign = :middle,
@@ -813,16 +833,16 @@ let
         dx_dots = box_width/4
         _text("$(v)_0", -3Δx, y)
         _arrow(Luxor.Point(-3Δx + box_width/2, y), Luxor.Point(-2Δx - box_width/2, y); rev)
-        draw_node("$(f)₁", -2Δx, y)
+        draw_node("$(f)_1", -2Δx, y)
         _arrow(Luxor.Point(-2Δx + box_width/2, y), Luxor.Point(-Δx - dx_dots, y); rev)
         _text("$(v)_1", -2Δx + box_width/2 + dy_up, y - dy_up)
-        _text("...", -Δx, y)
+        _text("\\cdots", -Δx, y)
         _arrow(Luxor.Point(-Δx + dx_dots, y), Luxor.Point(-box_width/2, y); rev)
         _text("$(v)_{k-1}", -box_width/2 - dy_up, y - dy_up)
-        draw_node("$(f)ₖ", 0, y)
+        draw_node("$(f)_k", 0, y)
         _text("$(v)_k", box_width/2 + dy_up, y - dy_up)
         _arrow(Luxor.Point(box_width/2, y), Luxor.Point(Δx - dx_dots, y); rev)
-        _text("...", Δx, y)
+        _text("\\cdots", Δx, y)
         _arrow(Luxor.Point(Δx + dx_dots, y), Luxor.Point(2Δx - box_width/2, y); rev)
         _text("$(v)_{K-1}", 2Δx - box_width/2 - dy_up, y - dy_up)
         draw_node("$(f)_K", 2Δx, y)
@@ -835,15 +855,15 @@ let
 	CGE.Luxor.@draw begin
 	    Luxor.background("white")
         draw_line("f", "s", -Δy, rev = false)
-        draw_line("∂f", "t", 0, rev = false)
-        draw_line("∂f*", "r", Δy, rev = true)
+        draw_line("\\partial f", "t", 0, rev = false)
+        draw_line("\\partial f^*", "r", Δy, rev = true)
         ks = ["0", "1", "k-1", "k", "K-1", "K"]
         xs = [-3Δx, -2Δx + box_width/2 + dy_up, -box_width/2 - dy_up, box_width/2 + dy_up, 2Δx - box_width/2 - dy_up, 3Δx]
         for i in eachindex(ks)
             k = ks[i]
             x = xs[i]
-            _text("S_$k", x, -3Δy/2)
-            _text("⟨t$k, r$k⟩$k", x, 3Δy/2)
+            _text("S_{$k}", x, -3Δy/2)
+            _text("\\langle t_{$k}, r_{$k} \\rangle_{$k}", x, 3Δy/2)
             if i != 1
                 _text("=", (xs[i-1] + xs[i]) / 2, 3Δy/2)
             end
@@ -1507,7 +1527,9 @@ CUDA = "052768ef-5323-5732-b1bb-66c8b64840ba"
 ComputationGraphExplorer = "c9fc7d07-15e8-4fd8-b152-23c2424d2de2"
 DelimitedFiles = "8bb1440f-4735-579b-a4ab-409b98df4dab"
 HypertextLiteral = "ac1192a8-f4b3-4bfe-ba22-af5b92cd3ab2"
+LaTeXStrings = "b964fa9f-0449-5b57-a5c2-d3ea65f4040f"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
+MathTeXEngine = "0a4f8689-d25c-4efe-a92b-7142dfc1aa53"
 OneHotArrays = "0b1bfda6-eb8a-41d2-88d8-f5af5cad476f"
 PlotlyLight = "ca7969ec-10b3-423e-8d99-40f33abb42bf"
 PlutoTeachingTools = "661c6b06-c737-4d37-b85c-46df65de6f69"
@@ -1518,6 +1540,8 @@ Statistics = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
 CUDA = "~6.4.2"
 ComputationGraphExplorer = "~0.2.2"
 HypertextLiteral = "~1.0.0"
+LaTeXStrings = "~1.4.1"
+MathTeXEngine = "~0.6.9"
 OneHotArrays = "~0.2.11"
 PlotlyLight = "~0.13.1"
 PlutoTeachingTools = "~0.4.7"
@@ -1530,7 +1554,7 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.13.1"
 manifest_format = "2.1"
-project_hash = "eadf731b57d15d3cac7dce0a1668bece8dcfcba3"
+project_hash = "c121fa8ca76ca548215dd6e79d80b28fb25669a6"
 
 [[deps.AbstractFFTs]]
 deps = ["LinearAlgebra"]
@@ -1549,6 +1573,12 @@ git-tree-sha1 = "e71ee7b4aa06b045259a7d6101e1cb45ad140bce"
 registries = "General"
 uuid = "6e696c72-6542-2067-7265-42206c756150"
 version = "1.4.1"
+
+[[deps.AbstractTrees]]
+git-tree-sha1 = "2d9c9a55f9c93e8887ad391fbae72f8ef55e1177"
+registries = "General"
+uuid = "1520ce14-60c1-5f80-bbc7-55ef81b5835c"
+version = "0.4.5"
 
 [[deps.Adapt]]
 deps = ["LinearAlgebra"]
@@ -1588,6 +1618,13 @@ version = "1.5.0"
     OpenCL = "08131aa3-fb12-5dee-8b74-c09406e224a2"
     oneAPI = "8f75cd03-7ff8-4ecb-9b8f-daf728133b1b"
 
+[[deps.Automa]]
+deps = ["PrecompileTools", "TranscodingStreams"]
+git-tree-sha1 = "94eab0b3ccdcac361188cc661daf69d4433c1818"
+registries = "General"
+uuid = "67c07d97-cdcb-5c2c-af73-a7f9c32a568b"
+version = "1.2.0"
+
 [[deps.BFloat16s]]
 deps = ["LinearAlgebra", "Printf", "Random"]
 git-tree-sha1 = "e9f53743fbe41a7e794d58f79d7a13699d9748fa"
@@ -1598,6 +1635,12 @@ version = "0.6.2"
 [[deps.Base64]]
 uuid = "2a0f44e3-6c83-55bd-87e4-b1978d98bd5f"
 version = "1.11.0"
+
+[[deps.BaseDirs]]
+git-tree-sha1 = "8c290a1b223deaeea9aea44b235d24546da8eb98"
+registries = "General"
+uuid = "18cc8868-cbac-4acf-b575-c8ff214dc66f"
+version = "1.4.0"
 
 [[deps.Bzip2_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl"]
@@ -1722,6 +1765,19 @@ weakdeps = ["StyledStrings"]
     [deps.ColorTypes.extensions]
     StyledStringsExt = "StyledStrings"
 
+[[deps.ColorVectorSpace]]
+deps = ["ColorTypes", "FixedPointNumbers", "LinearAlgebra", "Requires", "Statistics", "TensorCore"]
+git-tree-sha1 = "8b3b6f87ce8f65a2b4f857528fd8d70086cd72b1"
+registries = "General"
+uuid = "c3611d14-8923-5661-9e6a-0046d554d3a4"
+version = "0.11.0"
+
+    [deps.ColorVectorSpace.extensions]
+    SpecialFunctionsExt = "SpecialFunctions"
+
+    [deps.ColorVectorSpace.weakdeps]
+    SpecialFunctions = "276daf66-3868-5448-9aa4-cd146d93841b"
+
 [[deps.Colors]]
 deps = ["ColorTypes", "FixedPointNumbers", "LinearAlgebra", "Reexport"]
 git-tree-sha1 = "291665b547f137df070e4dd83e432b5fee8cc4a0"
@@ -1762,6 +1818,22 @@ weakdeps = ["NNlib"]
 
     [deps.ComputationGraphExplorer.extensions]
     ComputationGraphExplorerNNlibExt = "NNlib"
+
+[[deps.ConstructionBase]]
+git-tree-sha1 = "b4b092499347b18a015186eae3042f72267106cb"
+registries = "General"
+uuid = "187b0558-2788-49d3-abe0-74a17ed4e7c9"
+version = "1.6.0"
+
+    [deps.ConstructionBase.extensions]
+    ConstructionBaseIntervalSetsExt = "IntervalSets"
+    ConstructionBaseLinearAlgebraExt = "LinearAlgebra"
+    ConstructionBaseStaticArraysExt = "StaticArrays"
+
+    [deps.ConstructionBase.weakdeps]
+    IntervalSets = "8197267c-284f-5f27-9208-e0e47529a953"
+    LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
+    StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
 
 [[deps.Crayons]]
 git-tree-sha1 = "54b76cbb40d9a0f5368c880725b2f141da77c94f"
@@ -1811,6 +1883,13 @@ version = "1.9.1"
 deps = ["ArgTools", "FileWatching", "LibCURL", "NetworkOptions"]
 uuid = "f43a241f-c20a-4ad4-852c-f6b1247861c6"
 version = "1.7.0"
+
+[[deps.EarCut_jll]]
+deps = ["Artifacts", "JLLWrappers", "Libdl"]
+git-tree-sha1 = "6123b906924c935459624131058fab6a587fc6c1"
+registries = "General"
+uuid = "5ae413db-bbd1-5e63-b57d-d24a61df00f5"
+version = "3.2.3+0"
 
 [[deps.EasyConfig]]
 deps = ["JSON3", "OrderedCollections", "StructTypes"]
@@ -1883,12 +1962,26 @@ registries = "General"
 uuid = "1fa38f19-a742-5d3f-a2b9-30dd87b9d5f8"
 version = "1.3.7"
 
+[[deps.FreeType]]
+deps = ["CEnum", "FreeType2_jll"]
+git-tree-sha1 = "907369da0f8e80728ab49c1c7e09327bf0d6d999"
+registries = "General"
+uuid = "b38be410-82b0-50bf-ab77-7b57e271db43"
+version = "4.1.1"
+
 [[deps.FreeType2_jll]]
 deps = ["Artifacts", "Bzip2_jll", "JLLWrappers", "Libdl", "Zlib_jll"]
 git-tree-sha1 = "70329abc09b886fd2c5d94ad2d9527639c421e3e"
 registries = "General"
 uuid = "d7e528f0-a631-5988-bf34-fe36492bcfd7"
 version = "2.14.3+1"
+
+[[deps.FreeTypeAbstraction]]
+deps = ["BaseDirs", "ColorVectorSpace", "Colors", "FreeType", "GeometryBasics", "Mmap"]
+git-tree-sha1 = "4ebb930ef4a43817991ba35db6317a05e59abd11"
+registries = "General"
+uuid = "663a7486-cb36-511b-a19d-713bb74d65c9"
+version = "0.10.8"
 
 [[deps.FriBidi_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl"]
@@ -1940,6 +2033,13 @@ git-tree-sha1 = "ac858e66e7bee15ccc5931967260db8fe051e2a6"
 registries = "General"
 uuid = "096a3bc2-3ced-46d0-87f4-dd12716f4bfc"
 version = "3.3.3"
+
+[[deps.GeometryBasics]]
+deps = ["EarCut_jll", "IterTools", "LinearAlgebra", "StaticArrays", "StructArrays", "Tables"]
+git-tree-sha1 = "83ea630384a13fc4f002b77690bc0afeb4255ac9"
+registries = "General"
+uuid = "5c1252a2-5f33-56bf-86c9-59e7332b4326"
+version = "0.4.2"
 
 [[deps.GettextRuntime_jll]]
 deps = ["Artifacts", "CompilerSupportLibraries_jll", "JLLWrappers", "Libdl", "Libiconv_jll"]
@@ -2014,6 +2114,12 @@ version = "1.0.0"
 deps = ["Markdown"]
 uuid = "b77e0a4c-d291-57a0-90e8-8db25a27a240"
 version = "1.11.0"
+
+[[deps.IterTools]]
+git-tree-sha1 = "42d5f897009e7ff2cf88db414a389e5ed1bdd023"
+registries = "General"
+uuid = "c8e1da08-722c-5040-9ed9-7db0dc04731e"
+version = "1.10.0"
 
 [[deps.IteratorInterfaceExtensions]]
 git-tree-sha1 = "a3f24677c21f5bbe9d2a714f95dcd58337fb2856"
@@ -2259,15 +2365,11 @@ git-tree-sha1 = "fe8060b3d693f682e14f1019b058c64effb62b43"
 registries = "General"
 uuid = "ae8d54c2-7ccd-5906-9d76-62fc9837b5bc"
 version = "4.5.0"
+weakdeps = ["LaTeXStrings", "MathTeXEngine", "Typstry"]
 
     [deps.Luxor.extensions]
     LuxorExtLatex = ["LaTeXStrings", "MathTeXEngine"]
     LuxorExtTypstry = ["Typstry"]
-
-    [deps.Luxor.weakdeps]
-    LaTeXStrings = "b964fa9f-0449-5b57-a5c2-d3ea65f4040f"
-    MathTeXEngine = "0a4f8689-d25c-4efe-a92b-7142dfc1aa53"
-    Typstry = "f0ed7684-a786-439e-b1e3-3b82803b501e"
 
 [[deps.MIMEs]]
 git-tree-sha1 = "c64d943587f7187e751162b3b84445bbbd79f691"
@@ -2285,6 +2387,13 @@ version = "0.5.16"
 deps = ["Base64", "JuliaSyntaxHighlighting", "StyledStrings"]
 uuid = "d6f4376e-aef5-505a-96c1-9c027394607a"
 version = "1.11.0"
+
+[[deps.MathTeXEngine]]
+deps = ["AbstractTrees", "Automa", "DataStructures", "FreeTypeAbstraction", "GeometryBasics", "LaTeXStrings", "REPL", "RelocatableFolders", "UnicodeFun"]
+git-tree-sha1 = "aa1078778be5a8e5259ff04fbc3d258b3e78d464"
+registries = "General"
+uuid = "0a4f8689-d25c-4efe-a92b-7142dfc1aa53"
+version = "0.6.9"
 
 [[deps.Mmap]]
 uuid = "a63ad114-7e13-5084-954f-fe012c677804"
@@ -2537,6 +2646,13 @@ registries = "General"
 uuid = "189a3867-3050-52da-a836-e630ba90ab69"
 version = "1.2.2"
 
+[[deps.RelocatableFolders]]
+deps = ["SHA", "Scratch"]
+git-tree-sha1 = "ffdaf70d81cf6ff22c2b6e733c900c3321cab864"
+registries = "General"
+uuid = "05181044-ff0b-4ac5-8273-598c1e38db00"
+version = "1.0.1"
+
 [[deps.Requires]]
 deps = ["UUIDs"]
 git-tree-sha1 = "62389eeff14780bfe55195b7204c0d8738436d64"
@@ -2618,6 +2734,21 @@ registries = "General"
 uuid = "892a3eda-7b42-436c-8928-eab12a02cf0e"
 version = "0.6.1"
 
+[[deps.StructArrays]]
+deps = ["ConstructionBase", "DataAPI", "Tables"]
+git-tree-sha1 = "9537ef82c42cdd8c5d443cbc359110cbb36bae10"
+registries = "General"
+uuid = "09ab397b-f2b6-538f-b94a-2f83cf4a842a"
+version = "0.6.21"
+weakdeps = ["Adapt", "GPUArraysCore", "KernelAbstractions", "LinearAlgebra", "SparseArrays", "StaticArrays"]
+
+    [deps.StructArrays.extensions]
+    StructArraysAdaptExt = "Adapt"
+    StructArraysGPUArraysCoreExt = ["GPUArraysCore", "KernelAbstractions"]
+    StructArraysLinearAlgebraExt = "LinearAlgebra"
+    StructArraysSparseArraysExt = "SparseArrays"
+    StructArraysStaticArraysExt = "StaticArrays"
+
 [[deps.StructTypes]]
 deps = ["Dates", "UUIDs"]
 git-tree-sha1 = "159331b30e94d7b11379037feeb9b690950cace8"
@@ -2658,6 +2789,13 @@ deps = ["ArgTools", "SHA"]
 uuid = "a4e569a6-e804-4fa4-b0f3-eef7a1d5b13e"
 version = "1.10.0"
 
+[[deps.TensorCore]]
+deps = ["LinearAlgebra"]
+git-tree-sha1 = "1feb45f88d133a655e001435632f019a9a1bcdb6"
+registries = "General"
+uuid = "62fd8b95-f654-4bbd-a8a5-9c27f68ccd50"
+version = "0.1.1"
+
 [[deps.Test]]
 deps = ["InteractiveUtils", "Logging", "Random", "Serialization"]
 uuid = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
@@ -2675,6 +2813,12 @@ version = "0.1.6"
 
     [deps.Tracy.weakdeps]
     TracyProfiler_jll = "0c351ed6-8a68-550e-8b79-de6f926da83c"
+
+[[deps.TranscodingStreams]]
+git-tree-sha1 = "0c45878dcfdcfa8480052b6ab162cdd138781742"
+registries = "General"
+uuid = "3bb67fe8-82b1-5028-8e26-92a6c54297fa"
+version = "0.11.3"
 
 [[deps.Tricks]]
 git-tree-sha1 = "311349fd1c93a31f783f977a71e8b062a57d4101"
@@ -2715,6 +2859,13 @@ version = "1.11.0"
 [[deps.Unicode]]
 uuid = "4ec0a83e-493e-50e2-b9ac-8f72acf5a8f5"
 version = "1.11.0"
+
+[[deps.UnicodeFun]]
+deps = ["REPL"]
+git-tree-sha1 = "53915e50200959667e78a92a418594b428dffddf"
+registries = "General"
+uuid = "1cfade01-22cf-5700-b092-accc4b62d6e1"
+version = "0.4.1"
 
 [[deps.UnsafeAtomics]]
 deps = ["LLVM"]
@@ -3066,7 +3217,7 @@ uuid = "23338594-aafe-5451-b93e-139f81909106"
 # ╟─0980ef52-526d-421d-8c63-04272f16cbdd
 # ╟─191f33ab-b535-4cb1-96b3-6b2f10fd633a
 # ╟─c1ae773e-0f2d-4c1c-bae2-25f45bb28fbb
-# ╠═c62eb6b6-aca2-4c27-ab7e-e3374515d9aa
+# ╟─c62eb6b6-aca2-4c27-ab7e-e3374515d9aa
 # ╟─068ef840-04cb-4de4-9512-721f57e5750e
 # ╟─7331c447-c0a6-4a47-af00-36efc449d9d9
 # ╟─bebe2bb8-cf74-4eaa-85d1-712b990b5985
@@ -3135,6 +3286,7 @@ uuid = "23338594-aafe-5451-b93e-139f81909106"
 # ╠═f1ba3d3c-d0a5-4290-ab73-9ce34bd5e5f6
 # ╠═b7d4a91e-3c52-4f86-9a0d-5e8c1f2b6d47
 # ╠═a06be2d9-73c1-4f85-b2e7-18d3c5a90f47
+# ╠═d26cba1c-27d8-4ee7-99e5-6c0e0fc6b6e5
 # ╠═7f459370-eb6f-4d82-bf99-1528e136ca5c
 # ╟─e8b1c40d-27a6-4f39-b95e-6d3a0f81c72b
 # ╟─b3c8d70e-9a41-4d26-85fb-6e02f19ca4d3
