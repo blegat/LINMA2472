@@ -345,15 +345,14 @@ In layer ``i``, ``\hat{y}_{i,j}`` depends on
 Given the keys and values of the past positions, the computation of ``\hat{y}_{i,j}`` is **independent** of the other positions.
 """
 
-# ╔═╡ 3c2c2065-f860-48c9-9925-6e7c069b1e1c
-md"Highlight what is needed to predict ``x_0``: $(@bind kv_needed CheckBox())"
-
 # ╔═╡ 9057ce05-ba9b-46c9-847b-514e219f93a1
 qa(md"What do we need to compute to predict ``x_0`` ?", md"""
 Only the columns with a path to ``\hat{y}_{N,-1}`` in the computational graph.
 These are exactly the nodes reached by the backward pass of reverse-mode AD from ``\hat{y}_{N,-1}``, the other ones do not contribute to the prediction of ``x_0``.
 * In the last layer, computing ``\hat{y}_{N,j}`` for ``j < -1`` is **useless** to predict ``x_0``!
 * In the other layers, every position is needed but the positions ``k < -1`` are only needed through their keys and values.
+
+Highlight what is needed to predict ``x_0``: $(@bind kv_needed CheckBox())
 """)
 
 # ╔═╡ a14e505e-2e4a-4c73-8133-7560ba58916b
@@ -896,10 +895,16 @@ function transformer_graph(; kv_cache = false, needed = false, n_ctx = 4, N = 3,
         Luxor.setdash("solid")
         for i in 1:N, j in js
             s = status(i, j)
-            Luxor.setopacity(s in (:computed, :new) ? 1 : s == :cached ? 0.5 : 0.25)
+            opacity = s in (:computed, :new) ? 1 : s == :cached ? 0.5 : 0.25
             y = stack_bottom(i)
             for (h, color) in blocks
                 center = Luxor.Point(X(j), y - h / 2)
+                # Opaque white background so that the arrow behind is hidden
+                # when the block is drawn with some transparency
+                Luxor.setopacity(1)
+                Luxor.sethue("white")
+                Luxor.box(center, block_width, h, 2, :fill)
+                Luxor.setopacity(opacity)
                 Luxor.sethue(color)
                 Luxor.box(center, block_width, h, 2, :fill)
                 Luxor.sethue("black")
@@ -2555,7 +2560,6 @@ uuid = "23338594-aafe-5451-b93e-139f81909106"
 # ╟─b2982908-a2ec-436a-abae-4dcdf896a3af
 # ╟─e6420fcc-3b76-4dd5-b172-c7381afb5e5e
 # ╟─083fcca6-10e0-4483-a754-19d1f2720ec7
-# ╟─3c2c2065-f860-48c9-9925-6e7c069b1e1c
 # ╟─9057ce05-ba9b-46c9-847b-514e219f93a1
 # ╟─a14e505e-2e4a-4c73-8133-7560ba58916b
 # ╟─9a8eef1b-27c0-4d57-a389-53708ade9058
