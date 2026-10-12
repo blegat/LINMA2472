@@ -4,6 +4,18 @@
 using Markdown
 using InteractiveUtils
 
+# This Pluto notebook uses @bind for interactivity. When running this notebook outside of Pluto, the following 'mock version' of @bind gives bound variables a default value (instead of an error).
+macro bind(def, element)
+    #! format: off
+    return quote
+        local iv = try Base.loaded_modules[Base.PkgId(Base.UUID("6e696c72-6542-2067-7265-42206c756150"), "AbstractPlutoDingetjes")].Bonds.initial_value catch; b -> missing; end
+        local el = $(esc(element))
+        global $(esc(def)) = Core.applicable(Base.get, el) ? Base.get(el) : iv(el)
+        el
+    end
+    #! format: on
+end
+
 # ╔═╡ 32621224-a782-4bf6-9570-562cf2bb7360
 using PlutoUI, DataFrames, PrettyTables, LinearAlgebra, Luxor, LaTeXStrings, MathTeXEngine, PlutoUI, PlutoUI.ExperimentalLayout, HypertextLiteral, PlutoTeachingTools
 
@@ -319,41 +331,81 @@ md"## Transformer variations"
 # ╔═╡ a5b20939-9afa-48c0-aa67-cbca6bc99804
 md"## Cost of LLMs"
 
+# ╔═╡ b2982908-a2ec-436a-abae-4dcdf896a3af
+md"## Dependencies between positions"
+
+# ╔═╡ e6420fcc-3b76-4dd5-b172-c7381afb5e5e
+md"""
+Let ``\hat{y}_{i,j}`` be the column of ``\hat{Y}_i`` at the position of ``x_j``, with ``\hat{Y}_0 = CX + P``.
+In layer ``i``, ``\hat{y}_{i,j}`` depends on
+* ``\hat{y}_{i-1,j}`` for the query, the residual connection and the feed-forward network,
+* ``\hat{y}_{i-1,k}`` for ``k < j`` **only** through their keys ``W_\ell^K\hat{y}_{i-1,k}`` and values ``W_\ell^V\hat{y}_{i-1,k}`` for each head ``\ell``,
+* not on ``\hat{y}_{i-1,k}`` for ``k > j`` because of the mask.
+
+Given the keys and values of the past positions, the computation of ``\hat{y}_{i,j}`` is **independent** of the other positions.
+"""
+
+# ╔═╡ 3c2c2065-f860-48c9-9925-6e7c069b1e1c
+md"Highlight what is needed to predict ``x_0``: $(@bind kv_needed CheckBox())"
+
+# ╔═╡ 9057ce05-ba9b-46c9-847b-514e219f93a1
+qa(md"What do we need to compute to predict ``x_0`` ?", md"""
+Only the columns with a path to ``\hat{y}_{N,-1}`` in the computational graph.
+These are exactly the nodes reached by the backward pass of reverse-mode AD from ``\hat{y}_{N,-1}``, the other ones do not contribute to the prediction of ``x_0``.
+* In the last layer, computing ``\hat{y}_{N,j}`` for ``j < -1`` is **useless** to predict ``x_0``!
+* In the other layers, every position is needed but the positions ``k < -1`` are only needed through their keys and values.
+""")
+
 # ╔═╡ a14e505e-2e4a-4c73-8133-7560ba58916b
 md"## Key-Value (KV) cache"
 
 # ╔═╡ 9a8eef1b-27c0-4d57-a389-53708ade9058
 md"""
-Let ``\hat{Y}_{i}`` be the intermediate output of ``i \in \{1, \ldots, N\}``.
-The columns of the matrix ``\text{softmax}(C^\top \hat{Y}_i)`` (column-wise softmax) can be thought as intermediate probabilities that we denote ``\hat{p}_i``:
-```math
-(\hat{p}_i(x_{-n_\text{ctx}+1} | x_{-n_\text{ctx}}), \ldots, \hat{p}_i(x_{-1} | x_{-2}, \ldots, x_{-n_\text{ctx}}), \hat{p}_i(x_0 | x_{-1}, \ldots, x_{-n_\text{ctx}}))
-```
-and we predict the next token using ``\hat{p}_N(x_0 | x_{-1}, \ldots, x_{-n_\text{ctx}})``.
+Once ``x_0`` is generated, the context window moves to ``x_{-n_\text{ctx}+1}, \ldots, x_0``.
+💡 For each layer ``i < N``, the keys and values of ``\hat{y}_{i,j}`` for ``j < 0`` were already computed for the previous token, let's **cache** them!
+Since the positions are independent given these keys and values, we only need to compute the new column ``\hat{y}_{i,0}`` of each layer ``i``.
 """
 
 # ╔═╡ 728f5fdf-77a5-46c7-b3ee-01064ef1b7e2
-qa(md"Should we discard all these intermediate ``\hat{Y}_i`` we computated or can we reuse it for the following token ?",
+qa(md"Is the KV cache equivalent to recomputing everything for the new context window ?",
 md"""
-For the next token, the corresponding intermediate probabilities would be:
+No! Without cache, we would compute new columns ``\hat{y}_{i,j}'`` that only depend on ``x_{-n_\text{ctx}+1}, \ldots, x_j``.
+The cached ``\hat{y}_{i,j}`` were computed while ``x_{-n_\text{ctx}}`` was still in the context window so they also depend on ``x_{-n_\text{ctx}}`` (dashed red edges).
+The cached columns have **one more token** in their context!
+""")
+
+# ╔═╡ b9a962a6-4f4f-4676-95b6-0c2cfd536031
+qa(md"Why does it still make sense ?",
+md"""
+Thanks to the mask, the transformer incorporates the sub-models (see Masked Attention)
 ```math
-(\hat{p}_i(x_{-n_\text{ctx}+2} | x_{-n_\text{ctx}+1}), \ldots, \hat{p}_i(x_{0} | x_{-1}, \ldots, x_{-n_\text{ctx}+1}), \hat{p}_i(x_1 | x_{0}, \ldots, x_{-n_\text{ctx}+1}))
+\bar{p}(x_{j+1} | x_j, \ldots, x_{-n_\text{ctx}})
 ```
-Note that
-```math
-\begin{align}
-   \hat{p}_i(x_{-n_\text{ctx}+2} | x_{-n_\text{ctx}+1})
-   & \approx
-   \hat{p}_i(x_{-n_\text{ctx}+2} | x_{-n_\text{ctx}+1}, x_{-n_\text{ctx}})\\
-   \hat{p}_i(x_{0} | x_{-1}, \ldots, x_{-n_\text{ctx}+1})
-   & \approx
-   \hat{p}_i(x_0 | x_{-1}, \ldots, x_{-n_\text{ctx}})
-\end{align}
-```
-So for any ``j < n_\text{ctx}``, the ``j``th column of the ``\hat{Y}_i'`` that should be computed for the new token is approximately equal to
-the ``(j+1)``th column of ``\hat{Y}_i`` that we already computed for the previous token.
-What's more, the column of ``\hat{Y}_i`` was computed with one more token as context compared to what we need to compute in ``\hat{Y}_i'``.
-So even though it's not equal, reusing what we computed in ``\hat{Y}_i`` should provide better result, assuming the trained transformers using this auto-regressive structure in his layers.
+so it is trained to predict the next token from contexts of every length from ``1`` to ``n_\text{ctx}``.
+We can reasonably assume that the trained weights follow an auto-regressive logic in which one more token of context can only improve the prediction.
+The same holds for the intermediate layers if we think of the columns of ``\text{softmax}(C^\top \hat{Y}_i)`` as intermediate probabilities ``\hat{p}_i``.
+
+So the KV cache is **not equivalent** but, from an auto-regressive point of view, it should be **at least as good**.
+Note that this is an assumption: the transformer is trained on each window from scratch, it never sees cached values during training!
+""")
+
+# ╔═╡ a0d935f9-185a-4608-ab9f-954fa0e66f44
+qa(md"When would the KV cache not make sense ?",
+md"""
+When the transformer learns a logic that is not auto-regressive.
+For instance, if the tokens describe the board of a game and we only want the next move given the state of the board, the context is fixed.
+There is then no reason for a column computed with an extra token in its context to be better.
+But in that case, we would not generate tokens in a rolling horizon fashion anyway.
+""")
+
+# ╔═╡ 941ad4d9-3406-463e-9af9-96687cd1ecea
+qa(md"What is the analogy with reverse-mode AD ? What is the cost ?",
+md"""
+The forward pass of reverse-mode AD stores the intermediate values so that the backward pass does not recompute them.
+Similarly, the KV cache stores the keys and values computed by the forward pass of the previous token so that the forward pass of the next token does not recompute them.
+We trade memory for time:
+* **Memory** : ``O(Nhn_\text{ctx}(d_k + d_v))`` for the cached keys and values.
+* **Time** : each new token costs ``O(Nn_\text{ctx}d_\text{emb} + Nd_\text{emb}^2)`` instead of ``O(Nn_\text{ctx}^2d_\text{emb} + Nn_\text{ctx}d_\text{emb}^2)``.
 """)
 
 # ╔═╡ c8923675-e73e-4621-82b9-966d8b003b97
@@ -756,6 +808,132 @@ HTML(html(@draw begin
 end 300 400)),
 )
 
+# ╔═╡ a57f2149-c876-4421-a958-e9aed1f892a6
+"""
+    mathjax_figure(draw; width, height)
+
+Luxor only draws the shapes, the labels are overlaid in HTML so that
+they are typeset by the MathJax of Pluto.
+`draw(label)` draws the shapes with the origin at the center and adds labels
+with `label(text, x, y; color, fontsize, halign)`.
+"""
+function mathjax_figure(draw; width, height)
+    labels = []
+    function label(text, x, y; color = "black", fontsize = 14, halign = :center)
+        dx = halign == :left ? "0" : "-50%"
+        push!(labels, @htl("""<span class="tex" style="position: absolute; left: $(x + width / 2)px; top: $(y + height / 2)px; transform: translate($dx, -50%); white-space: nowrap; color: $color; font-size: $(fontsize)px;">\$$text\$</span>"""))
+    end
+    Luxor.Drawing(width, height, :svg)
+    Luxor.origin()
+    Luxor.background("white")
+    draw(label)
+    Luxor.finish()
+    svg = Luxor.svgstring()
+    @htl("""<div style="position: relative; width: $(width)px; height: $(height)px;">
+    <div style="position: absolute; inset: 0;">$(HTML(svg))</div>
+    $labels
+    </div>""")
+end
+
+# ╔═╡ 293266c6-01e7-4da0-8caf-56b1ce0aae85
+"""
+    transformer_graph(; kv_cache = false, needed = false, n_ctx = 4, N = 3)
+
+Draw the dependencies between the columns of ``\\hat{Y}_0, \\ldots, \\hat{Y}_N``.
+If `needed` is `true`, the columns that are not needed to predict ``x_0`` are greyed out.
+If `kv_cache` is `true`, show the computation of the next token with the KV cache.
+"""
+function transformer_graph(; kv_cache = false, needed = false, n_ctx = 4, N = 3, width = 640, height = 340)
+    mathjax_figure(; width, height) do label
+        colors = (computed = "#546b8c", kv = "#9673a6", cached = "#ffb570", new = "#67ab9f", unneeded = "#d0d0d0", extra = "#e06666")
+        js = kv_cache ? (-n_ctx:0) : (-n_ctx:-1)
+        Δx = 90
+        Δy = 60
+        X(j) = (j - (first(js) + last(js)) / 2) * Δx + 50
+        Y(i) = (N / 2 - i) * Δy
+        radius = 9
+        in_window(j) = !kv_cache || j > -n_ctx
+        function status(i, j)
+            if kv_cache
+                j == 0 && return :new
+                (i == N || !in_window(j)) && return :unneeded
+                return :cached
+            end
+            needed && i == N && j != -1 && return :unneeded
+            return :computed
+        end
+        # Edges from position `k` in layer `i - 1` to position `j` in layer `i`
+        for i in 1:N, j in js, k in js
+            k <= j || continue
+            s = status(i, j)
+            if s == :new
+                in_window(k) || continue
+                color = k == j ? colors.computed : colors.kv
+            elseif kv_cache && s == :cached && !in_window(k)
+                # The cached values still have `x_{-n_ctx}` in their context
+                color = colors.extra
+            elseif s == :unneeded || (kv_cache && s == :cached)
+                color = colors.unneeded
+            else
+                color = k == j ? colors.computed : colors.kv
+            end
+            p = Luxor.Point(X(k), Y(i - 1))
+            q = Luxor.Point(X(j), Y(i))
+            d = (q - p) / Luxor.distance(p, q)
+            Luxor.sethue(color)
+            Luxor.setdash(color == colors.extra ? "dash" : "solid")
+            Luxor.arrow(p + radius * d, q - radius * d; linewidth = k == j ? 1.5 : 1, arrowheadlength = 6)
+        end
+        Luxor.setdash("solid")
+        for i in 0:N, j in js
+            s = status(i, j)
+            Luxor.sethue(colors[s])
+            Luxor.circle(Luxor.Point(X(j), Y(i)), radius, :fill)
+        end
+        for i in 0:N
+            label(i == N ? "\\hat{Y}_N" : "\\hat{Y}_$i", X(first(js)) - 60, Y(i))
+        end
+        for j in js
+            label("x_{$j}", X(j), Y(0) + 25; color = in_window(j) ? "black" : colors.unneeded)
+            s = status(N, j)
+            if s in (:computed, :new)
+                label("x_{$(j + 1)}", X(j), Y(N) - 25; color = j == last(js) ? "black" : "gray")
+            end
+        end
+        if kv_cache
+            y = Y(0) + 45
+            Luxor.sethue("black")
+            Luxor.setline(1)
+            Luxor.line(Luxor.Point(X(-n_ctx + 1) - 15, y), Luxor.Point(X(0) + 15, y), :stroke)
+            label("\\text{context window}", (X(-n_ctx + 1) + X(0)) / 2, y + 12; fontsize = 12)
+            y = -height / 2 + 15
+            for (x, s, text) in [(-280, :cached, "\\text{cached}"), (-170, :new, "\\text{computed for } x_1"), (-20, :unneeded, "\\text{not needed}")]
+                Luxor.sethue(colors[s])
+                Luxor.circle(Luxor.Point(x, y), 6, :fill)
+                label(text, x + 12, y; fontsize = 12, halign = :left)
+            end
+            Luxor.sethue(colors.extra)
+            Luxor.setdash("dash")
+            Luxor.line(Luxor.Point(110, y), Luxor.Point(135, y), :stroke)
+            Luxor.setdash("solid")
+            label("x_{$(-n_ctx)} \\text{ in the context}", 143, y; fontsize = 12, halign = :left)
+        else
+            y = -height / 2 + 15
+            for (x, color, text) in [(-200, colors.computed, "same position"), (-40, colors.kv, "past positions through keys and values")]
+                Luxor.sethue(color)
+                Luxor.line(Luxor.Point(x, y), Luxor.Point(x + 25, y), :stroke)
+                label("\\text{$text}", x + 33, y; fontsize = 12, halign = :left)
+            end
+        end
+    end
+end
+
+# ╔═╡ 083fcca6-10e0-4483-a754-19d1f2720ec7
+transformer_graph(needed = kv_needed)
+
+# ╔═╡ 52c97de1-3d75-4b51-8397-86ea67af6c77
+transformer_graph(kv_cache = true)
+
 # ╔═╡ d050a7ee-3aa7-4539-a236-5b6446599ded
 struct BPE
 	text::String
@@ -930,7 +1108,7 @@ PrettyTables = "~3.4.8"
 PLUTO_MANIFEST_TOML_CONTENTS = """
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.13.0"
+julia_version = "1.13.1"
 manifest_format = "2.1"
 project_hash = "2fc8ef83ef52c737e7f1b433bec45077ad6216dd"
 
@@ -1565,7 +1743,7 @@ version = "1.9.1+0"
 [[deps.LibSSH2_jll]]
 deps = ["Artifacts", "CompilerSupportLibraries_jll", "Libdl", "OpenSSL_jll", "Zlib_jll"]
 uuid = "29816b5a-b9ab-546f-933c-edad1886dfa8"
-version = "1.11.103+0"
+version = "1.11.104+0"
 
 [[deps.Libdl]]
 uuid = "8f399da3-3557-5675-b5ff-fb832c97cbdb"
@@ -2349,9 +2527,18 @@ uuid = "23338594-aafe-5451-b93e-139f81909106"
 # ╟─8d6ec2b3-997e-4df5-a3b2-c1dffa53d0ec
 # ╟─25b79953-fd7c-46c1-b760-d57c09910981
 # ╟─45efc71d-d5f8-474e-9b89-e72fac7110fd
+# ╟─b2982908-a2ec-436a-abae-4dcdf896a3af
+# ╟─e6420fcc-3b76-4dd5-b172-c7381afb5e5e
+# ╟─083fcca6-10e0-4483-a754-19d1f2720ec7
+# ╟─3c2c2065-f860-48c9-9925-6e7c069b1e1c
+# ╟─9057ce05-ba9b-46c9-847b-514e219f93a1
 # ╟─a14e505e-2e4a-4c73-8133-7560ba58916b
 # ╟─9a8eef1b-27c0-4d57-a389-53708ade9058
+# ╟─52c97de1-3d75-4b51-8397-86ea67af6c77
 # ╟─728f5fdf-77a5-46c7-b3ee-01064ef1b7e2
+# ╟─b9a962a6-4f4f-4676-95b6-0c2cfd536031
+# ╟─a0d935f9-185a-4608-ab9f-954fa0e66f44
+# ╟─941ad4d9-3406-463e-9af9-96687cd1ecea
 # ╟─c8923675-e73e-4621-82b9-966d8b003b97
 # ╟─04e9b912-6712-4290-acc4-f24bb27a1469
 # ╟─c1437dcc-22cb-424f-9b8e-326172f82d86
@@ -2368,6 +2555,8 @@ uuid = "23338594-aafe-5451-b93e-139f81909106"
 # ╠═4f1d5112-dbac-4eb6-8518-0dc4193c3f8e
 # ╠═85a10748-8d19-44a8-a1c5-0d13b093f1bf
 # ╠═a873f760-bfc1-489f-a58e-75e12afa54f2
+# ╠═a57f2149-c876-4421-a958-e9aed1f892a6
+# ╠═293266c6-01e7-4da0-8caf-56b1ce0aae85
 # ╠═d050a7ee-3aa7-4539-a236-5b6446599ded
 # ╠═29474a70-32eb-4281-8626-87819afa7267
 # ╠═89305cae-098f-4644-9109-d00f1e3bc04c
