@@ -419,6 +419,163 @@ img("sutskever2014Sequence")
 # ╔═╡ 6bff7bca-ea1d-44c6-b8c3-040250f90654
 md"## Cross-Attention"
 
+# ╔═╡ 321b2919-62f7-42fd-9ae3-8ab9bc309525
+md"# Energy consumption of LLMs"
+
+# ╔═╡ 7be26ee1-de61-4b66-b221-5c5c728c2901
+md"## Orders of magnitude"
+
+# ╔═╡ d069517e-c9c9-4b1e-b55f-1ff5d1ccabbe
+md"""
+| | Energy |
+|---|---|
+| 10 W LED bulb for 1 hour | 10 Wh = 36 kJ |
+| Heating 1 L of water from 20 °C to 100 °C | ≈ 93 Wh |
+| Belgian reference household, per year | ≈ 3,500 kWh |
+| Data centres worldwide in 2024 (≈ 1.5% of world electricity) | ≈ 415 TWh |
+| Data centres worldwide in 2030 (IEA projection) | ≈ 945 TWh |
+
+Source for data centres : [IEA, *Energy and AI*, 2025](https://www.iea.org/reports/energy-and-ai/executive-summary).
+
+As we will see, a **single** query costs a fraction of a Wh. The question is rather the number of queries and the energy needed to train the models.
+"""
+
+# ╔═╡ 3176c675-ce53-4471-b13b-1d694f5efdd8
+md"## Estimating the inference energy"
+
+# ╔═╡ ba00b790-67ac-49b8-86ee-6df42107f245
+md"""
+A dense transformer with ``N`` parameters needs ``\approx 2N`` FLOPs per generated token (one multiplication and one addition per weight), thanks to the KV cache.
+For a mixture of experts, ``N`` is the number of **active** parameters.
+An NVIDIA H100 performs ``\approx 989 \cdot 10^{12}`` FLOP/s (dense BF16) at 700 W so ``\approx 1.4 \cdot 10^{12}`` FLOP/J at **peak** utilization.
+
+* Parameters ``N`` : $(@bind energy_params Select([1 => "1B", 8 => "8B", 70 => "70B", 405 => "405B"], default = 8))
+* Generated tokens : $(@bind energy_tokens Slider([100, 300, 1000, 3000, 10000], default = 300, show_value = true))
+* GPU utilization : $(@bind energy_util Slider([0.01, 0.03, 0.1, 0.3, 1.0], default = 0.1, show_value = true))
+* Overhead factor (host CPU, idle machines, cooling) : $(@bind energy_overhead Slider(1.0:0.1:2.0, default = 1.7, show_value = true))
+"""
+
+# ╔═╡ 37484e4a-87ad-4022-a8d9-e189fbbc8060
+let
+	flop = 2 * energy_params * 1e9 * energy_tokens
+	joules = flop / (1.4e12 * energy_util) * energy_overhead
+	md"""
+Back-of-the-envelope estimate : $(round(flop, sigdigits = 2)) FLOP → $(round(joules / 3600, sigdigits = 2)) Wh per query → $(round(joules / 10, sigdigits = 2)) seconds of a 10 W LED bulb.
+
+This ignores the processing of the prompt and the attention cost which grows with the context length.
+The overhead factor 1.7 is the ratio between full stack and active TPU energy reported in [Elsworth et al., 2025](https://arxiv.org/abs/2508.15734).
+"""
+end
+
+# ╔═╡ a3380780-ec5e-46c1-a0e0-af64b3e1da1c
+qa(md"Why is the GPU utilization so low when generating tokens ?",
+md"""
+Generating one token requires a matrix-**vector** product with each weight matrix so each weight read from the GPU memory is only used for 2 FLOPs.
+Decoding is therefore limited by the **memory bandwidth**, not by the FLOPs.
+Data centres **batch** the queries of many users together so that each weight read from memory is used for a matrix-**matrix** product.
+A local GPU serving a single user cannot do that.
+""")
+
+# ╔═╡ 32fc8313-f3e8-489f-b0a1-ba740bc744fb
+md"## Inference vs web search"
+
+# ╔═╡ 22f68d24-1132-4e45-b8fb-7a1f362f0962
+md"""
+| Query | Wh / query | Scope | Source |
+|---|---|---|---|
+| Google search (2009) | 0.3 | Google servers, including building the index | [Hölzle, 2009](https://googleblog.blogspot.com/2009/01/powering-google-search.html) |
+| Text generation, models ≤ 11B | ≈ 0.05 | Measured on 8×A100 | [Luccioni et al., 2024](https://arxiv.org/abs/2311.16863) |
+| Llama-3.1-8B, short / long prompt | 0.05 / 0.44 | Modelled, data centre | [Jegham et al., 2025](https://arxiv.org/abs/2505.09598) |
+| Gemini Apps, median text prompt (May 2025) | 0.24 (0.10 accelerators only) | Measured, full stack | [Elsworth et al., 2025](https://arxiv.org/abs/2508.15734) |
+| GPT-4o, 500 output tokens | ≈ 0.3 | Estimate | [You, Epoch AI, 2025](https://epoch.ai/gradient-updates/how-much-energy-does-chatgpt-use) |
+| ChatGPT, average query | 0.34 | No methodology given | [Altman, 2025](https://blog.samaltman.com/the-gentle-singularity) |
+| Llama-3.1-405B, short / long prompt | 2.2 / 25 | Modelled, data centre | [Jegham et al., 2025](https://arxiv.org/abs/2505.09598) |
+| o3 (reasoning), short / long prompt | 1.2 / 12 | Modelled, data centre | [Jegham et al., 2025](https://arxiv.org/abs/2505.09598) |
+| Image generation | ≈ 2.9 | Measured on 8×A100 | [Luccioni et al., 2024](https://arxiv.org/abs/2311.16863) |
+
+* Small models and median prompts : **same order** as a (2009) web search.
+* Large models, long contexts and reasoning : **1 to 2 orders of magnitude** more.
+* Google reports a 33× reduction of the energy per prompt in 12 months [Elsworth et al., 2025](https://arxiv.org/abs/2508.15734). There is no recent public figure for a web search.
+"""
+
+# ╔═╡ be4a698a-848d-47bf-b825-24bc94621767
+md"## Network and local device"
+
+# ╔═╡ d605d0a5-7511-4a32-9e1b-1c2befa43796
+md"""
+**Network** : ``\approx 0.06`` kWh/GB in 2015, halving every 2 years [Aslan et al., 2018](https://doi.org/10.1111/jiec.12630).
+Extrapolating to ``\approx 0.002`` kWh/GB today, a 2.5 MB search result page ([HTTP Archive, 2024](https://almanac.httparchive.org/en/2024/page-weight)) costs ``\approx 0.005`` Wh and a text answer of a few kB much less.
+Moreover, the power of the network is mostly **fixed** : it does not grow with the data volume so the **marginal** cost of a query is close to zero [Mytton et al., 2024](https://ideas.repec.org/a/bla/inecol/v28y2024i4p966-980.html).
+
+**User device** : A 20 W laptop used for 30 seconds consumes ``\approx 0.17`` Wh, the **same order** as the server side of the query!
+User devices account for more than half of the emissions of the ICT sector [Malmodin et al., 2024](https://ideas.repec.org/a/eee/telpol/v48y2024i3s0308596123002124.html).
+"""
+
+# ╔═╡ cb6b040d-c213-4ecb-a047-fb66407752a3
+qa(md"Is a small model running on a local GPU cheaper than a web search ?",
+md"""
+A local GPU drawing 300 W and generating 100 tokens/s answers with 500 tokens in 5 s : ``300 \times 5 = 1500`` J ``\approx 0.4`` Wh.
+A laptop drawing 40 W at 30 tokens/s : ``40 \times 17 \approx 700`` J ``\approx 0.2`` Wh.
+
+This is the same order of magnitude as a web search (0.3 Wh in 2009) plus the device used to browse it.
+There is no network and no data centre but a single user cannot batch the queries so the GPU is used less efficiently than in a data centre.
+In a sense, the expensive training **compressed** the web into the weights so that the answer can be computed offline.
+""")
+
+# ╔═╡ 1d02cfbb-9d6b-41fd-9621-0103a9110813
+md"## Training : compressing the web"
+
+# ╔═╡ f544e9fc-fb9a-4c32-b215-fa3a0eb37b89
+md"""
+| Model | Energy | Scope | Source |
+|---|---|---|---|
+| GPT-3 (175B) | 1.3 GWh | Estimate, V100, PUE 1.1 | [Patterson et al., 2021](https://arxiv.org/abs/2104.10350) |
+| BLOOM (176B) | 0.43 GWh | Measured, A100, GPUs only | [Luccioni et al., 2022](https://arxiv.org/abs/2211.02001) |
+| OLMo 2 (7B / 13B) | 0.16 / 0.23 GWh | Measured, GPUs only | [Morrison et al., 2025](https://arxiv.org/abs/2503.05804) |
+| Llama 3.1 (405B) | ≤ 21.6 GWh | 30.84M H100 hours × 700 W | [Meta model card](https://huggingface.co/meta-llama/Llama-3.1-405B) |
+| GPT-4 | ``\approx 2 \cdot 10^{25}`` FLOP | Estimate | [Epoch AI](https://epoch.ai/data-insights/models-over-1e25-flop) |
+
+* 21.6 GWh ≈ 6,000 Belgian households for a year.
+* Experiments and development add a significant amount on top of the final training run : ≈ 50% for OLMo 2 [Morrison et al., 2025](https://arxiv.org/abs/2503.05804).
+* The CO₂ depends a lot on the electricity grid : BLOOM was trained on the French grid with 57 gCO₂/kWh [Luccioni et al., 2022](https://arxiv.org/abs/2211.02001).
+"""
+
+# ╔═╡ aa10118d-0991-4284-97f8-3a0728636a66
+md"## Training vs PageRank"
+
+# ╔═╡ b245ada9-1677-45bc-a883-bc213a2105b7
+md"""
+Google search also needs an expensive precomputation : crawling the web, building the index and computing the PageRank.
+
+* 1998 : "a PageRank for 26 million web pages can be computed in a few hours on a medium size workstation" [Brin and Page, 1998](http://infolab.stanford.edu/~backrub/google.html).
+* Today : the index covers "hundreds of billions of webpages" and is "well over 100,000,000 gigabytes" ([Google](https://www.google.com/search/howsearchworks/how-search-works/organizing-information/)).
+
+Back-of-the-envelope : ``10^{11}`` pages × 50 links × 2 FLOPs × 50 power iterations ``\approx 5 \cdot 10^{14}`` FLOP for the PageRank, that is ``10^{10}`` times less than GPT-4.
+However, PageRank is only a small part of the cost : crawling, parsing and storing the index dominate and there is **no public figure** for its energy.
+Note that LLMs also need the web to be crawled to obtain their training data.
+"""
+
+# ╔═╡ a6a6a352-7479-4f3f-9abb-900eb901466c
+qa(md"After how many queries does the inference energy exceed the training energy ?",
+md"""
+With 21.6 GWh for training and 0.3 Wh per query : ``21.6 \cdot 10^9 / 0.3 \approx 7 \cdot 10^{10}`` queries.
+With ``10^9`` queries per day, this takes about 72 days.
+For a widely used model, the energy of the **inference** dominates over the lifetime of the model.
+For a rarely used model, the **training** dominates.
+""")
+
+# ╔═╡ b4bfde70-510d-4ed5-acb2-7f0cdc3057ae
+md"## Caveats"
+
+# ╔═╡ 2b8fa47a-9761-4d16-9daa-bbb6a0c36f30
+md"""
+* **Scope** : the energy of the GPUs only, of the full servers or of the whole data centre differ by ``\approx 2.4\times`` [Elsworth et al., 2025](https://arxiv.org/abs/2508.15734).
+* **Average vs tail** : company figures are medians or averages. Long contexts and reasoning models cost 10 to 100× more.
+* **Dates** : the 0.3 Wh of a web search dates from 2009. Both web search and LLMs became much more efficient since then.
+* **Fixed vs marginal** : idle servers and networks consume energy even without queries. BLOOM consumed ``\approx 0.28`` kWh every 10 minutes while idle [Luccioni et al., 2022](https://arxiv.org/abs/2211.02001).
+* **Rebound effect** : the energy per query decreases quickly but the number of queries grows even faster. The demand of data centres is expected to more than double by 2030 [IEA, 2025](https://www.iea.org/reports/energy-and-ai/executive-summary).
+"""
+
 # ╔═╡ f572e113-b36b-4a6b-96c7-c26f100e1ad4
 md"## Utils"
 
@@ -2575,6 +2732,25 @@ uuid = "23338594-aafe-5451-b93e-139f81909106"
 # ╟─f7ca738d-5215-4e91-a2f3-a5ff10911313
 # ╟─6bff7bca-ea1d-44c6-b8c3-040250f90654
 # ╟─3d8add97-59e1-444a-838b-85c2a2ac60b3
+# ╟─321b2919-62f7-42fd-9ae3-8ab9bc309525
+# ╟─7be26ee1-de61-4b66-b221-5c5c728c2901
+# ╟─d069517e-c9c9-4b1e-b55f-1ff5d1ccabbe
+# ╟─3176c675-ce53-4471-b13b-1d694f5efdd8
+# ╟─ba00b790-67ac-49b8-86ee-6df42107f245
+# ╟─37484e4a-87ad-4022-a8d9-e189fbbc8060
+# ╟─a3380780-ec5e-46c1-a0e0-af64b3e1da1c
+# ╟─32fc8313-f3e8-489f-b0a1-ba740bc744fb
+# ╟─22f68d24-1132-4e45-b8fb-7a1f362f0962
+# ╟─be4a698a-848d-47bf-b825-24bc94621767
+# ╟─d605d0a5-7511-4a32-9e1b-1c2befa43796
+# ╟─cb6b040d-c213-4ecb-a047-fb66407752a3
+# ╟─1d02cfbb-9d6b-41fd-9621-0103a9110813
+# ╟─f544e9fc-fb9a-4c32-b215-fa3a0eb37b89
+# ╟─aa10118d-0991-4284-97f8-3a0728636a66
+# ╟─b245ada9-1677-45bc-a883-bc213a2105b7
+# ╟─a6a6a352-7479-4f3f-9abb-900eb901466c
+# ╟─b4bfde70-510d-4ed5-acb2-7f0cdc3057ae
+# ╟─2b8fa47a-9761-4d16-9daa-bbb6a0c36f30
 # ╟─f572e113-b36b-4a6b-96c7-c26f100e1ad4
 # ╠═32621224-a782-4bf6-9570-562cf2bb7360
 # ╠═f6f7376e-9984-4289-b8ff-9d47e5358791
