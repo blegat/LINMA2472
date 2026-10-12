@@ -843,15 +843,23 @@ Draw the dependencies between the columns of ``\\hat{Y}_0, \\ldots, \\hat{Y}_N``
 If `needed` is `true`, the columns that are not needed to predict ``x_0`` are greyed out.
 If `kv_cache` is `true`, show the computation of the next token with the KV cache.
 """
-function transformer_graph(; kv_cache = false, needed = false, n_ctx = 4, N = 3, width = 640, height = 340)
+function transformer_graph(; kv_cache = false, needed = false, n_ctx = 4, N = 3, width = 640, height = 420)
     mathjax_figure(; width, height) do label
         colors = (computed = "#546b8c", kv = "#9673a6", cached = "#ffb570", new = "#67ab9f", unneeded = "#d0d0d0", extra = "#e06666")
         js = kv_cache ? (-n_ctx:0) : (-n_ctx:-1)
         Δx = 90
-        Δy = 60
+        Δy = 80
         X(j) = (j - (first(js) + last(js)) / 2) * Δx + 50
         Y(i) = (N / 2 - i) * Δy
         radius = 9
+        # Blocks of a layer from bottom to top with the colors of the figure
+        # of the paper: attention, add & norm, feed-forward, add & norm
+        blocks = [(14, "#FFE2BB"), (6, "#F2F4C1"), (14, "#C2E8F7"), (6, "#F2F4C1")]
+        block_width = 24
+        gap = 3
+        stack_height = sum(first, blocks) + gap * (length(blocks) - 1)
+        stack_bottom(i) = (Y(i - 1) + Y(i) + stack_height) / 2
+        attention(i, j) = Luxor.Point(X(j) - block_width / 2, stack_bottom(i) - first(blocks[1]) / 2)
         in_window(j) = !kv_cache || j > -n_ctx
         function status(i, j)
             if kv_cache
@@ -878,13 +886,30 @@ function transformer_graph(; kv_cache = false, needed = false, n_ctx = 4, N = 3,
                 color = k == j ? colors.computed : colors.kv
             end
             p = Luxor.Point(X(k), Y(i - 1))
-            q = Luxor.Point(X(j), Y(i))
+            # The past positions only enter through the attention
+            q = k == j ? Luxor.Point(X(j), Y(i) + radius) : attention(i, j)
             d = (q - p) / Luxor.distance(p, q)
             Luxor.sethue(color)
             Luxor.setdash(color == colors.extra ? "dash" : "solid")
-            Luxor.arrow(p + radius * d, q - radius * d; linewidth = k == j ? 1.5 : 1, arrowheadlength = 6)
+            Luxor.arrow(p + radius * d, q; linewidth = k == j ? 1.5 : 1, arrowheadlength = 6)
         end
         Luxor.setdash("solid")
+        for i in 1:N, j in js
+            s = status(i, j)
+            Luxor.setopacity(s in (:computed, :new) ? 1 : s == :cached ? 0.5 : 0.25)
+            y = stack_bottom(i)
+            for (h, color) in blocks
+                center = Luxor.Point(X(j), y - h / 2)
+                Luxor.sethue(color)
+                Luxor.box(center, block_width, h, 2, :fill)
+                Luxor.sethue("black")
+                Luxor.setline(0.8)
+                Luxor.box(center, block_width, h, 2, :stroke)
+                y -= h + gap
+            end
+        end
+        Luxor.setopacity(1)
+        Luxor.setline(1.5)
         for i in 0:N, j in js
             s = status(i, j)
             Luxor.sethue(colors[s])
