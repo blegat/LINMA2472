@@ -191,6 +191,39 @@ md"## Forward tangents"
 # ╔═╡ 5aff8e66-787d-4dc5-a9b1-0fdec25ce0f0
 md"## Reverse tangents"
 
+# ╔═╡ 66bd8159-581d-471c-841d-8e42e0de0496
+md"""
+## Reverse mode on a DAG
+
+* Forward mode: we know how to propagate ``t`` through any graph.
+* Reverse mode on a chain: we know that ``r_{k-1} = \partial f_k^* r_k``.
+* Reverse mode on a DAG: ❓
+
+Consider the simplest DAG that is not a chain: ``x`` is used by both ``f_1`` and ``f_2``.
+The reverse pass brings two contributions ``\partial f_1^* r_1`` and ``\partial f_2^* r_2`` back to the same ``x``.
+"""
+
+# ╔═╡ 37bfd8ed-8983-4a89-9ba5-a90a35151729
+md"""
+## Let's turn it into a chain!
+
+Key idea: introduce ``\text{dup}(x) = (x, x)`` so that ``f = g_2 \circ g_1`` is a chain with ``g_1 = \text{dup}`` and ``g_2(x_1, x_2) = (f_1(x_1), f_2(x_2))``.
+"""
+
+# ╔═╡ 7aba4481-bed6-44b7-85e3-3b2deb2b2fd7
+md"""
+``f_1`` and ``f_2`` now contribute to **different** entries of the output of ``\text{dup}`` so there is nothing to combine:
+```math
+\partial g_2^* \begin{bmatrix} r_1 \\ r_2 \end{bmatrix}
+=
+\begin{bmatrix} \partial f_1^* & 0 \\ 0 & \partial f_2^* \end{bmatrix}
+\begin{bmatrix} r_1 \\ r_2 \end{bmatrix}
+=
+\begin{bmatrix} \partial f_1^* r_1 \\ \partial f_2^* r_2 \end{bmatrix}
+```
+What remains is the reverse pass of ``\text{dup}``... but ``\text{dup}`` is a function like any other: we can compute its Jacobian!
+"""
+
 # ╔═╡ 90850509-463d-44c7-88ae-4406aebd4be1
 md"## Computation graph"
 
@@ -855,73 +888,27 @@ import ComputationGraphExplorer as CGE
 # ╔═╡ df1f29ce-026d-4935-83aa-0d597cb166dd
 ScalarNode = CGE.Node{Int,DummyMetadata};
 
-# ╔═╡ 157c413e-b166-48ff-b28e-58b88f018a94
+# ╔═╡ 79df35ff-3718-4a9c-a384-4e8c12175ab8
 """
-    chain_figure(annotate; width = 640, height = 360)
+    mathjax_figure(draw; width, height)
 
-Draw the forward, tangent and reverse chains of ``f_K \\circ \\cdots \\circ f_1``.
 Luxor only draws the shapes, the labels are overlaid in HTML so that
 they are typeset by the MathJax of Pluto.
-Additional labels are added with `annotate(label, geometry)` where
-`label(text, x, y; color, fontsize, class)` adds a label and `geometry`
-gives the position of the columns `xs` with their index `ks`.
+`draw(label)` draws the shapes with the origin at the center and adds labels
+with `label(text, x, y; color, fontsize, class)`.
+Labels of class `equal` are centered between the labels of class
+`inner-product` once MathJax has set their width.
 """
-function chain_figure(annotate; width = 640, height = 360)
+function mathjax_figure(draw; width, height)
     Luxor = CGE.Luxor
-    box_width = 45
-    dy_up = 3box_width/8
-    Δx = 90
-    Δy = 90
-    colors = (s = "#7ea6e0", t = "#67ab9f", r = "#ffb570")
     labels = []
-    function _arrow(start, finish; rev, color)
-        if rev
-            start, finish = finish, start
-        end
-        Luxor.sethue(color)
-        Luxor.arrow(start, finish; linewidth = 1.5, arrowheadlength = 10)
-    end
-    function _text(text, x, y; color = "black", fontsize = 14, class = "")
+    function label(text, x, y; color = "black", fontsize = 14, class = "")
         push!(labels, @htl("""<span class="tex $class" style="position: absolute; left: $(x + width / 2)px; top: $(y + height / 2)px; transform: translate(-50%, -50%); white-space: nowrap; color: $color; font-size: $(fontsize)px;">\$$text\$</span>"""))
-    end
-    function draw_node(text, x, y; fill_color = "white", stroke_color = "#f79009", linewidth = 2, width = box_width, height = box_width)
-        center = Luxor.Point(x, y)
-        Luxor.sethue(fill_color)
-        Luxor.box(center, width, height, 12, :fill)
-        Luxor.sethue(stroke_color)
-        Luxor.setline(linewidth)
-        Luxor.box(center, width, height, 12, :stroke)
-        _text(text, x, y)
-    end
-    function draw_line(f, v, y; rev, color = "black", stroke_color)
-        dx_dots = box_width/4
-        _text("$(v)_0", -3Δx, y; color)
-        _arrow(Luxor.Point(-3Δx + box_width/2, y), Luxor.Point(-2Δx - box_width/2, y); rev, color)
-        draw_node("$(f)_1", -2Δx, y; stroke_color)
-        _arrow(Luxor.Point(-2Δx + box_width/2, y), Luxor.Point(-Δx - dx_dots, y); rev, color)
-        _text("$(v)_1", -2Δx + box_width/2 + dy_up, y - dy_up; color)
-        _text("\\cdots", -Δx, y)
-        _arrow(Luxor.Point(-Δx + dx_dots, y), Luxor.Point(-box_width/2, y); rev, color)
-        _text("$(v)_{k-1}", -box_width/2 - dy_up, y - dy_up; color)
-        draw_node("$(f)_k", 0, y; stroke_color)
-        _text("$(v)_k", box_width/2 + dy_up, y - dy_up; color)
-        _arrow(Luxor.Point(box_width/2, y), Luxor.Point(Δx - dx_dots, y); rev, color)
-        _text("\\cdots", Δx, y)
-        _arrow(Luxor.Point(Δx + dx_dots, y), Luxor.Point(2Δx - box_width/2, y); rev, color)
-        _text("$(v)_{K-1}", 2Δx - box_width/2 - dy_up, y - dy_up; color)
-        draw_node("$(f)_K", 2Δx, y; stroke_color)
-        _text("$(v)_K", 3Δx, y; color)
-        _arrow(Luxor.Point(2Δx + box_width/2, y), Luxor.Point(3Δx - box_width/2, y); rev, color)
     end
     Luxor.Drawing(width, height, :svg)
     Luxor.origin()
     Luxor.background("white")
-    draw_line("f", "s", -Δy, rev = false, color = colors.s, stroke_color = "#546b8c")
-    draw_line("\\partial f", "t", 0, rev = false; color = colors.t, stroke_color = "#40635c")
-    draw_line("\\partial f^*", "r", Δy, rev = true; color = colors.r, stroke_color = "#b58b63")
-    ks = ["0", "1", "k-1", "k", "K-1", "K"]
-    xs = [-3Δx, -2Δx + box_width/2 + dy_up, -box_width/2 - dy_up, box_width/2 + dy_up, 2Δx - box_width/2 - dy_up, 3Δx]
-    annotate(_text, (; ks, xs, Δy, dy_up, colors))
+    draw(label)
     Luxor.finish()
     svg = Luxor.svgstring()
     @htl("""<div style="position: relative; width: $(width)px; height: $(height)px;">
@@ -948,6 +935,69 @@ function chain_figure(annotate; width = 640, height = 360)
     </div>""")
 end
 
+# ╔═╡ 157c413e-b166-48ff-b28e-58b88f018a94
+"""
+    chain_figure(annotate; width = 640, height = 360)
+
+Draw the forward, tangent and reverse chains of ``f_K \\circ \\cdots \\circ f_1``
+with [`mathjax_figure`](@ref).
+Additional labels are added with `annotate(label, geometry)` where
+`label(text, x, y; color, fontsize, class)` adds a label and `geometry`
+gives the position of the columns `xs` with their index `ks`.
+"""
+function chain_figure(annotate; width = 640, height = 360)
+    mathjax_figure(; width, height) do _text
+        Luxor = CGE.Luxor
+        box_width = 45
+        dy_up = 3box_width/8
+        Δx = 90
+        Δy = 90
+        colors = (s = "#7ea6e0", t = "#67ab9f", r = "#ffb570")
+        function _arrow(start, finish; rev, color)
+            if rev
+                start, finish = finish, start
+            end
+            Luxor.sethue(color)
+            Luxor.arrow(start, finish; linewidth = 1.5, arrowheadlength = 10)
+        end
+        function draw_node(text, x, y; fill_color = "white", stroke_color = "#f79009", linewidth = 2, width = box_width, height = box_width)
+            center = Luxor.Point(x, y)
+            Luxor.sethue(fill_color)
+            Luxor.box(center, width, height, 12, :fill)
+            Luxor.sethue(stroke_color)
+            Luxor.setline(linewidth)
+            Luxor.box(center, width, height, 12, :stroke)
+            _text(text, x, y)
+        end
+        function draw_line(f, v, y; rev, color = "black", stroke_color)
+            dx_dots = box_width/4
+            _text("$(v)_0", -3Δx, y; color)
+            _arrow(Luxor.Point(-3Δx + box_width/2, y), Luxor.Point(-2Δx - box_width/2, y); rev, color)
+            draw_node("$(f)_1", -2Δx, y; stroke_color)
+            _arrow(Luxor.Point(-2Δx + box_width/2, y), Luxor.Point(-Δx - dx_dots, y); rev, color)
+            _text("$(v)_1", -2Δx + box_width/2 + dy_up, y - dy_up; color)
+            _text("\\cdots", -Δx, y)
+            _arrow(Luxor.Point(-Δx + dx_dots, y), Luxor.Point(-box_width/2, y); rev, color)
+            _text("$(v)_{k-1}", -box_width/2 - dy_up, y - dy_up; color)
+            draw_node("$(f)_k", 0, y; stroke_color)
+            _text("$(v)_k", box_width/2 + dy_up, y - dy_up; color)
+            _arrow(Luxor.Point(box_width/2, y), Luxor.Point(Δx - dx_dots, y); rev, color)
+            _text("\\cdots", Δx, y)
+            _arrow(Luxor.Point(Δx + dx_dots, y), Luxor.Point(2Δx - box_width/2, y); rev, color)
+            _text("$(v)_{K-1}", 2Δx - box_width/2 - dy_up, y - dy_up; color)
+            draw_node("$(f)_K", 2Δx, y; stroke_color)
+            _text("$(v)_K", 3Δx, y; color)
+            _arrow(Luxor.Point(2Δx + box_width/2, y), Luxor.Point(3Δx - box_width/2, y); rev, color)
+        end
+        draw_line("f", "s", -Δy, rev = false, color = colors.s, stroke_color = "#546b8c")
+        draw_line("\\partial f", "t", 0, rev = false; color = colors.t, stroke_color = "#40635c")
+        draw_line("\\partial f^*", "r", Δy, rev = true; color = colors.r, stroke_color = "#b58b63")
+        ks = ["0", "1", "k-1", "k", "K-1", "K"]
+        xs = [-3Δx, -2Δx + box_width/2 + dy_up, -box_width/2 - dy_up, box_width/2 + dy_up, 2Δx - box_width/2 - dy_up, 3Δx]
+        annotate(_text, (; ks, xs, Δy, dy_up, colors))
+    end
+end
+
 # ╔═╡ a3ba6cd3-b2c8-42c0-9483-cb0c0c88ed8e
 chain_figure() do label, geometry
     (; ks, xs, Δy, colors) = geometry
@@ -972,6 +1022,81 @@ chain_figure() do label, geometry
         end
     end
 end
+
+# ╔═╡ fa886ef3-192f-4daa-b59b-aca0c6365111
+"""
+    fanout_figure(; dup, width = 640, height = 260)
+
+Draw the forward and reverse passes for `x` used by both `f_1` and `f_2`
+with [`mathjax_figure`](@ref).
+If `dup` is `true`, `x` is first duplicated with `dup` so that we get a chain.
+"""
+function fanout_figure(; dup, width = 640, height = 260)
+    mathjax_figure(; width, height) do label
+        Luxor = CGE.Luxor
+        box_width = 45
+        colors = (s = "#7ea6e0", r = "#ffb570", g = "gray")
+        function node(text, center; width = box_width)
+            Luxor.sethue("white")
+            Luxor.box(center, width, box_width, 12, :fill)
+            Luxor.sethue("#546b8c")
+            Luxor.setline(2)
+            Luxor.box(center, width, box_width, 12, :stroke)
+            label(text, center.x, center.y)
+        end
+        # Forward arrow from `p` to `q` and the reverse arrow next to it on
+        # the side given by the sign of `side`
+        function arrows(p, q; side = 1)
+            d = (q - p) / Luxor.distance(p, q)
+            n = side * Luxor.Point(d.y, -d.x)
+            Luxor.sethue(colors.s)
+            Luxor.arrow(p, q; linewidth = 1.5, arrowheadlength = 10)
+            Luxor.sethue(colors.r)
+            Luxor.arrow(q + 8n, p + 8n; linewidth = 1.5, arrowheadlength = 10)
+            return (p + q) / 2, n
+        end
+        x_f, x_s, Δy = 40, 230, 60
+        x_x = dup ? -280 : -180
+        label("x", x_x, 0; color = colors.s)
+        label("r_0 = {\\color{red}?}", x_x, 28; color = colors.r)
+        start = Luxor.Point(x_x + 14, 0)
+        if dup
+            x_dup = -180
+            Luxor.sethue(colors.g)
+            Luxor.setline(1)
+            Luxor.setdash("dash")
+            Luxor.box(Luxor.Point(x_dup, 0), 80, 70, 8, :stroke)
+            Luxor.box(Luxor.Point(x_f, 0), 80, 200, 8, :stroke)
+            Luxor.setdash("solid")
+            label("g_1", x_dup, -47; color = colors.g)
+            label("g_2", x_f, -112; color = colors.g)
+            arrows(start, Luxor.Point(x_dup - 25, 0); side = -1)
+            node("\\text{dup}", Luxor.Point(x_dup, 0); width = 50)
+            start = Luxor.Point(x_dup + 25, 0)
+        end
+        for (i, side) in [(1, 1), (2, -1)]
+            y = (2i - 3) * Δy
+            mid, n = arrows(start, Luxor.Point(x_f - box_width / 2, y); side)
+            if dup
+                p = mid - 12n
+                label("x", p.x, p.y; color = colors.s)
+            end
+            p = mid + 24n
+            label("\\partial f_$(i)^* r_$i", p.x, p.y; color = colors.r, fontsize = 12)
+            node("f_$i", Luxor.Point(x_f, y))
+            _, n = arrows(Luxor.Point(x_f + box_width / 2, y), Luxor.Point(x_s - 20, y); side)
+            label("s_$i", x_s, y; color = colors.s)
+            p = Luxor.Point(x_s, y) + 22n
+            label("r_$i", p.x, p.y; color = colors.r)
+        end
+    end
+end
+
+# ╔═╡ 6c441843-d6da-46b1-9463-d133ba74e66a
+fanout_figure(dup = false)
+
+# ╔═╡ a9a4841d-18cc-4386-aa38-017771650afb
+fanout_figure(dup = true)
 
 # ╔═╡ 7f459370-eb6f-4d82-bf99-1528e136ca5c
 import LinearAlgebra, DelimitedFiles
@@ -1352,6 +1477,24 @@ md"""
 qa(md"Why is ``\partial\text{dup}^*`` a sum ?", md"The Jacobian is ``\partial\text{dup} = \begin{bmatrix}
 1\\1\\1\end{bmatrix}``. In reverse mode, we multiply by the adjoint (why ? See next lecture!) of the Jacobian (here the transpose) ``\partial\text{dup}^* = \begin{bmatrix}
 1 & 1 & 1\end{bmatrix}``. Left-multiplying a vector with a row vector of ones results in its sum.")
+
+# ╔═╡ 383461cb-9f51-42b2-ab76-d9580b39409e
+qa(md"How should we combine ``\partial f_1^* r_1`` and ``\partial f_2^* r_2`` into ``r_0`` ? Sum them ? Multiply them ?", md"We don't know yet! 😱 The only way to find out is to make sure that reverse mode computes the same derivative as forward mode. But we only know how to do this for a **chain**... and this is not a chain.")
+
+# ╔═╡ 10e5c137-64a9-4282-b3fe-26e625625ae4
+qa(md"What is the reverse pass of ``\text{dup}`` ?", md"""
+In forward mode, ``\partial \text{dup} = \begin{bmatrix} 1 \\ 1 \end{bmatrix}`` maps ``t`` to ``(t, t)``.
+For the reverse pass to compute the same derivative, it must multiply by its adjoint ``\partial \text{dup}^* = \begin{bmatrix} 1 & 1 \end{bmatrix}``:
+```math
+r_0
+=
+\begin{bmatrix} 1 & 1 \end{bmatrix}
+\begin{bmatrix} \partial f_1^* r_1 \\ \partial f_2^* r_2 \end{bmatrix}
+=
+\partial f_1^* r_1 + \partial f_2^* r_2
+```
+It's a **sum**! 🎉 So we initialize ``r_0 = 0`` and each function using ``x`` accumulates its contribution with ``r_0 \mathrel{\raise{0.19ex}{\scriptstyle+}} = \partial f_i^* r_i``.
+""")
 
 # ╔═╡ 28df733e-7db9-4e78-9121-52d8e6ca7591
 qa(md"Can this directed graph have cycles ?", md"No, it is a Directed Acyclic Graph. (DAG)")
@@ -3290,6 +3433,13 @@ uuid = "23338594-aafe-5451-b93e-139f81909106"
 # ╟─fa5dba01-a3f7-452c-877e-352d578ecf51
 # ╟─69c08fab-c317-462c-817c-3f841a8a0941
 # ╟─8deca676-8a0b-41eb-b7a0-4d65e1158b0b
+# ╟─66bd8159-581d-471c-841d-8e42e0de0496
+# ╟─6c441843-d6da-46b1-9463-d133ba74e66a
+# ╟─383461cb-9f51-42b2-ab76-d9580b39409e
+# ╟─37bfd8ed-8983-4a89-9ba5-a90a35151729
+# ╟─a9a4841d-18cc-4386-aa38-017771650afb
+# ╟─7aba4481-bed6-44b7-85e3-3b2deb2b2fd7
+# ╟─10e5c137-64a9-4282-b3fe-26e625625ae4
 # ╟─885bc5c9-aefc-4d8a-a4da-6062c64eaa41
 # ╟─d2b8fa5c-c604-4093-a2dd-5c95f2eaa676
 # ╟─5aff8e66-787d-4dc5-a9b1-0fdec25ce0f0
@@ -3422,7 +3572,9 @@ uuid = "23338594-aafe-5451-b93e-139f81909106"
 # ╠═b7d4a91e-3c52-4f86-9a0d-5e8c1f2b6d47
 # ╠═a06be2d9-73c1-4f85-b2e7-18d3c5a90f47
 # ╠═d26cba1c-27d8-4ee7-99e5-6c0e0fc6b6e5
+# ╠═79df35ff-3718-4a9c-a384-4e8c12175ab8
 # ╠═157c413e-b166-48ff-b28e-58b88f018a94
+# ╠═fa886ef3-192f-4daa-b59b-aca0c6365111
 # ╠═7f459370-eb6f-4d82-bf99-1528e136ca5c
 # ╟─e8b1c40d-27a6-4f39-b95e-6d3a0f81c72b
 # ╟─b3c8d70e-9a41-4d26-85fb-6e02f19ca4d3
