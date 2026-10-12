@@ -295,6 +295,9 @@ r_0 & = r_1 \cdot \partial f_1(s_0) = \begin{bmatrix} 1 & 1 \end{bmatrix} \begin
 ```
 """
 
+# ╔═╡ 1a0026be-7975-478c-a447-f66ea95f551d
+md"## Interpretation of tangents"
+
 # ╔═╡ f4d1ee7c-4a01-4b2d-aa9b-ec41ceb0ad0f
 md"## Memory usage of forward mode"
 
@@ -852,13 +855,24 @@ import ComputationGraphExplorer as CGE
 # ╔═╡ df1f29ce-026d-4935-83aa-0d597cb166dd
 ScalarNode = CGE.Node{Int,DummyMetadata};
 
-# ╔═╡ 310d6a10-b887-4dd0-ba93-f901726ddbbc
-let
-    width, height = 640, 360
+# ╔═╡ 157c413e-b166-48ff-b28e-58b88f018a94
+"""
+    chain_figure(annotate; width = 640, height = 360)
+
+Draw the forward, tangent and reverse chains of ``f_K \\circ \\cdots \\circ f_1``.
+Luxor only draws the shapes, the labels are overlaid in HTML so that
+they are typeset by the MathJax of Pluto.
+Additional labels are added with `annotate(label, geometry)` where
+`label(text, x, y; color, fontsize, class)` adds a label and `geometry`
+gives the position of the columns `xs` with their index `ks`.
+"""
+function chain_figure(annotate; width = 640, height = 360)
+    Luxor = CGE.Luxor
     box_width = 45
     dy_up = 3box_width/8
-    # Luxor only draws the shapes, the labels are overlaid in HTML so that
-    # they are typeset by the MathJax of Pluto
+    Δx = 90
+    Δy = 90
+    colors = (s = "#7ea6e0", t = "#67ab9f", r = "#ffb570")
     labels = []
     function _arrow(start, finish; rev, color)
         if rev
@@ -899,27 +913,15 @@ let
         _text("$(v)_K", 3Δx, y; color)
         _arrow(Luxor.Point(2Δx + box_width/2, y), Luxor.Point(3Δx - box_width/2, y); rev, color)
     end
-    Luxor = CGE.Luxor
-    Δx = 90
-    Δy = 90
     Luxor.Drawing(width, height, :svg)
     Luxor.origin()
     Luxor.background("white")
-    draw_line("f", "s", -Δy, rev = false, color = "#7ea6e0", stroke_color = "#546b8c")
-    draw_line("\\partial f", "t", 0, rev = false; color = "#67ab9f", stroke_color = "#40635c")
-    draw_line("\\partial f^*", "r", Δy, rev = true; color = "#ffb570", stroke_color = "#b58b63")
+    draw_line("f", "s", -Δy, rev = false, color = colors.s, stroke_color = "#546b8c")
+    draw_line("\\partial f", "t", 0, rev = false; color = colors.t, stroke_color = "#40635c")
+    draw_line("\\partial f^*", "r", Δy, rev = true; color = colors.r, stroke_color = "#b58b63")
     ks = ["0", "1", "k-1", "k", "K-1", "K"]
     xs = [-3Δx, -2Δx + box_width/2 + dy_up, -box_width/2 - dy_up, box_width/2 + dy_up, 2Δx - box_width/2 - dy_up, 3Δx]
-    for i in eachindex(ks)
-        k = ks[i]
-        x = xs[i]
-        _text("\\mathcal{S}_{$k}", x, -3Δy/2)
-        fontsize = 12
-        _text("\\langle t_{$k}, r_{$k} \\rangle_{$k}", x, 3Δy/2; fontsize, class = "inner-product")
-        if i != 1
-            _text("=", (xs[i-1] + xs[i]) / 2, 3Δy/2; fontsize, class = "equal")
-        end
-    end
+    annotate(_text, (; ks, xs, Δy, dy_up, colors))
     Luxor.finish()
     svg = Luxor.svgstring()
     @htl("""<div style="position: relative; width: $(width)px; height: $(height)px;">
@@ -944,6 +946,31 @@ let
     invalidation.then(() => observer.disconnect())
     </script>
     </div>""")
+end
+
+# ╔═╡ a3ba6cd3-b2c8-42c0-9483-cb0c0c88ed8e
+chain_figure() do label, geometry
+    (; ks, xs, Δy, colors) = geometry
+    dy_down = 30
+    for (k, x) in zip(ks, xs)
+        label("\\dfrac{\\partial s_{$k}}{\\partial s_0}", x, dy_down; color = colors.t, fontsize = 12)
+        label("\\dfrac{\\partial s_K}{\\partial s_{$k}}", x, Δy + dy_down; color = colors.r, fontsize = 12)
+    end
+end
+
+# ╔═╡ 310d6a10-b887-4dd0-ba93-f901726ddbbc
+chain_figure() do label, geometry
+    (; ks, xs, Δy) = geometry
+    for i in eachindex(ks)
+        k = ks[i]
+        x = xs[i]
+        label("\\mathcal{S}_{$k}", x, -3Δy/2)
+        fontsize = 12
+        label("\\langle t_{$k}, r_{$k} \\rangle_{$k}", x, 3Δy/2; fontsize, class = "inner-product")
+        if i != 1
+            label("=", (xs[i-1] + xs[i]) / 2, 3Δy/2; fontsize, class = "equal")
+        end
+    end
 end
 
 # ╔═╡ 7f459370-eb6f-4d82-bf99-1528e136ca5c
@@ -3285,6 +3312,8 @@ uuid = "23338594-aafe-5451-b93e-139f81909106"
 # ╟─ac52550e-3287-427f-b957-ac61bc850f4d
 # ╟─e88ada81-d37f-4811-aa17-17eb7dd9d8a7
 # ╟─32a0bec0-4f1d-4dba-a5db-422741f88808
+# ╟─1a0026be-7975-478c-a447-f66ea95f551d
+# ╟─a3ba6cd3-b2c8-42c0-9483-cb0c0c88ed8e
 # ╟─f4d1ee7c-4a01-4b2d-aa9b-ec41ceb0ad0f
 # ╟─e8c60922-5bbf-45b5-8311-18c8f8525623
 # ╟─73ba544c-616a-4db1-b91d-0b20a7b8924b
@@ -3393,6 +3422,7 @@ uuid = "23338594-aafe-5451-b93e-139f81909106"
 # ╠═b7d4a91e-3c52-4f86-9a0d-5e8c1f2b6d47
 # ╠═a06be2d9-73c1-4f85-b2e7-18d3c5a90f47
 # ╠═d26cba1c-27d8-4ee7-99e5-6c0e0fc6b6e5
+# ╠═157c413e-b166-48ff-b28e-58b88f018a94
 # ╠═7f459370-eb6f-4d82-bf99-1528e136ca5c
 # ╟─e8b1c40d-27a6-4f39-b95e-6d3a0f81c72b
 # ╟─b3c8d70e-9a41-4d26-85fb-6e02f19ca4d3
