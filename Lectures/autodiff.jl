@@ -222,6 +222,79 @@ md"""# Comparison
 * Reverse mode of ``f(x)`` computes Vector-Jacobian Product (VJP) ``v^\top J_f(x)`` or in other words ``J_v(x)^\top v``
 """
 
+# ╔═╡ e88ada81-d37f-4811-aa17-17eb7dd9d8a7
+md"""
+## From forward to reverse mode
+
+Consider ``f(x_1, x_2) = x_1^2 + x_2^2`` at ``s_0 = (1, 2)``. We decompose it as ``f = f_2 \circ f_1`` and compute the **local** Jacobians:
+```math
+\begin{align}
+f_1(x_1, x_2) & = \begin{bmatrix} x_1^2 \\ x_2^2 \end{bmatrix} &
+s_1 & = f_1(s_0) = \begin{bmatrix} 1 \\ 4 \end{bmatrix} &
+\partial f_1(s_0) & = \begin{bmatrix} 2 & 0 \\ 0 & 4 \end{bmatrix}\\
+f_2(x_1, x_2) & = x_1 + x_2 &
+s_2 & = f_2(s_1) = 5 &
+\partial f_2(s_1) & = \begin{bmatrix} 1 & 1 \end{bmatrix}
+\end{align}
+```
+
+Forward mode computes one column of the Jacobian ``\partial f(s_0)`` for each one-hot tangent ``t_0``:
+```math
+\begin{align}
+t_0 & = \begin{bmatrix} 1 \\ 0 \end{bmatrix} &
+t_1 & = \partial f_1(s_0) \cdot t_0 = \begin{bmatrix} 2 & 0 \\ 0 & 4 \end{bmatrix} \begin{bmatrix} 1 \\ 0 \end{bmatrix} = \begin{bmatrix} 2 \\ 0 \end{bmatrix} &
+t_2 & = \partial f_2(s_1) \cdot t_1 = \begin{bmatrix} 1 & 1 \end{bmatrix} \begin{bmatrix} 2 \\ 0 \end{bmatrix} = 2\\
+t_0 & = \begin{bmatrix} 0 \\ 1 \end{bmatrix} &
+t_1 & = \partial f_1(s_0) \cdot t_0 = \begin{bmatrix} 2 & 0 \\ 0 & 4 \end{bmatrix} \begin{bmatrix} 0 \\ 1 \end{bmatrix} = \begin{bmatrix} 0 \\ 4 \end{bmatrix} &
+t_2 & = \partial f_2(s_1) \cdot t_1 = \begin{bmatrix} 1 & 1 \end{bmatrix} \begin{bmatrix} 0 \\ 4 \end{bmatrix} = 4
+\end{align}
+```
+"""
+
+# ╔═╡ 32a0bec0-4f1d-4dba-a5db-422741f88808
+md"""
+## From forward to reverse mode
+
+Concatenating the two columns gives the full Jacobian. We can then factor ``\partial f_2(s_1)`` and then ``\partial f_1(s_0)`` out of the concatenation:
+```math
+\begin{align}
+\partial f(s_0) & =
+\begin{bmatrix} 2 & 4 \end{bmatrix}\\
+& =
+\begin{bmatrix}
+\begin{bmatrix} 1 & 1 \end{bmatrix} \begin{bmatrix} 2 & 0 \\ 0 & 4 \end{bmatrix} \begin{bmatrix} 1 \\ 0 \end{bmatrix} &
+\begin{bmatrix} 1 & 1 \end{bmatrix} \begin{bmatrix} 2 & 0 \\ 0 & 4 \end{bmatrix} \begin{bmatrix} 0 \\ 1 \end{bmatrix}
+\end{bmatrix}\\
+& =
+\begin{bmatrix} 1 & 1 \end{bmatrix}
+\begin{bmatrix}
+\begin{bmatrix} 2 & 0 \\ 0 & 4 \end{bmatrix} \begin{bmatrix} 1 \\ 0 \end{bmatrix} &
+\begin{bmatrix} 2 & 0 \\ 0 & 4 \end{bmatrix} \begin{bmatrix} 0 \\ 1 \end{bmatrix}
+\end{bmatrix}\\
+& =
+\begin{bmatrix} 1 & 1 \end{bmatrix}
+\begin{bmatrix} 2 & 0 \\ 0 & 4 \end{bmatrix}
+\begin{bmatrix}
+\begin{bmatrix} 1 \\ 0 \end{bmatrix} &
+\begin{bmatrix} 0 \\ 1 \end{bmatrix}
+\end{bmatrix}\\
+& =
+\begin{bmatrix} 1 & 1 \end{bmatrix}
+\begin{bmatrix} 2 & 0 \\ 0 & 4 \end{bmatrix}
+\xcancel{\begin{bmatrix} 1 & 0 \\ 0 & 1 \end{bmatrix}}
+\end{align}
+```
+The concatenation of the one-hot tangents is the identity so it disappears!
+We are left with ``\partial f_2(s_1) \cdot \partial f_1(s_0)`` that we can compute from left to right in a single pass: this is reverse mode!
+```math
+\begin{align}
+r_2 & = 1 &
+r_1 & = r_2 \cdot \partial f_2(s_1) = \begin{bmatrix} 1 & 1 \end{bmatrix} &
+r_0 & = r_1 \cdot \partial f_1(s_0) = \begin{bmatrix} 1 & 1 \end{bmatrix} \begin{bmatrix} 2 & 0 \\ 0 & 4 \end{bmatrix} = \begin{bmatrix} 2 & 4 \end{bmatrix}
+\end{align}
+```
+"""
+
 # ╔═╡ f4d1ee7c-4a01-4b2d-aa9b-ec41ceb0ad0f
 md"## Memory usage of forward mode"
 
@@ -3210,6 +3283,8 @@ uuid = "23338594-aafe-5451-b93e-139f81909106"
 # ╟─bab3a3cb-0ad2-4ea5-a15c-6593fc22e496
 # ╟─c73f79c6-a28f-4c7a-89e5-8d70a245a210
 # ╟─ac52550e-3287-427f-b957-ac61bc850f4d
+# ╟─e88ada81-d37f-4811-aa17-17eb7dd9d8a7
+# ╟─32a0bec0-4f1d-4dba-a5db-422741f88808
 # ╟─f4d1ee7c-4a01-4b2d-aa9b-ec41ceb0ad0f
 # ╟─e8c60922-5bbf-45b5-8311-18c8f8525623
 # ╟─73ba544c-616a-4db1-b91d-0b20a7b8924b
