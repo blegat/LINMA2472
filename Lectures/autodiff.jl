@@ -1114,7 +1114,7 @@ end;
 
 # ╔═╡ 0a9d0913-a1bb-4f47-8b85-db8714d0f6ab
 data = DelimitedFiles.readdlm(
-    joinpath(@__DIR__, "data", "wine.data"),
+    last(save_image(URL("https://archive.ics.uci.edu/ml/machine-learning-databases/wine/wine.data"))),
     ',', Float64,
 );
 
