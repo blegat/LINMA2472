@@ -79,7 +79,7 @@ as a DAG is given below (Source: [2]).
 Both implementations are explained below, and should be completed in the `forward.jl` and `reverse.jl` code files respectively. The reverse-mode exercise uses `ComputationGraphExplorer`, which already builds the expression graph, propagates primal values, and overloads the elementary operations. Your task is to attach derivative metadata and implement its backward propagation.
 
 **A. Forward mode**: The Forward mode is the most intuitive. It follows the natural order of the elementary operations: starting from the leaves of the DAG (the variables) and their local jacobians, and propagating directional derivatives from left to right in the graph. Note that we said **directional** derivatives. Indeed, each forward pass through the expression graph starts with a direction $u$, and computes     
-![equation](https://latex.codecogs.com/svg.latex?\displaystyle%20v^{(i)}%20=%20\textbf{J}f_{i}\left(x^{(i-1)}\right)v^{(i-1)}\quad\text{for%20}i=0,\dots,K,\quad\text{from%20}v^{(0)}=u\text{%20until%20}v^{(K)}=v),     
+$$ v^{(i)} = \textbf{J}f_{i}\left(x^{(i-1)}\right)v^{(i-1)}\quad\text{for }i=0,\dots,K,\quad\text{from }v^{(0)}=u\text{ until }v^{(K)}=v, $$
 where $\textbf{J}f_{i} \left(x^{(i-1)}\right)$ denotes the jacobian matrix of function $f_i$, evaluated at $x^{(i-1)}$.   
 
 For some applications, only a directional derivative (sometimes called Jacobian Vector Product (JVP)) is needed. When the entire gradient of a function of $n$ variables (or the Jacobian if the function has multiple outputs) is requested, we simply perform $n$ forward passes, with directions $u=e_i$ for $i$ from $1$ to $n$.    
