@@ -20,12 +20,12 @@ See the README in each subfolder for more details and troubleshooting:
 | S3    | 28/09/2025 | Tensor AD     | Legat     | ⚗ Reverse Lab             | 🚀 Start   |
 | S4    | 05/10/2025 | Tensor AD     | Legat     |                           |            |
 | S5    | 12/10/2025 | Second order  | Legat     |                           |            |
-| S6    | 19/10/2025 | Transformers  | Legat     |                           | 💬 Midterm |
+| S6    | 19/10/2025 | Transformers  | Legat     | Practice Tensor AD        |            |
 |       | 26/10/2025 | 🎃            |           |                           |            |
-| S7    | 02/11/2025 | Transformers  | Legat     |                           |            |
+| S7    | 02/11/2025 | Transformers  | Legat     |                           | Q&A        |
 | S8    | 09/11/2025 | Armistice     |           |                           |            |
 | S9    | 16/11/2025 | TBA           | Blondel   |                           |            |
 | S10   | 23/11/2025 | TBA           | Blondel   |                           | 🏁 End     |
 | S11   | 30/11/2025 | TBA           | Blondel   |                           | 💬 Oral    |
-| S12   | 07/12/2025 | Implicit Diff | Legat     |                           | 💬 Oral    |
-| S13   | 14/12/2025 | Sparse AD     | Montoison |                           | 💬 Oral    |
+| S12   | 07/12/2025 | Implicit Diff | Legat     | Practice Implicit Diff    | 💬 Oral    |
+| S13   | 14/12/2025 | Sparse AD     | Montoison | Practice Sparse AD        | 💬 Oral    |
