@@ -8,6 +8,10 @@ The html versions accessible here are static, see [here](Lectures) for details o
 * Implicit Differentiation [html](Lectures/implicit.html) [pdf](Lectures/implicit.pdf)
 * Sparse AD [html](Lectures/sparse.html) [pdf](Lectures/sparse.pdf)
 
+## Exercise sessions
+
+* On AD and the Adjoint Jacobians: [exercises](Exercises/Adjoint-jacobian/main.pdf) and [Julia-file](Exercises/Adjoint-jacobian/flash.jl)
+
 ## Past exams
 
 > The content of the course as changed in the 2025-2026 year,
