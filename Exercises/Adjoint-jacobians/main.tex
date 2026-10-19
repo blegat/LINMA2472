@@ -179,21 +179,21 @@ Consider the elementary operation
 \[F_1: \mathbb{R}^{m \times n} \rightarrow \mathbb{R}^{m \times p}, \quad F_1(X) = XB,\]
 for some $B\in \mathbb{R}^{n \times p}$ and the Frobenius inner product $\langle X, Y\rangle = \operatorname{tr}(XY^\top)$. \vspace{0.2cm}\\
 The action of the Jacobian of this elementary operation on a perturbation
-$V$ is given by $J_{F_1}(X)[V] = VB$,
+$U$ is given by $J_{F_1}(X)[U] = UB$,
 which can be viewed as the linear map
-$\mathcal{A}(V)=VB$ applied on the direction $V$. Using the definition above, find the Adjoint  Jacobian of operation $F_1$. \vspace{0.2cm}\\
+$\mathcal{A}(U)=UB$ applied on the direction $U$. Using the definition above, find the Adjoint  Jacobian of operation $F_1$. \vspace{0.2cm}\\
 \[
 \setlength{\fboxsep}{8pt}
-\fbox{$\displaystyle \mathcal{A}^*(Y) = \hspace{3cm}$}
+\fbox{$\displaystyle \mathcal{A}^*(V) = \hspace{3cm}$}
 \] \\
 \begin{solution}
 Using the definition of adjoint recalled above and the cyclic property of the trace, we find
 \[
-    \forall X, Y, \qquad \langle \mathcal{A}(X), Y \rangle = \langle XB, Y \rangle = \operatorname{tr}(XBY^\top) = \operatorname{tr}(X(YB^\top)^\top) = \langle X, YB^\top \rangle = \langle X, \mathcal{A}^*(Y) \rangle, 
+    \forall U, V, \qquad \langle \mathcal{A}(U), V \rangle = \langle UB, V \rangle = \operatorname{tr}(UBV^\top) = \operatorname{tr}(U(VB^\top)^\top) = \langle U, VB^\top \rangle = \langle U, \mathcal{A}^*(V) \rangle, 
 \]
 where therefore
 \[
-    \mathcal{A}^*(Y)=YB^\top.
+    \mathcal{A}^*(V)=VB^\top.
 \]
 \end{solution}
 
@@ -207,7 +207,7 @@ F_2(X) = X \odot B,
 for some $B\in \mathbb{R}^{m \times n}$, where $\odot$ denotes the Hadamard
 (element-wise) product, and the Frobenius inner product is given by $\langle X, Y\rangle = \operatorname{tr}(XY^\top)$.
 \vspace{0.2cm}\\
-The Jacobian in the direction $V$ can be viewed as a linear map, $J_{F_2}(X)[V] = \mathcal{A}(V)$. Find the expression of this linear map. 
+The Jacobian in the direction $V$ can be viewed as a linear map, $J_{F_2}(X)[U] = \mathcal{A}(U)$. Find the expression of this linear map. 
 Then, using the definition above, find the adjoint Jacobian of the operation $F_2$.
 \vspace{0.2cm}\\
 \[
@@ -215,40 +215,40 @@ Then, using the definition above, find the adjoint Jacobian of the operation $F_
 \fbox{$\displaystyle \mathcal{A}^*(Y) = \hspace{3cm}$}
 \] \\
 \begin{solution}
-First, the Jacobian in the direction $V$ is
+First, the Jacobian in the direction $U$ is
 \[
-    J_{F_2}(X)[V]
+    J_{F_2}(X)[U]
     =
     \left.\frac{\mathrm{d}}{\mathrm{d}t}
-    F_2(X+tV)\right|_{t=0}
+    F_2(X+tU)\right|_{t=0}
     =
     \left.\frac{\mathrm{d}}{\mathrm{d}t}
-    \bigl((X+tV)\odot B\bigr)\right|_{t=0}
+    \bigl((X+tU)\odot B\bigr)\right|_{t=0}
     =
-    V\odot B.
+    U\odot B.
 \]
 Hence, the corresponding linear map is
 \[
-    \mathcal{A}(V)=V\odot B.
+    \mathcal{A}(U)=U\odot B.
 \]
 Using the definition and the properties of the Frobenius inner product, we find
 \[
-    \forall X, Y, \qquad
-    \langle \mathcal{A}(X), Y \rangle
+    \forall U, V, \qquad
+    \langle \mathcal{A}(U), V \rangle
     =
-    \langle X \odot B, Y \rangle
+    \langle U \odot B, V \rangle
     =
-    \sum_{i,j} X_{ij} B_{ij} Y_{ij}
+    \sum_{i,j} U_{ij} B_{ij} V_{ij}
     =
-    \sum_{i,j} X_{ij} (Y \odot B)_{ij}
+    \sum_{i,j} U_{ij} (V \odot B)_{ij}
     =
-    \langle X, Y \odot B \rangle
+    \langle U, V \odot B \rangle
     =
-    \langle X, \mathcal{A}^*(Y) \rangle,
+    \langle U, \mathcal{A}^*(V) \rangle,
 \]
 where therefore
 \[
-    \mathcal{A}^*(Y)=Y\odot B = \mathcal{A}(Y).
+    \mathcal{A}^*(V)=V\odot B = \mathcal{A}(V).
 \]
 \end{solution}
 
@@ -262,8 +262,8 @@ F_3(X) = X^{\odot 2},
 where $X^{\odot 2}$ denotes the element-wise square of $X$, and the Frobenius
 inner product is given by $\langle X, Y\rangle = \operatorname{tr}(XY^\top)$.
 \vspace{0.2cm}\\
-The Jacobian in the direction $V$ can be viewed as a linear map,
-$J_{F_3}(X)[V] = \mathcal{A}_X(V)$. Find the expression of this linear map.
+The Jacobian in the direction $U$ can be viewed as a linear map,
+$J_{F_3}(X)[U] = \mathcal{A}_X(U)$. Find the expression of this linear map.
 Then, using the definition above, find the adjoint Jacobian of the operation $F_3$.
 \vspace{0.2cm}\\
 \[
@@ -271,41 +271,41 @@ Then, using the definition above, find the adjoint Jacobian of the operation $F_
 \fbox{$\displaystyle \mathcal{A}_X^*(Y) = \hspace{3cm}$}
 \]
 \begin{solution}
-First, the Jacobian in the direction $V$ is
+First, the Jacobian in the direction $U$ is
 \[
-    J_F(X)[V]
+    J_F(X)[U]
     =
     \left.\frac{\mathrm{d}}{\mathrm{d}t}
-    F(X+tV)\right|_{t=0}
+    F(X+tU)\right|_{t=0}
     =
     \left.\frac{\mathrm{d}}{\mathrm{d}t}
-    (X+tV)^{\odot 2}\right|_{t=0}
+    (X+tU)^{\odot 2}\right|_{t=0}
     =
-    2X\odot V.
+    2X\odot U.
 \]
 Hence, the corresponding linear map is
 \[
-    \mathcal{A}_X(V)=2X\odot V.
+    \mathcal{A}_X(U)=2X\odot U.
 \]
 Using the definition of adjoint recalled above and the properties of the
 Frobenius inner product, we find
 \[
-    \forall H, Y, \qquad
-    \langle \mathcal{A}_X(H), Y \rangle
+    \forall U, V, \qquad
+    \langle \mathcal{A}_X(U), V \rangle
     =
-    \langle 2X \odot H, Y \rangle
+    \langle 2X \odot U, V \rangle
     =
-    \sum_{i,j} 2X_{ij}H_{ij}Y_{ij}
+    \sum_{i,j} 2X_{ij}U_{ij}V_{ij}
     =
-    \sum_{i,j} H_{ij}(2X_{ij}Y_{ij})
+    \sum_{i,j} U_{ij}(2X_{ij}V_{ij})
     =
-    \langle H, 2X \odot Y \rangle
+    \langle U, 2X \odot V \rangle
     =
-    \langle H, \mathcal{A}_X^*(Y) \rangle,
+    \langle U, \mathcal{A}_X^*(V) \rangle,
 \]
 where therefore
 \[
-    \mathcal{A}_X^*(Y)=2X\odot Y = \mathcal{A}_X(Y).
+    \mathcal{A}_X^*(V)=2X\odot V = \mathcal{A}_X(V).
 \]
 \end{solution}
 
@@ -320,67 +320,67 @@ where $\mathbb{R}^{m \times n}$ is equipped with the Frobenius inner product
 $\langle X, Y\rangle = \operatorname{tr}(XY^\top)$ and $\mathbb{R}$ with the
 usual scalar product.
 \vspace{0.2cm}\\
-The Jacobian in the direction $V$ can be viewed as a linear map,
-$J_{F_4}(X)[V] = \mathcal{A}(V)$. Find the expression of this linear map.
+The Jacobian in the direction $U$ can be viewed as a linear map,
+$J_{F_4}(X)[U] = \mathcal{A}(U)$. Find the expression of this linear map.
 Then, using the definition above, find the adjoint Jacobian of the operation $F_4$.
 \vspace{0.2cm}\\
 \[
 \setlength{\fboxsep}{8pt}
-\fbox{$\displaystyle \mathcal{A}^*(y) = \hspace{3cm}$}
+\fbox{$\displaystyle \mathcal{A}^*(v) = \hspace{3cm}$}
 \]
 \begin{solution}
-First, the Jacobian in the direction $V$ is
+First, the Jacobian in the direction $U$ is
 \[
-    J_{F_4}(X)[V]
+    J_{F_4}(X)[U]
     =
     \left.\frac{\mathrm{d}}{\mathrm{d}t}
-    F_4(X+tV)\right|_{t=0}
+    F_4(X+tU)\right|_{t=0}
     =
     \left.\frac{\mathrm{d}}{\mathrm{d}t}
     \left(
-    \sum_{i=1}^{m}\sum_{j=1}^{n}(X_{ij}+tV_{ij})
+    \sum_{i=1}^{m}\sum_{j=1}^{n}(X_{ij}+tU_{ij})
     \right)\right|_{t=0}
     =
-    \sum_{i=1}^{m}\sum_{j=1}^{n}V_{ij}.
+    \sum_{i=1}^{m}\sum_{j=1}^{n}U_{ij}.
 \]
 Hence, the corresponding linear map is
 \[
-    \mathcal{A}(V)
+    \mathcal{A}(U)
     =
-    \sum_{i=1}^{m}\sum_{j=1}^{n}V_{ij}.
+    \sum_{i=1}^{m}\sum_{j=1}^{n}U_{ij}.
 \]
 Using the definition of adjoint recalled above, we find
 \[
-    \forall V, y, \qquad
-    \langle \mathcal{A}(V), y \rangle
+    \forall U, v, \qquad
+    \langle \mathcal{A}(U), v \rangle
     =
-    y \sum_{i=1}^{m}\sum_{j=1}^{n} V_{ij}
+    v \sum_{i=1}^{m}\sum_{j=1}^{n} U_{ij}
     =
-    \sum_{i=1}^{m}\sum_{j=1}^{n} V_{ij} y
+    \sum_{i=1}^{m}\sum_{j=1}^{n} U_{ij} v
     =
-    \left\langle V, y\mathbf{1}_{m\times n} \right\rangle
+    \left\langle U, v\mathbf{1}_{m\times n} \right\rangle
     =
-    \langle V, \mathcal{A}^*(y) \rangle,
+    \langle U, \mathcal{A}^*(v) \rangle,
 \]
 where $\mathbf{1}_{m\times n}$ denotes the matrix whose entries are all equal to $1$.
 Therefore,
 \[
-    \mathcal{A}^*(y)
+    \mathcal{A}^*(v)
     =
-    y\mathbf{1}_{m\times n}.
+    v\mathbf{1}_{m\times n}.
 \]
 \end{solution}
 
 5. \textbf{Adjoint Jacobian of the softmax}. \vspace{0.2cm}\\
 Consider the elementary operation
     \[
-    F_4: \mathbb{R}^{1 \times n} \rightarrow \mathbb{R}^{1 \times n},
+    F_5: \mathbb{R}^{1 \times n} \rightarrow \mathbb{R}^{1 \times n},
     \qquad
-    F_4(X) = \operatorname{softmax}(X),
+    F_5(X) = \operatorname{softmax}(X),
     \]
     where
     \[
-    \bigl(F_4(X)\bigr)_i
+    \bigl(F_5(X)\bigr)_i
     =
     \frac{e^{X_i}}{\sum_{j=1}^n e^{X_j}},
     \]
@@ -391,16 +391,16 @@ Consider the elementary operation
     \[
     S=\operatorname{softmax}(X).
     \]
-    The Jacobian in the direction $V$ can be viewed as a linear map,
-    $J_{F_4}(X)[V]=\mathcal{A}_X(V)$.
+    The Jacobian in the direction $U$ can be viewed as a linear map,
+    $J_{F_5}(X)[U]=\mathcal{A}_X(U)$.
     Find the expression of this linear map.
     Then, using the definition above, find the adjoint Jacobian of the operation
-    $F_4$.
+    $F_5$.
     \vspace{0.2cm}\\
     
     \[
     \setlength{\fboxsep}{8pt}
-    \fbox{$\displaystyle \mathcal{A}_X^*(Y) = \hspace{3cm}$}
+    \fbox{$\displaystyle \mathcal{A}_X^*(V) = \hspace{3cm}$}
     \]
     
     \begin{solution}
@@ -408,18 +408,18 @@ Consider the elementary operation
         \[
             S=\operatorname{softmax}(X).
         \]
-        For each component, the Jacobian in the direction $V$ is
+        For each component, the Jacobian in the direction $U$ is
         \[
         \begin{aligned}
-            \bigl(J_{F_4}(X)[V]\bigr)_i
+            \bigl(J_{F_5}(X)[U]\bigr)_i
             &=
             \left.
             \frac{\mathrm{d}}{\mathrm{d}t}
-            \frac{e^{X_i+tV_i}}
-            {\sum_{j=1}^n e^{X_j+tV_j}}
+            \frac{e^{X_i+tU_i}}
+            {\sum_{j=1}^n e^{X_j+tU_j}}
             \right|_{t=0} \\
             &= \frac{
-            e^{X_i}V_i\sum_{j=1}^n e^{X_j}
+            e^{X_i}U_i\sum_{j=1}^n e^{X_j}
             -
             e^{X_i}\sum_{j=1}^n e^{X_j}V_j
             }{
@@ -433,56 +433,56 @@ Consider the elementary operation
         \]
         Therefore,
         \[
-            J_{F_4}(X)[V]
+            J_{F_5}(X)[U]
             =
-            S\odot V-\langle S,V\rangle S.
+            S\odot U-\langle S,U\rangle S.
         \]
         Hence, the corresponding linear map is
         \[
-            \mathcal{A}_X(V)
+            \mathcal{A}_X(U)
             =
-            S\odot V-\langle S,V\rangle S.
+            S\odot U-\langle S,U\rangle S.
         \]
         Using the definition of adjoint recalled above, we find
         \[
         \begin{aligned}
-            \langle \mathcal{A}_X(V),Y\rangle
+            \langle \mathcal{A}_X(U),V\rangle
             &=
             \left\langle
-            S\odot V-\langle S,V\rangle S,Y
+            S\odot U-\langle S,U\rangle S,V
             \right\rangle \\
             &=
-            \langle S\odot V,Y\rangle
+            \langle S\odot U,V\rangle
             -
-            \langle S,V\rangle\langle S,Y\rangle \\
+            \langle S,U\rangle\langle S,V\rangle \\
             &=
-            \langle V,S\odot Y\rangle
+            \langle U,S\odot V\rangle
             -
             \left\langle
-            V,\langle S,Y\rangle S
+            U,\langle S,V\rangle S
             \right\rangle \\
             &=
             \left\langle
-            V,
-            S\odot Y-\langle S,Y\rangle S
+            U,
+            S\odot V-\langle S,V\rangle S
             \right\rangle \\
             &=
-            \langle V,\mathcal{A}_X^*(Y)\rangle.
+            \langle U,\mathcal{A}_X^*(V)\rangle.
         \end{aligned}
         \]
         Therefore,
         \[
-            \mathcal{A}_X^*(Y)
+            \mathcal{A}_X^*(V)
             =
-            S\odot Y-\langle S,Y\rangle S
+            S\odot V-\langle S,V\rangle S
             =
-            \mathcal{A}_X(Y).
+            \mathcal{A}_X(V).
         \]
         It can also be written as 
         \[
-            \mathcal{A}_X^*(Y)
+            \mathcal{A}_X^*(V)
             =
-            S\odot (Y-\langle S,Y\rangle \mathbf{1}^\top).
+            S\odot (V-\langle S,V\rangle \mathbf{1}^\top).
         \]
     \end{solution}
     \vspace{0.3cm}
