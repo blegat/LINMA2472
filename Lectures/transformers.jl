@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v1.0.3
+# v1.0.4
 
 using Markdown
 using InteractiveUtils
@@ -154,7 +154,7 @@ HAlign(
 ```math
 \begin{multline}
 \hat{p}(x_0 | x_{-1}, \ldots, x_{-n_\text{ctx}}) = \\
-	\text{softmax}(W_2 \tanh(W_1
+	\text{softmax}(C^\top W_2 \tanh(W_1
 \begin{bmatrix}
 C x_{-1}\\
 \vdots\\
@@ -295,6 +295,13 @@ md"## Multi-Head Attention"
 
 # ╔═╡ 6fc13413-53de-4c75-9b9e-620e0b7f8a1f
 qa(md"Is ``W^O`` needed if ``h = 1`` ?", md"No, if ``h = 1``, we can merge ``W^OW_1^V`` into a new ``W_1^V``.")
+
+# ╔═╡ 006f44b0-c10d-44c3-8300-183e706b605d
+md"""
+#### Further readings
+
+This dictionary viewpoint can also be view as a *memory store* that recalls by similarity, called *associate memory*. See [this blog post](https://alexwang.ai/posts/associative-memory/) for more details.
+"""
 
 # ╔═╡ d05e6f0f-0081-4fb6-91e9-ac2f58beda4a
 md"# Decoder-only transformer"
@@ -1295,7 +1302,7 @@ PrettyTables = "~3.4.8"
 PLUTO_MANIFEST_TOML_CONTENTS = """
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.13.1"
+julia_version = "1.13.2"
 manifest_format = "2.1"
 project_hash = "2fc8ef83ef52c737e7f1b433bec45077ad6216dd"
 
@@ -1915,7 +1922,7 @@ version = "1.0.0"
 [[deps.LibCURL_jll]]
 deps = ["Artifacts", "CompilerSupportLibraries_jll", "LibSSH2_jll", "Libdl", "OpenSSL_jll", "Zlib_jll", "Zstd_jll", "nghttp2_jll"]
 uuid = "deac9b47-8bc7-5906-a0fe-35ac56dc84c0"
-version = "8.18.0+1"
+version = "8.22.0+0"
 
 [[deps.LibGit2]]
 deps = ["LibGit2_jll", "NetworkOptions", "Printf", "SHA"]
@@ -1925,7 +1932,7 @@ version = "1.11.0"
 [[deps.LibGit2_jll]]
 deps = ["Artifacts", "CompilerSupportLibraries_jll", "LibSSH2_jll", "Libdl", "OpenSSL_jll", "PCRE2_jll", "Zlib_jll"]
 uuid = "e37daf67-58a4-590a-8e99-b0245dd2ffc5"
-version = "1.9.1+0"
+version = "1.9.7+0"
 
 [[deps.LibSSH2_jll]]
 deps = ["Artifacts", "CompilerSupportLibraries_jll", "Libdl", "OpenSSL_jll", "Zlib_jll"]
@@ -2087,7 +2094,7 @@ version = "10.5.1+0"
 [[deps.OpenSSL_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "458c3c95-2e84-50aa-8efc-19380b2a3a95"
-version = "3.5.6+0"
+version = "3.5.8+0"
 
 [[deps.Opus_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl"]
@@ -2529,7 +2536,7 @@ version = "0.4.16"
 [[deps.Zlib_jll]]
 deps = ["Libdl"]
 uuid = "83775a58-1f1d-513f-b197-d71354ab007a"
-version = "1.3.1+2"
+version = "1.3.2+0"
 
 [[deps.Zstd_jll]]
 deps = ["CompilerSupportLibraries_jll", "Libdl"]
@@ -2600,12 +2607,12 @@ version = "1.3.8+0"
 [[deps.nghttp2_jll]]
 deps = ["Artifacts", "CompilerSupportLibraries_jll", "Libdl"]
 uuid = "8e850ede-7688-5339-a07c-302acd2aaf8d"
-version = "1.67.1+0"
+version = "1.70.0+0"
 
 [[deps.p7zip_jll]]
 deps = ["Artifacts", "CompilerSupportLibraries_jll", "Libdl"]
 uuid = "3f19e933-33d8-53b3-aaab-bd5110c3b7a0"
-version = "17.8.2+0"
+version = "17.8.3+0"
 
 [[deps.x264_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl"]
@@ -2692,6 +2699,7 @@ uuid = "23338594-aafe-5451-b93e-139f81909106"
 # ╟─b7583418-f4fb-4c63-b421-b5b9af269768
 # ╟─d014e6aa-92f6-4ca1-be47-516565d1bb20
 # ╟─6fc13413-53de-4c75-9b9e-620e0b7f8a1f
+# ╟─006f44b0-c10d-44c3-8300-183e706b605d
 # ╟─d05e6f0f-0081-4fb6-91e9-ac2f58beda4a
 # ╟─a3efd921-eb14-4901-9d6c-800cc812fe02
 # ╟─b9caae1a-38aa-4d01-9cda-3d6782fb0e03
