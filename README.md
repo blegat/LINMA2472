@@ -36,7 +36,7 @@ These 10-minute meetings will take place on Monday 2nd of October 2026, at 8:30-
 This will give you the chance to present your progress, ask questions and get some help.
 No need to prepare slides and if you don't have questions, we'll ask you some to see where you're heading and provide guidance.
 
-| Time | Session 1 | Session 2 |
+| Time | BARB00 | BARB01 |
 | --- | --- | --- |
 | 08:10–08:20 | 2 | 20 |
 | 08:20–08:30 | 16 | 26 |
