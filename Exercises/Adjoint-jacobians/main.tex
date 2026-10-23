@@ -28,16 +28,15 @@
 \usepackage{comment}
 % Solutions
 %-----------------------------------------------------------------
-\newif\ifshowsolutions
-%\showsolutionstrue   % show solutions
-\showsolutionsfalse % hide solutions
 \ifshowsolutions
     \NewEnviron{solution}{%
         \par\medskip
+        \begingroup
         \color{blue}
         \noindent\textbf{Solution.}\quad
         \BODY
         \par\medskip
+        \endgroup
     }
 \else
     \NewEnviron{solution}{}
@@ -421,14 +420,14 @@ Consider the elementary operation
             &= \frac{
             e^{X_i}U_i\sum_{j=1}^n e^{X_j}
             -
-            e^{X_i}\sum_{j=1}^n e^{X_j}V_j
+            e^{X_i}\sum_{j=1}^n e^{X_j}U_j
             }{
             \left(\sum_{j=1}^n e^{X_j}\right)^2
             } \\[1mm]
             &=
-            S_iV_i
+            S_i U_i
             -
-            S_i\sum_{j=1}^n S_jV_j.
+            S_i\sum_{j=1}^n S_jU_j.
         \end{aligned}
         \]
         Therefore,

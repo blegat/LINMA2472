@@ -10,7 +10,7 @@ The html versions accessible here are static, see [here](Lectures) for details o
 
 ## Exercise sessions
 
-* On AD and the Adjoint Jacobians: [exercises](Exercises/Adjoint-jacobians/main.pdf) and [Julia-file](Exercises/Adjoint-jacobians/flash.jl)
+* On AD and the Adjoint Jacobians: [exercises](Exercises/Adjoint-jacobians/exercises.pdf) / [solutions](Exercises/Adjoint-jacobians/solutions.pdf) and [Julia-file](Exercises/Adjoint-jacobians/flash.jl) / [solution](Exercises/Adjoint-jacobians/flash-completed.jl)
 
 ## Past exams
 
