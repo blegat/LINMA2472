@@ -1,0 +1,51 @@
+\titledquestion{Implicit}
+
+Consider the function
+\[
+	f(x, \lambda) : x^3 - \lambda x^2 + x - 1
+\]
+If $|\lambda| < \sqrt{3}$,
+the derivative $\partial_1 f(x, \lambda) = 3x^2 - 2\lambda x + 1$
+is positive for all $x$.
+Therefore, for any $\lambda \in (-\sqrt{3}, \sqrt{3})$,
+there exists a unique $x^*$ such that
+$f(x^*, \lambda) = 0$.
+Let $x^*(\lambda) : (-\sqrt{3}, \sqrt{3}) \to \mathbb{R}$ be this solution.
+
+\begin{itemize}
+	\item We have $x^*(1) = 1$, find the value of derivative $\partial x^*(1)$.
+	
+	\begin{solutionbox}{7cm}
+        We have
+        \[
+            \partial x^*(\lambda)
+            = \frac{-\partial_2 f(1, 1)}{\partial_1 f(1, 1)}
+            = \frac{(x^*)^2}{3(x^*)^2 - 2\lambda x^* + 1}
+            = \frac{1}{2}
+        \]
+	\end{solutionbox}
+	\item What is the value of the second derivative $\partial^2 x^*(1)$ ?
+	
+	\begin{solutionbox}{9.5cm}
+        Let $n, d$ be the numerator and denominator:
+        \[
+            n = (x^*)^2
+            \qquad
+            d = 3(x^*)^2 - 2\lambda x^* + 1.
+        \]
+        We have
+        \[
+            \partial^2 x^*(\lambda)
+            = \frac{n'd - nd'}{d^2}
+        \]
+        where $n' = 2x^*(x^*)' = 2 \cdot 1 \cdot (1/2) = 1$,
+        $d = 2$, $n = 1$ and
+        \[ d' = 6x^*(x^*)' - 2\lambda' x^* - 2\lambda (x^*)'
+        = 3 - 2 - 2/2 = 0 \]
+        so
+        \[
+            \partial^2 x^*(\lambda)
+            = \frac{1 \cdot 2 - 1 \cdot 0}{2^2} = \frac{2}{4} = \frac{1}{2}.
+        \]
+	\end{solutionbox}
+\end{itemize}	

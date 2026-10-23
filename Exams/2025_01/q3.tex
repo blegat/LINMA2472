@@ -1,0 +1,40 @@
+\titledquestion{Stable Diffusion for music generation}
+
+Consider the problem of music generation given a text prompt.
+For instance, given ``classic jazz'', the model should generate a music of
+style ``classic jazz''.
+The music is represented by a sequence $(y_k)_{k=1}^N$ of real numbers of
+fixed length $N$.
+These represent the intensity of the music sampled at a given fixed rate (for instance every millisecond).
+
+\begin{itemize}
+    \item Draw the model and different components that you would use for this:
+    \begin{solutionbox}{8.5cm}
+        \emph{(sketch)}
+		Transformer encoder for the text prompt which is then given by
+		a diffusion model with cross-attention.
+		The diffusion model starts with a random vector of $N$ numbers
+		and then generates the music.
+    \end{solutionbox}
+    \item Describe the datasets needed and the procedure to be used to train each component of the model.
+    \begin{solutionbox}{4cm}
+        \emph{(sketch)}
+		First train encoder and then diffusion model.
+    \end{solutionbox}
+    \item Given a text prompt, describe the procedure to generate a new music.
+    \begin{solutionbox}{4cm}
+        \emph{(sketch)}
+		Classifier-Free Guidance.
+    \end{solutionbox}
+    \item Explain how you can use an auto-encoder to prevent the model from learning imperceptible details of the music. How do you adapt the training and inference process with this new component ?
+    \begin{solutionbox}{4cm}
+        \emph{(sketch)}
+		Use Variational Auto-Encoder to first compress the music.
+    \end{solutionbox}
+    \item Suppose that you want to generate a ``classic jazz'' music that, when reversed in time sounds like ``classic rock''.
+      How would you use your already trained model to achieve this task without retraining ?
+    \begin{solutionbox}{4cm}
+        \emph{(sketch)}
+		Like project.
+    \end{solutionbox}
+\end{itemize}
