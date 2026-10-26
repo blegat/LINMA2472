@@ -8,6 +8,11 @@ The html versions accessible here are static, see [here](Lectures) for details o
 * Implicit Differentiation [html](Lectures/implicit.html) [pdf](Lectures/implicit.pdf)
 * Sparse AD [html](Lectures/sparse.html) [pdf](Lectures/sparse.pdf)
 
+## Reversi AI tournament
+
+Explore the [tournament standings, head-to-head records and games](tournaments/).
+Past tournament snapshots are available in the date selector.
+
 ## Exercise sessions
 
 * On AD and the Adjoint Jacobians: [exercises](Exercises/Adjoint-jacobians/exercises.pdf) / [solutions](Exercises/Adjoint-jacobians/solutions.pdf) and [Julia-file](Exercises/Adjoint-jacobians/flash.jl) / [solution](Exercises/Adjoint-jacobians/flash-completed.jl)

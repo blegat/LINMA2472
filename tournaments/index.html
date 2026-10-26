@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Standings, head-to-head records and every game from the LINMA2472 Reversi AI tournament.">
+  <title>Reversi arena · LINMA2472</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="style.css">
+  <script type="module" src="app.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#standings-section">Skip to standings</a>
+  <header class="topbar shell">
+    <a class="course-link" href="../"><span class="board-mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span> LINMA2472</a>
+    <span class="topbar-label">Algorithms in data science <span>/</span> AI tournament</span>
+  </header>
+  <main class="shell">
+    <section class="intro">
+      <div><p class="eyebrow">Student AIs, head to head</p><h1>Reversi arena<span>.</span></h1>
+        <p class="intro-copy">Sixty-four squares. Every move counts.<br>Explore the players, the matchups and the results.</p>
+      </div>
+      <div class="run-picker"><label for="run-select">Tournament snapshot</label>
+        <select id="run-select" disabled><option>Loading snapshots…</option></select>
+        <span id="snapshot-note">Latest published results selected by default</span>
+      </div>
+    </section>
+    <div id="loading" class="notice" role="status">Loading tournament results…</div>
+    <div id="error" class="notice error" role="alert" hidden><p id="error-message"></p><button id="retry" class="button" type="button">Try again</button></div>
+    <div id="empty" class="notice" hidden>No tournament results have been published yet.</div>
+    <div id="dashboard" hidden>
+      <section class="overview" aria-label="Tournament overview">
+        <div class="winner-card">
+          <div><p class="eyebrow" id="winner-label">Top of the board</p><h2 id="winner-name"></h2><p id="winner-detail"></p></div>
+          <span class="winner-rank" id="winner-rank" aria-hidden="true">01</span>
+        </div>
+        <div class="stats-card">
+          <div><span class="stat-number" id="stat-players">—</span><span>Qualified players</span></div>
+          <div><span class="stat-number" id="stat-games">—</span><span>Games played</span></div>
+          <div><span class="stat-number" id="stat-groups">—</span><span>Groups submitted</span></div>
+        </div>
+      </section>
+      <div class="competition-grid">
+        <section class="panel standings-panel" id="standings-section" aria-labelledby="standings-title">
+          <div class="panel-heading"><div><p class="eyebrow">The leaderboard</p><h2 id="standings-title">Final standings</h2></div><span class="tag">All stages</span></div>
+          <p class="section-note">Final ranks from the tournament. Records below include round-robin and ladder games.</p>
+          <div class="table-scroll"><table class="standings-table">
+            <caption class="sr-only">Qualified players and their records across all stages. Column buttons change the display order.</caption>
+            <thead><tr>
+              <th aria-sort="ascending"><button data-sort="rank" type="button">Rank <span aria-hidden="true">↕</span></button></th>
+              <th><button data-sort="name" type="button">Player <span aria-hidden="true">↕</span></button></th>
+              <th class="number"><button data-sort="wins" type="button">W <span aria-hidden="true">↕</span></button></th>
+              <th class="number">D</th><th class="number">L</th><th class="record-column">Record</th>
+              <th class="number"><button data-sort="difference" type="button">Disc ± <span aria-hidden="true">↕</span></button></th>
+              <th class="number" title="Change from round-robin rank to final rank">Rank Δ</th>
+            </tr></thead><tbody id="standings-body"></tbody>
+          </table></div>
+          <p id="no-players" class="section-note" hidden>No players passed eligibility checks in this snapshot.</p>
+          <div class="record-legend"><span><i class="win-swatch"></i>Win</span><span><i class="draw-swatch"></i>Draw</span><span><i class="loss-swatch"></i>Loss</span></div>
+        </section>
+        <section class="panel matchups-panel" aria-labelledby="matchups-title">
+          <div class="panel-heading"><div><p class="eyebrow">The matchups</p><h2 id="matchups-title">Head to head</h2></div></div>
+          <p class="section-note">Each row player's wins · draws · losses.<br>Select a cell to explore those games.</p>
+          <div class="table-scroll" id="matrix"></div>
+          <p id="no-matchups" class="section-note" hidden>No head-to-head games recorded for this snapshot.</p>
+        </section>
+      </div>
+      <section class="panel games-panel" id="games-section" aria-labelledby="games-title">
+        <div class="panel-heading games-heading"><div><p class="eyebrow">Move by move</p><h2 id="games-title">The game room <span id="game-count" class="count"></span></h2></div>
+          <div class="filters"><label class="sr-only" for="stage-filter">Filter by stage</label><select id="stage-filter"><option value="all">All stages</option><option value="1">Round robin</option><option value="2">Ladder</option></select>
+            <label class="sr-only" for="player-filter">Filter by player</label><select id="player-filter"><option value="all">All players</option></select>
+          </div>
+        </div>
+        <div id="match-filter" class="match-filter" hidden><span id="match-filter-label"></span><button type="button" id="clear-match">Clear matchup ×</button></div>
+        <div class="table-scroll"><table class="games-table">
+          <caption class="sr-only">Recorded games with colour assignments, final disc counts and outcomes.</caption>
+          <thead><tr><th>Game</th><th>Stage</th><th>Black</th><th class="score-column">Final board</th><th>White</th><th>Winner</th><th class="number">Moves</th></tr></thead>
+          <tbody id="games-body"></tbody>
+        </table></div>
+        <p id="no-games" class="empty-games" hidden>No games match these filters.</p>
+        <p class="section-note games-note">Disc counts are shown as Black – White. Forfeits are included in the recorded results.</p>
+      </section>
+      <details class="panel roster-panel" id="roster">
+        <summary><span>All groups <span class="count" id="roster-count"></span></span><span class="summary-hint">Qualification details <span aria-hidden="true">+</span></span></summary>
+        <div class="roster-content"><label class="sr-only" for="group-search">Search groups, players and qualification notes</label><input id="group-search" type="search" placeholder="Find a group, player or qualification note…">
+          <div class="table-scroll"><table><caption class="sr-only">Qualification and explanations for every submitted group.</caption><thead><tr><th>Group</th><th>Player</th><th>Qualification</th><th>Notes</th></tr></thead><tbody id="roster-body"></tbody></table></div>
+          <p id="no-groups" class="section-note" hidden>No groups match your search.</p>
+        </div>
+      </details>
+      <footer class="footer"><div><strong>LINMA2472</strong><span>Student AIs. Open results.</span></div><nav aria-label="Download raw tournament data"><span>Raw data</span><a id="results-download" href="#">Results CSV ↗</a><a id="games-download" href="#">Games CSV ↗</a></nav></footer>
+    </div>
+    <p id="announcement" class="sr-only" role="status" aria-live="polite"></p>
+    <noscript><p class="notice">Enable JavaScript to explore the tournament. Raw CSV files are available in each dated tournament folder.</p></noscript>
+  </main>
+</body>
+</html>

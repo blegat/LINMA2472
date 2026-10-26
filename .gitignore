@@ -1,3 +1,5 @@
 .ipynb_checkpoints
 Manifest.toml
 cache
+tournaments/runs.json
+__pycache__/

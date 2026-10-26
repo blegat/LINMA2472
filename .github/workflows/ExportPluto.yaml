@@ -80,6 +80,13 @@ jobs:
                   )'
 
 
+            - name: Index raw tournament snapshots
+              run: |
+                python3 tournaments/generate_index.py
+                # The deployment action stages files with git add. Include the
+                # generated index in the deployment, while ignoring it on main.
+                sed -i '\|^tournaments/runs.json$|d' .gitignore
+
             - name: Deploy to gh-pages
               uses: JamesIves/github-pages-deploy-action@releases/v4
               with:
