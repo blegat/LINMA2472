@@ -27,6 +27,26 @@ Use the links at the bottom of the viewer to download the raw results and games.
 If a snapshot has no recorded games, the standings show the round-robin wins and
 losses from its results file instead.
 
+## Tournament points
+
+Qualified groups earn `0.4 / 2^position` points, using their final position after
+the ladder stage (starting at position 1):
+
+| Final position | Points |
+| --- | --- |
+| 1st | 0.2 |
+| 2nd | 0.1 |
+| 3rd | 0.05 |
+| 4th | 0.025 |
+
+Points halve at each subsequent position. Groups that do not qualify earn zero.
+The overall leaderboard sums each group's points across all published tournaments.
+Use its search field or **Show all groups** to see every group's total, including
+zero-point groups. Equal totals share a rank; zero-point groups are unranked.
+
+The sum of the points earned in each tournament is converted into bonus points
+for the projects.
+
 ## Run the viewer locally
 
 From the root of this public repository, using Python 3.9 or later:

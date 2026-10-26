@@ -31,7 +31,7 @@
     <div id="dashboard" hidden>
       <section class="overview" aria-label="Tournament overview">
         <div class="winner-card">
-          <div><p class="eyebrow" id="winner-label">Top of the board</p><h2 id="winner-name"></h2><p id="winner-detail"></p></div>
+          <div><p class="eyebrow" id="winner-label">Top of the board</p><h2 id="winner-name"></h2><span id="winner-points" class="points-award"></span><p id="winner-detail"></p></div>
           <span class="winner-rank" id="winner-rank" aria-hidden="true">01</span>
         </div>
         <div class="stats-card">
@@ -39,6 +39,22 @@
           <div><span class="stat-number" id="stat-games">—</span><span>Games played</span></div>
           <div><span class="stat-number" id="stat-groups">—</span><span>Groups submitted</span></div>
         </div>
+      </section>
+      <section class="panel points-panel" aria-labelledby="points-title">
+        <div class="panel-heading points-heading"><div><p class="eyebrow">The points race</p><h2 id="points-title">Overall leaderboard</h2></div><span id="points-run-count" class="tag">All tournaments</span></div>
+        <div class="points-toolbar"><p class="section-note">Total points across all published tournaments, independent of the snapshot selected above.</p>
+          <label class="sr-only" for="points-search">Find a group or player in total points</label><input id="points-search" type="search" placeholder="Find a group or player…" disabled>
+        </div>
+        <p class="section-note" id="points-status" role="status">Loading points across all tournaments…</p>
+        <button type="button" class="button points-retry" id="points-retry" hidden>Retry total points</button>
+        <div id="points-results" hidden>
+          <div class="table-scroll"><table class="points-table"><caption class="sr-only">Cumulative tournament points for each group. Equal totals share a rank; groups with zero points are unranked.</caption>
+            <thead><tr><th>Rank</th><th>Player</th><th class="number">Qualified runs</th><th class="number">Total points</th></tr></thead><tbody id="points-body"></tbody>
+          </table></div>
+          <p id="points-empty" class="section-note" hidden>No group has earned points yet.</p>
+          <div class="points-footer"><span id="points-visible-count"></span><button type="button" class="button" id="points-show-all">Show all groups</button></div>
+        </div>
+        <p class="section-note points-rule">Per tournament: <strong>1st · 0.2 points</strong> <span>2nd · 0.1</span> <span>3rd · 0.05</span> <span>Then halves at each place. Zero if not qualified.</span></p>
       </section>
       <div class="competition-grid">
         <section class="panel standings-panel" id="standings-section" aria-labelledby="standings-title">
@@ -53,6 +69,7 @@
               <th class="number">D</th><th class="number">L</th><th class="record-column">Record</th>
               <th class="number"><button data-sort="difference" type="button">Disc ± <span aria-hidden="true">↕</span></button></th>
               <th class="number" title="Change from round-robin rank to final rank">Rank Δ</th>
+              <th class="number"><button data-sort="points" type="button">Points <span aria-hidden="true">↕</span></button></th>
             </tr></thead><tbody id="standings-body"></tbody>
           </table></div>
           <p id="no-players" class="section-note" hidden>No players passed eligibility checks in this snapshot.</p>
@@ -88,7 +105,7 @@
             <dl id="qualification-guide"></dl>
           </section>
           <label class="sr-only" for="group-search">Search groups, players and qualification notes</label><input id="group-search" type="search" placeholder="Find a group, player or qualification note…">
-          <div class="table-scroll"><table><caption class="sr-only">Qualification and explanations for every submitted group.</caption><thead><tr><th>Group</th><th>Player</th><th>Qualification</th><th>Notes</th></tr></thead><tbody id="roster-body"></tbody></table></div>
+          <div class="table-scroll"><table><caption class="sr-only">Qualification, tournament points and explanations for every submitted group.</caption><thead><tr><th>Group</th><th>Player</th><th>Qualification</th><th class="number">Points</th><th>Notes</th></tr></thead><tbody id="roster-body"></tbody></table></div>
           <p id="no-groups" class="section-note" hidden>No groups match your search.</p>
         </div>
       </details>

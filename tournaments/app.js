@@ -1,8 +1,13 @@
-import { readResults, readGames, playerName, stageName, statusName, statusDescription, standings, matchup } from "./core.js";
+import { readResults, readGames, playerName, stageName, statusName, statusDescription, standings, matchup, tournamentPoints, totalPoints } from "./core.js";
 
 const $ = id => document.getElementById(id);
-const state = { players: [], games: [], ranked: [], pair: null, sort: "rank", direction: 1 };
+const state = { players: [], games: [], ranked: [], pair: null, sort: "rank", direction: 1,
+  runs: [], results: new Map(), totals: [], showAllTotals: false };
 let controller;
+let totalsVersion = 0;
+const regularPoints = new Intl.NumberFormat("en", { maximumSignificantDigits: 12, useGrouping: false });
+const smallPoints = new Intl.NumberFormat("en", { notation: "scientific", maximumSignificantDigits: 6 });
+const formatPoints = value => (value > 0 && value < 0.00001 ? smallPoints : regularPoints).format(value);
 const dateLabel = id => new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "long", year: "numeric" })
   .format(new Date(`${id}T12:00:00`));
 const findPlayer = id => state.players.find(player => player.id === id) || { id };
@@ -39,6 +44,32 @@ function recordBar(player) {
   return bar;
 }
 
+function renderTotals() {
+  const query = $("points-search").value.trim().toLocaleLowerCase();
+  const matching = state.totals.filter(player =>
+    `Group ${player.id} ${player.name}`.toLocaleLowerCase().includes(query));
+  const visible = query || state.showAllTotals ? matching : matching.filter(player => player.total > 0).slice(0, 10);
+  const maximum = state.totals[0]?.total || 0;
+  $("points-body").replaceChildren(...visible.map(player => {
+    const row = node("tr", null, player.rank === 1 ? "leader" : "");
+    const rank = cell(null); rank.append(node("span", player.rank ?? "—", "rank-chip"));
+    const name = cell(null); name.append(playerCell(player));
+    const points = cell(null, "number"), score = node("div", null, "total-score");
+    const meter = node("span", null, "points-meter"), fill = node("span");
+    meter.setAttribute("aria-hidden", "true");
+    fill.style.width = `${maximum ? Math.min(100, player.total / maximum * 100) : 0}%`;
+    meter.append(fill); score.append(meter, node("strong", formatPoints(player.total), "points-value")); points.append(score);
+    row.append(rank, name, cell(`${player.qualifiedRuns} / ${state.runs.length}`, "number muted"), points);
+    return row;
+  }));
+  $("points-visible-count").textContent = `Showing ${visible.length} of ${state.totals.length} groups`;
+  $("points-empty").hidden = visible.length > 0;
+  $("points-empty").textContent = query ? "No groups match your search." : "No group has earned points yet.";
+  const topCount = Math.min(10, state.totals.filter(player => player.total > 0).length);
+  $("points-show-all").hidden = Boolean(query) || state.totals.length === topCount;
+  $("points-show-all").textContent = state.showAllTotals ? "Show top scorers" : `Show all ${state.totals.length} groups`;
+}
+
 function renderStandings() {
   const ranked = [...state.ranked].sort((a, b) => {
     const first = state.sort === "name" ? playerName(a) : a[state.sort];
@@ -57,7 +88,8 @@ function renderStandings() {
     delta.title = "Change from round-robin rank to final rank";
     row.append(rank, name, cell(player.wins, "number"), cell(player.draws, "number muted"),
       cell(player.losses, "number"), record,
-      cell(signed(player.difference), `number ${player.difference > 0 ? "positive" : player.difference < 0 ? "negative" : "muted"}`), delta);
+      cell(signed(player.difference), `number ${player.difference > 0 ? "positive" : player.difference < 0 ? "negative" : "muted"}`), delta,
+      cell(formatPoints(player.points), "number points-value"));
     return row;
   }));
   $("no-players").hidden = state.ranked.length > 0;
@@ -153,7 +185,8 @@ function renderRoster() {
   $("roster-body").replaceChildren(...players.map(player => {
     const row = node("tr"), qualification = cell(null);
     qualification.append(node("span", statusName(player.status), `qualification ${player.status === "allowed" ? "qualified" : player.status === "failed" ? "failed" : ""}`));
-    row.append(cell(`Group ${player.id}`), cell(player.name || "—"), qualification, cell(player.explanation || "—"));
+    row.append(cell(`Group ${player.id}`), cell(player.name || "—"), qualification,
+      cell(formatPoints(tournamentPoints(player)), "number points-value"), cell(player.explanation || "—"));
     return row;
   }));
   $("no-groups").hidden = players.length > 0;
@@ -168,6 +201,8 @@ function renderRun(run) {
   const winner = state.ranked[0];
   $("winner-label").textContent = state.ranked.length === 1 ? "Top of the board · sole entrant" : "Top of the board";
   $("winner-name").textContent = winner ? playerName(winner) : "No qualified player";
+  $("winner-points").textContent = winner ? `${formatPoints(winner.points)} points this tournament` : "";
+  $("winner-points").hidden = !winner;
   $("winner-rank").textContent = winner ? String(winner.rank ?? 1).padStart(2, "0") : "—";
   $("winner-detail").textContent = winner ? `Group ${winner.id} · ${winner.wins} wins · ${winner.draws} draws · ${winner.losses} losses` : "See qualification details for this snapshot.";
   $("stat-players").textContent = state.ranked.length;
@@ -193,6 +228,31 @@ async function getText(path, signal) {
   if (!response.ok) throw new Error(`Could not load ${path} (HTTP ${response.status}).`);
   return response.text();
 }
+function getResults(run) {
+  if (!state.results.has(run.id)) {
+    const request = getText(`${run.id}/results.csv`).then(readResults);
+    state.results.set(run.id, request);
+    request.catch(() => { if (state.results.get(run.id) === request) state.results.delete(run.id); });
+  }
+  return state.results.get(run.id);
+}
+async function loadTotals() {
+  const version = ++totalsVersion;
+  $("points-status").hidden = false; $("points-status").textContent = "Loading points across all tournaments…";
+  $("points-results").hidden = true; $("points-retry").hidden = true; $("points-search").disabled = true;
+  try {
+    const snapshots = await Promise.all(state.runs.map(async run => ({ id: run.id, players: await getResults(run) })));
+    if (version !== totalsVersion) return;
+    state.totals = totalPoints(snapshots); state.showAllTotals = false;
+    $("points-search").value = ""; $("points-search").disabled = false;
+    $("points-run-count").textContent = `${state.runs.length} tournament${state.runs.length === 1 ? "" : "s"}`;
+    renderTotals(); $("points-status").hidden = true; $("points-results").hidden = false;
+  } catch (error) {
+    if (version !== totalsVersion) return;
+    $("points-status").textContent = `Total points are unavailable because a tournament could not be loaded. ${error.message}`;
+    $("points-retry").hidden = false;
+  }
+}
 function showError(error) {
   $("loading").hidden = true; $("dashboard").hidden = true;
   $("error-message").textContent = `The results could not be loaded. ${error.message}`;
@@ -204,10 +264,10 @@ async function loadRun(run) {
   $("loading").hidden = false; $("error").hidden = true; $("dashboard").hidden = true;
   try {
     const [results, games] = await Promise.all([
-      getText(`${run.id}/results.csv`, signal), run.games ? getText(`${run.id}/games.csv`, signal) : Promise.resolve(""),
+      getResults(run), run.games ? getText(`${run.id}/games.csv`, signal) : Promise.resolve(""),
     ]);
     if (signal.aborted) return;
-    state.players = readResults(results); state.games = readGames(games);
+    state.players = results; state.games = readGames(games);
     renderRun(run);
     const url = new URL(location.href); url.searchParams.set("run", run.id); history.replaceState(null, "", url);
     $("loading").hidden = true; $("dashboard").hidden = false;
@@ -222,6 +282,8 @@ async function boot() {
     }
     const runs = manifest.runs.sort((a, b) => b.id.localeCompare(a.id));
     if (!runs.length) { $("loading").hidden = true; $("empty").hidden = false; return; }
+    state.runs = runs; state.results = new Map();
+    const totals = loadTotals();
     const select = $("run-select");
     select.replaceChildren(...runs.map((run, i) => new Option(`${dateLabel(run.id)}${i === 0 ? " · latest" : ""}`, run.id)));
     const requested = new URL(location.href).searchParams.get("run");
@@ -229,17 +291,21 @@ async function boot() {
     select.value = chosen.id; select.disabled = false;
     select.onchange = () => loadRun(runs.find(run => run.id === select.value));
     await loadRun(chosen);
+    await totals;
   } catch (error) { showError(error); }
 }
 
 document.querySelectorAll("[data-sort]").forEach(button => button.addEventListener("click", () => {
   const sort = button.dataset.sort;
-  state.direction = state.sort === sort ? -state.direction : ["wins", "difference"].includes(sort) ? -1 : 1;
+  state.direction = state.sort === sort ? -state.direction : ["wins", "difference", "points"].includes(sort) ? -1 : 1;
   state.sort = sort; renderStandings();
 }));
 $("stage-filter").addEventListener("change", renderGames);
 $("player-filter").addEventListener("change", () => { state.pair = null; renderGames(); });
 $("clear-match").addEventListener("click", () => { state.pair = null; renderGames(); });
 $("group-search").addEventListener("input", renderRoster);
+$("points-search").addEventListener("input", renderTotals);
+$("points-show-all").addEventListener("click", () => { state.showAllTotals = !state.showAllTotals; renderTotals(); });
+$("points-retry").addEventListener("click", loadTotals);
 $("retry").addEventListener("click", boot);
 boot();

@@ -85,6 +85,35 @@ th button { border: 0; background: none; color: inherit; font: inherit; padding:
 }
 
 .intro .eyebrow { text-transform: none; letter-spacing: .03em; font-size: 12px; }
+.points-award { display: inline-block; padding: 4px 9px; margin-bottom: 10px; border: 1px solid #6c8975; border-radius: 5px; color: #e5d3a2; font-size: 12px; font-weight: 650; }
+.points-panel { margin-bottom: 24px; }
+.points-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 20px; margin: 12px 25px 20px; }
+.points-toolbar .section-note { margin: 0; }
+.points-toolbar input { width: 235px; flex-shrink: 0; font-size: 12px; }
+.points-table td { padding-block: 14px; }
+.points-table th:nth-child(3) { width: 140px; }
+.points-table th:last-child { width: 230px; }
+.total-score { display: flex; justify-content: end; align-items: center; gap: 18px; }
+.points-value { color: #7b602d; font-weight: 650; font-variant-numeric: tabular-nums; }
+.points-meter { display: block; width: 110px; height: 7px; border-radius: 8px; overflow: hidden; background: #eee9db; }
+.points-meter > span { display: block; height: 100%; background: #bd9b50; }
+.points-footer { display: flex; justify-content: space-between; align-items: center; padding: 15px 25px; border-top: 1px solid var(--line); color: var(--muted); font-size: 11px; }
+.points-footer .button { font-size: 11px; }
+.points-rule { display: flex; flex-wrap: wrap; gap: 5px 14px; padding-top: 15px; border-top: 1px solid var(--line); }
+.points-rule strong { font-weight: 650; color: #7b602d; }
+.points-retry { margin: 0 25px 20px; }
+@media (max-width: 560px) {
+  .points-toolbar { display: block; margin: 12px 18px 18px; }
+  .points-toolbar input { width: 100%; margin-top: 12px; }
+  .points-table th, .points-table td { padding: 13px 8px; }
+  .points-table th:first-child, .points-table td:first-child { padding-left: 18px; }
+  .points-table th:last-child, .points-table td:last-child { padding-right: 18px; width: auto; }
+  .points-table th:nth-child(3) { width: auto; }
+  .points-table .player-name { font-size: 12px; }
+  .total-score { gap: 7px; }.points-meter { width: 35px; }
+  .points-footer { padding: 14px 18px; gap: 12px; }
+  .standings-table th:nth-child(7), .standings-table td:nth-child(7) { display: none; }
+}
 .qualification-guide { margin: 0 25px 22px; padding: 18px 20px; background: #f6f6f0; border-radius: 8px; }
 .qualification-guide h3 { font-size: 12px; font-weight: 650; margin: 0 0 16px; }
 .qualification-guide dl { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px 28px; margin: 0; }

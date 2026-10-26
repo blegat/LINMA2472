@@ -100,6 +100,48 @@ export const statusName = status => qualifications[status]?.label || status;
 export const statusDescription = status => qualifications[status]?.description ||
   "See the Notes column for the recorded qualification outcome.";
 
+function scoringRank(player) {
+  return player.status === "allowed" && Number.isSafeInteger(player.rank) && player.rank > 0;
+}
+
+export function tournamentPoints(player) {
+  return scoringRank(player) ? 0.4 / 2 ** player.rank : 0;
+}
+
+export function totalPoints(snapshots) {
+  if (new Set(snapshots.map(snapshot => snapshot.id)).size !== snapshots.length) {
+    throw new Error("A tournament cannot be counted twice in total points.");
+  }
+  const ordered = [...snapshots].sort((a, b) => a.id.localeCompare(b.id));
+  const maxRank = ordered.reduce((maximum, snapshot) => snapshot.players.reduce(
+    (rank, player) => scoringRank(player) ? Math.max(rank, player.rank) : rank, maximum), 1);
+  const groups = new Map();
+  for (const snapshot of ordered) {
+    for (const player of snapshot.players) {
+      if (!groups.has(player.id)) {
+        groups.set(player.id, { id: player.id, name: "", total: 0, qualifiedRuns: 0, units: 0n });
+      }
+      const group = groups.get(player.id);
+      if (player.name) group.name = player.name;
+      group.total += tournamentPoints(player);
+      if (scoringRank(player)) {
+        group.qualifiedRuns++;
+        // Scores share a denominator. Compare integer numerators so equal sums
+        // receive the same rank despite floating-point addition order.
+        group.units += 1n << BigInt(maxRank - player.rank);
+      }
+    }
+  }
+  const sorted = [...groups.values()].sort((a, b) => a.units === b.units ? Number(a.id) - Number(b.id) :
+    a.units > b.units ? -1 : 1);
+  let previous = null, rank = null;
+  return sorted.map(({ units, ...group }, index) => {
+    if (units !== previous) rank = units > 0n ? index + 1 : null;
+    previous = units;
+    return { ...group, rank };
+  });
+}
+
 export function standings(players, games) {
   return players.filter(player => player.status === "allowed").map(player => {
     const played = games.filter(game => game.black === player.id || game.white === player.id);
@@ -108,7 +150,7 @@ export function standings(players, games) {
     const difference = played.reduce((sum, game) => sum + (game.black === player.id ? 1 : -1) *
       (game.blackDiscs - game.whiteDiscs), 0);
     return {
-      ...player, played: played.length,
+      ...player, points: tournamentPoints(player), played: played.length,
       wins: played.length ? wins : player.initialWins,
       draws, losses: played.length ? played.length - wins - draws : player.initialLosses,
       difference,
