@@ -1,4 +1,4 @@
-import { readResults, readGames, playerName, stageName, statusName, standings, matchup } from "./core.js";
+import { readResults, readGames, playerName, stageName, statusName, statusDescription, standings, matchup } from "./core.js";
 
 const $ = id => document.getElementById(id);
 const state = { players: [], games: [], ranked: [], pair: null, sort: "rank", direction: 1 };
@@ -177,6 +177,13 @@ function renderRun(run) {
   $("results-download").href = `${run.id}/results.csv`;
   $("games-download").href = `${run.id}/games.csv`; $("games-download").hidden = !run.games;
   $("snapshot-note").textContent = `${dateLabel(run.id)} · published snapshot`;
+  $("qualification-guide").replaceChildren(...[...new Set(state.players.map(player => player.status))].map(status => {
+    const item = node("div", null, "qualification-item");
+    const term = node("dt");
+    term.append(node("span", statusName(status), `qualification ${status === "allowed" ? "qualified" : status === "failed" ? "failed" : ""}`));
+    item.append(term, node("dd", statusDescription(status)));
+    return item;
+  }));
   renderStandings(); renderMatrix(); renderGames(); renderRoster();
   $("announcement").textContent = `${dateLabel(run.id)} loaded: ${state.ranked.length} qualified players and ${state.games.length} games.`;
 }

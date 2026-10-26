@@ -83,3 +83,14 @@ th button { border: 0; background: none; color: inherit; font: inherit; padding:
   .games-table td:nth-child(7) { grid-area: moves; align-self: end; font-size: 10px; }
   .games-table td:nth-child(7)::before { content: "Moves: "; }
 }
+
+.intro .eyebrow { text-transform: none; letter-spacing: .03em; font-size: 12px; }
+.qualification-guide { margin: 0 25px 22px; padding: 18px 20px; background: #f6f6f0; border-radius: 8px; }
+.qualification-guide h3 { font-size: 12px; font-weight: 650; margin: 0 0 16px; }
+.qualification-guide dl { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px 28px; margin: 0; }
+.qualification-guide dt { margin: 0; }
+.qualification-guide dd { margin: 8px 0 0; color: var(--muted); font-size: 12px; line-height: 1.65; }
+@media (max-width: 560px) {
+  .qualification-guide { margin: 0 18px 18px; padding: 16px; }
+  .qualification-guide dl { grid-template-columns: 1fr; gap: 18px; }
+}

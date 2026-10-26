@@ -15,7 +15,6 @@ See the README in each subfolder for more details and troubleshooting:
 
 The [tournament viewer](https://blegat.github.io/LINMA2472/tournaments/) displays
 standings, matchups and games from the raw CSV snapshots in [`tournaments/`](tournaments).
-See its [README](tournaments/README.md) for the two-file publishing workflow.
 
 ## Schedule
 

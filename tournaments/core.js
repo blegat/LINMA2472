@@ -74,10 +74,31 @@ export function readGames(text) {
 
 export const playerName = player => player?.name || `Group ${player?.id ?? "?"}`;
 export const stageName = phase => ({ "1": "Round robin", "2": "Ladder" }[phase] || `Stage ${phase}`);
-export const statusName = status => ({
-  allowed: "Qualified", positional_ai: "Default player", failed: "Failed eligibility",
-  "non-dl": "Excluded by policy", "non-transformer": "Excluded by policy (legacy)",
-}[status] || status);
+const qualifications = {
+  allowed: {
+    label: "Qualified",
+    description: "Uses a pure deep-learning model without search or handcrafted move-selection heuristics, and passed the loading and legal-play checks within the move time limit.",
+  },
+  positional_ai: {
+    label: "Default player",
+    description: "Uses the starter positional player, which chooses moves using a fixed table of scores for board squares, rather than a neural network. It does not enter the tournament.",
+  },
+  failed: {
+    label: "Failed eligibility",
+    description: "Could not be classified, failed to load, or failed the legal-play checks, including illegal moves, invalid passes or exceeding the time limit. The Notes column gives the reason.",
+  },
+  "non-dl": {
+    label: "Excluded by policy",
+    description: "Move selection uses tree or graph search (such as minimax or MCTS), opening books, handcrafted heuristics or another method outside pure deep learning. Neural networks combined with those methods are excluded too.",
+  },
+  "non-transformer": {
+    label: "Excluded by policy (legacy)",
+    description: "Was excluded under the older transformer-only rules. This status records the qualification policy used for that snapshot.",
+  },
+};
+export const statusName = status => qualifications[status]?.label || status;
+export const statusDescription = status => qualifications[status]?.description ||
+  "See the Notes column for the recorded qualification outcome.";
 
 export function standings(players, games) {
   return players.filter(player => player.status === "allowed").map(player => {

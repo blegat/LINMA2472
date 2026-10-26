@@ -82,7 +82,12 @@
       </section>
       <details class="panel roster-panel" id="roster">
         <summary><span>All groups <span class="count" id="roster-count"></span></span><span class="summary-hint">Qualification details <span aria-hidden="true">+</span></span></summary>
-        <div class="roster-content"><label class="sr-only" for="group-search">Search groups, players and qualification notes</label><input id="group-search" type="search" placeholder="Find a group, player or qualification note…">
+        <div class="roster-content">
+          <section class="qualification-guide" aria-labelledby="qualification-guide-title">
+            <h3 id="qualification-guide-title">Qualifications in this snapshot</h3>
+            <dl id="qualification-guide"></dl>
+          </section>
+          <label class="sr-only" for="group-search">Search groups, players and qualification notes</label><input id="group-search" type="search" placeholder="Find a group, player or qualification note…">
           <div class="table-scroll"><table><caption class="sr-only">Qualification and explanations for every submitted group.</caption><thead><tr><th>Group</th><th>Player</th><th>Qualification</th><th>Notes</th></tr></thead><tbody id="roster-body"></tbody></table></div>
           <p id="no-groups" class="section-note" hidden>No groups match your search.</p>
         </div>

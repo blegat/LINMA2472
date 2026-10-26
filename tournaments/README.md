@@ -1,53 +1,40 @@
-# Reversi tournament viewer
+# Reversi AI tournament
 
-The viewer uses the original `results.csv` and `games.csv` produced by the private
-Julia tournament runner. All standings displays, game summaries and head-to-head
-records are calculated in the browser. A single viewer serves every snapshot, so
-changing the visualization also changes how historical raw data is displayed.
+[Open the tournament viewer](https://blegat.github.io/LINMA2472/tournaments/).
 
-## Publish another snapshot
+Explore the standings, head-to-head records and games played by the student AIs.
+Select an available tournament snapshot, filter games by stage or player, or
+select a cell in the head-to-head table to see that matchup's games.
 
-Copy the unmodified files into a dated folder in this public repository:
+## Reading the results
 
-```text
-tournaments/
-  2026-10-26/
-    results.csv
-    games.csv
-  2026-11-02/
-    results.csv
-    games.csv
-```
+- **Final standings** show the tournament's final ranking after the ladder stage.
+- **Wins, draws and losses** include all recorded games, across both the round
+  robin and ladder. **Disc ±** is the total number of discs scored minus conceded.
+- **Head to head** shows the row player's wins, draws and losses against each
+  opponent.
+- **Qualification details** explains each status in the selected snapshot and
+  lists every group's outcome. The Notes column gives any specific reason for
+  exclusion or a failed eligibility check.
 
-Commit and push the new CSVs through the normal repository workflow. No manifest,
-HTML, derived statistics or visualization output needs to be maintained by hand.
-The existing GitHub Pages workflow runs `generate_index.py`, which discovers the
-dated folders and writes the small `runs.json` file used by the snapshot selector.
-Folders must be named `YYYY-MM-DD`. A run with only `results.csv` is supported,
-including historical runs with a single qualified player and no recorded games.
+Pure deep-learning players can qualify.
+Tree or graph search, opening books and handcrafted move-selection heuristics
+are excluded, including when combined with a neural network. Players must also
+pass the loading and legal-play checks within the move time limit. Older snapshots
+retain the qualification rules and outcomes recorded at that time.
 
-The viewer is available at `tournaments/` on the course website. A link such as
-`tournaments/?run=2026-10-26` selects a particular snapshot.
+Use the links at the bottom of the viewer to download the raw results and games.
+If a snapshot has no recorded games, the standings show the round-robin wins and
+losses from its results file instead.
 
-## Local preview and checks
+## Run the viewer locally
 
-From the repository root:
+From the root of this public repository, using Python 3.9 or later:
 
 ```sh
 python3 tournaments/generate_index.py
 python3 -m http.server 8000
 ```
 
-Open `http://localhost:8000/tournaments/`. To run the focused checks (Node 18+ and
-Python 3.9+, no third-party packages):
-
-```sh
-node --test tournaments/test/*.test.js
-python3 -m unittest discover -s tournaments/test -p 'test_*.py'
-```
-
-Final ranks come directly from `results.csv`; the viewer does not rerank players.
-Win/draw/loss records and disc differences include every row of `games.csv`, across
-both the round robin and ladder. When no games file exists, round-robin wins and
-losses from the results file are shown instead. Historical qualification statuses
-are retained as recorded, rather than reinterpreted using today's eligibility rules.
+Open <http://localhost:8000/tournaments/> in a browser with JavaScript enabled.
+No third-party Python packages are required.
