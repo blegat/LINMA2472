@@ -1545,7 +1545,7 @@ qa(md"We are free to choose any scalar product ``\langle \cdot, \cdot \rangle_k`
    md"""
 If we change the scalar product ``\langle \cdot, \cdot \rangle_k``, it changes both the adjoint ``\partial f^*_k`` and ``\partial f^*_{k+1}``. But it does not affect the gradient of ``f`` as the changes made to both these Jacobian cancel out. The composition ``(\partial f^*_k) \circ (\partial f^*_{k+1})`` is unaffected by the choice of the scalar product ``\langle \cdot, \cdot \rangle_k``.
 
-For example, suppose ``\mathcal{S}_0 = \mathcal{S}_1 = \mathcal{S}_2 = \mathbb{R}`` and ``f_1(x) = x^2`` and ``f_2(x) = \exp(x)``. For ``s_0 = 1``, we have ``s_1 = 2``, ``s_2  = e``, ``\partial f_1(1) = 2``, ``\partial f_2(1) = e``.
+For example, suppose ``\mathcal{S}_0 = \mathcal{S}_1 = \mathcal{S}_2 = \mathbb{R}`` and ``f_1(x) = x^2`` and ``f_2(x) = \exp(x)``. For ``s_0 = 1``, we have ``s_1 = 1``, ``s_2  = e``, ``\partial f_1(1) = 2``, ``\partial f_2(1) = e``.
 So forward math computes ``(f_2 \circ f_1)'(1) = \partial f_1(1) \cdot \partial f_2(1) = 2e``.
 
 For ``\langle x, y \rangle_0 = \rangle x, y \rangle_1 = \rangle x, y \rangle_2 = xy``, we have ``\partial f_1^*(1) = 2``, ``\partial f_2^*(1) = e``. So the reverse mode computes ````(f_2 \circ f_1)'(1) = \partial f_1^*(1) \cdot \partial f_2^*(1) = 2e``.
