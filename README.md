@@ -56,4 +56,4 @@ No need to prepare slides and if you don't have questions, we'll ask you some to
 | 09:50–10:00 | 6 | 22 |
 | 10:00–10:10 | 18 | 9 |
 | 10:10–10:20 | 11 | 23 |
-| 10:20–10:30 | 1 |   |
+| 10:20–10:30 | 8 |   |
