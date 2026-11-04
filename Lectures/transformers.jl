@@ -798,24 +798,100 @@ function draw_transformer(decoder_only = true)
 	end
 end
 
+# ╔═╡ 0322b582-219b-4fbb-92e5-c82ff635615c
+function draw_preactivation_decoder()
+    x = -20
+    function block(y, height, color, lines)
+        sethue(color)
+        box(Point(x, y), 164, height, 4, :fill)
+        sethue("black")
+        box(Point(x, y), 164, height, 4, :stroke)
+        for (i, line) in enumerate(lines)
+            text(
+                line,
+                Point(x, y + 15 * (i - (length(lines) + 1) / 2));
+                halign = :center,
+                valign = :middle,
+            )
+        end
+    end
+    function connection(y1, y2)
+        arrow(Point(x, y1), Point(x, y2); linewidth = 1.5, arrowheadlength = 6)
+    end
+    function addition(y)
+        sethue("#F2F4C1")
+        circle(Point(x, y), 9, :fill)
+        sethue("black")
+        circle(Point(x, y), 9, :stroke)
+        text("+", Point(x, y); halign = :center, valign = :middle)
+    end
+    function residual(y1, y2)
+        circle(Point(x, y1), 2.5, :fill)
+        poly([Point(x, y1), Point(88, y1), Point(88, y2)]; action = :stroke)
+        arrow(Point(88, y2), Point(x + 9, y2); linewidth = 1.5, arrowheadlength = 6)
+    end
+    fontface("sans")
+    fontsize(13)
+    setline(1.5)
+    sethue("#F4F4F4")
+    box(Point(-5, 30), 224, 296, 12, :fill)
+    sethue("black")
+    box(Point(-5, 30), 224, 296, 12, :stroke)
+    text("N×", Point(128, 30); halign = :center, valign = :middle)
+
+    # Each residual path bypasses both the normalization and its sub-block.
+    residual(163, 49)
+    residual(29, -86)
+    connection(189, 151)
+    block(139, 24, "#F2F4C1", ["Layer Norm"])
+    connection(127, 115)
+    block(94, 42, "#FFE2BB", ["Masked Multi-Head", "Attention"])
+    connection(73, 58)
+    addition(49)
+    connection(40, 16)
+    block(4, 24, "#F2F4C1", ["Layer Norm"])
+    connection(-8, -20)
+    block(-40, 40, "#C2E8F7", ["Feed-Forward"])
+    connection(-60, -77)
+    addition(-86)
+
+    # The final normalization is outside the repeated decoder block.
+    connection(-95, -132)
+    block(-144, 24, "#F2F4C1", ["Layer Norm"])
+    connection(-156, -171)
+    block(-183, 24, "#DADDEF", ["Linear"])
+    connection(-195, -211)
+    block(-223, 24, "#CEE8D1", ["Softmax"])
+    connection(-235, -246)
+    text("Output probabilities", Point(x, -260); halign = :center, valign = :middle)
+
+    addition(198)
+    connection(217, 207)
+    block(232, 30, "#F9DEDE", ["Input Embedding"])
+    connection(255, 247)
+    text("Inputs (shifted right)", Point(x, 267); halign = :center, valign = :middle)
+    line(Point(100, 211), Point(100, 198), :stroke)
+    arrow(Point(100, 198), Point(x + 9, 198); linewidth = 1.5, arrowheadlength = 6)
+    text("Positional", Point(100, 220); halign = :center, valign = :middle)
+    text("Encoding", Point(100, 235); halign = :center, valign = :middle)
+    return nothing
+end
+
 # ╔═╡ d1ba8da3-add8-4dbe-9ebf-9a32fa5cd5dd
 HAlign(
-md"""
-*Pre-activation* for residual neural networks introduced in $(cite("he2016Identity")) and used in GPT-2 $(cite("radford2019Language")). See figure on the right.
+    md"""
+    *Pre-activation* for residual neural networks introduced in $(cite("he2016Identity")) and used in GPT-2 $(cite("radford2019Language")). See figure on the right.
 
-*Rotary Positional Encoding* $(cite("su2023RoFormer")) replaces
-``W^K(Cx_i + p_i)`` and ``W^Q(Cx_i + p_i)``
-by ``R^i W^KCx_i`` and ``R^i W^QCx_i`` where ``R`` is a rotation matrix.
-Advantage : ``\langle k_i, q_j \rangle`` contains ``R^{i - j}`` → **relative** difference of position.
-""",
-HTML(html(@draw begin
-	draw_transformer()
-	sethue("blue")
-	scale(2, 2)
-	arrow(Point(175, -36), Point(180, -43), Point(170, -48), Point(145, -53), :stroke, startarrow=false, finisharrow=true)
-	arrow(Point(175, -30), Point(190, -10), Point(195, 10), Point(145, 17), :stroke, startarrow=false, finisharrow=true)
-	arrow(Point(175, 120), Point(190, 130), Point(195, 150), Point(145, 192), :stroke, startarrow=false, finisharrow=true)
-end 300 400)),
+    Layer normalization is applied **before** attention and feed-forward, leaving an **identity** residual path. A final layer normalization follows the ``N`` blocks.
+
+    *Rotary Positional Encoding* $(cite("su2023RoFormer")) replaces
+    ``W^K(Cx_i + p_i)`` and ``W^Q(Cx_i + p_i)``
+    by ``R^i W^KCx_i`` and ``R^i W^QCx_i`` where ``R`` is a rotation matrix.
+    Advantage : ``\langle k_i, q_j \rangle`` contains ``R^{i - j}`` → **relative** difference of position.
+    """,
+    HTML(html(@draw begin
+        draw_preactivation_decoder()
+    end 300 560)),
 )
 
 # ╔═╡ 8d6ec2b3-997e-4df5-a3b2-c1dffa53d0ec
@@ -2767,6 +2843,7 @@ uuid = "23338594-aafe-5451-b93e-139f81909106"
 # ╠═94ae440d-0644-49db-9461-f1a1ff1d7f87
 # ╠═4f1d5112-dbac-4eb6-8518-0dc4193c3f8e
 # ╠═85a10748-8d19-44a8-a1c5-0d13b093f1bf
+# ╠═0322b582-219b-4fbb-92e5-c82ff635615c
 # ╠═a873f760-bfc1-489f-a58e-75e12afa54f2
 # ╠═a57f2149-c876-4421-a958-e9aed1f892a6
 # ╠═293266c6-01e7-4da0-8caf-56b1ce0aae85
