@@ -1,0 +1,20 @@
+Name,Num params,Ref,Vocabulary size,Embedding dimension,Context window,Feed-Forward hidden dimension,Tokenizer
+Gemini-1.5,,[TGLB24],256k,,10M,,SentencePiece
+Gemini-1,1.[8B/3.25B](https://storage.googleapis.com/deepmind-media/gemini/gemini_1_report.pdf),[TABA24],256k,,10M,,SentencePiece
+Gemma-2,27B,[TRPS24],256k,4608,8192,73728,SentencePiece
+Gemma-2,9B,[TRPS24],256k,3584,8192,28672,SentencePiece
+Gemma-2,2B,[TRPS24],256k,2304,8192,18432,SentencePiece
+Gemma,7B,[TMHD24],256k,3072,8192,49152,SentencePiece
+Gemma,2B,[TMHD24],256k,2048,8192,32768,SentencePiece
+GPT-2,1.5B,[RWCL19],[50k](https://github.com/openai/gpt-2),[768](https://github.com/huggingface/transformers/blob/main/src/transformers/models/gpt2/configuration_gpt2.py),1024,3072,tiktoken
+Llama-2,7B,[TMSA23],[32k](https://github.com/meta-llama/llama-models),[4096](https://huggingface.co/docs/transformers/v4.31.0/en/model_doc/llama2),[4k](https://github.com/meta-llama/llama-models),,SentencePiece
+GPT-4o,,,[200k](https://github.com/kaisugi/gpt4_vocab_list/blob/main/o200k_base_vocab_list.txt),,128k,,tiktoken
+GPT-4,,,[100k](https://github.com/kaisugi/gpt4_vocab_list/blob/main/cl100k_base_vocab_list.txt),,32k,,tiktoken
+GPT-3.5,,,[100k](https://github.com/kaisugi/gpt4_vocab_list/blob/main/cl100k_base_vocab_list.txt),,4096,,tiktoken
+GPT-3,[175B](https://arxiv.org/pdf/2005.14165),[BMRS20],50k,,2048,,tiktoken
+Llama-3.2,1B/3B,,128k,,[128k](https://github.com/meta-llama/llama-models),,tiktoken
+Llama-3.1,8B/70B/405B,,128k,,[128k](https://github.com/meta-llama/llama-models),,tiktoken
+Llama-3,8B/70B,,128k,,[8k](https://github.com/meta-llama/llama-models),[4096](https://github.com/meta-llama/llama-models),tiktoken
+MegaByte,,[YSFA23],256,,8192,,Bytes
+base,,[VSPU17],37k,512,,2048,
+big,,[VSPU17],37k,1024,,4096,
