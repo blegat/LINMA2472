@@ -50,8 +50,12 @@ jobs:
               uses: actions/cache@v6
               with:
                   path: pluto_state_cache
-                  key: ${{ runner.os }}-pluto_state_cache-v2-${{ hashFiles('**/Project.toml', '**/Manifest.toml', '.github/workflows/*' ) }}-${{ hashFiles('**/*jl') }}
+                  # The cached files are named after the Pluto version, which is not part of the key.
+                  # Without `run_id`, a primary key hit would never save the cache again so a new Pluto
+                  # version would make every subsequent run miss the cache.
+                  key: ${{ runner.os }}-pluto_state_cache-v2-${{ hashFiles('**/Project.toml', '**/Manifest.toml', '.github/workflows/*' ) }}-${{ hashFiles('**/*jl') }}-${{ github.run_id }}
                   restore-keys: |
+                      ${{ runner.os }}-pluto_state_cache-v2-${{ hashFiles('**/Project.toml', '**/Manifest.toml', '.github/workflows/*' ) }}-${{ hashFiles('**/*jl') }}
                       ${{ runner.os }}-pluto_state_cache-v2-${{ hashFiles('**/Project.toml', '**/Manifest.toml', '.github/workflows/*' ) }}
 
             - name: Ignore notebook state cache in export
