@@ -83,6 +83,15 @@ jobs:
                     # more parameters can go here
                   )'
 
+            # Malt stops forwarding the output of a notebook worker as soon as it
+            # exits, so the kernel log is the only trace of why it died.
+            - name: Show why notebook workers died
+              if: always()
+              run: |
+                lscpu | grep -E 'Model name|avx512' | cut -c1-200
+                free -m
+                sudo dmesg -T | grep -i -E 'oom|killed process|segfault|trap|julia' | tail -n 50 || true
+
 
             - name: Index raw tournament snapshots
               run: |
