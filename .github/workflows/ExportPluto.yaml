@@ -80,9 +80,6 @@ jobs:
                     Export_cache_dir="pluto_state_cache",
                     Export_baked_notebookfile=false,
                     Export_baked_state=false,
-                    # Running notebooks in parallel sometimes exhausts the
-                    # runner memory and the notebook worker gets killed
-                    Export_number_of_parallel_tasks=1,
                     # more parameters can go here
                   )'
 
