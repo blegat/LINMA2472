@@ -1,0 +1,52 @@
+\titledquestion{Kernels for prediction of gene expression}
+
+One would like to predict, from the DNA sequence of an individual (or an appropriate subsequence), the level of expression of a particular gene (for instance, in order to estimate the predisposition of said individual to a disease). A DNA (sub)sequence is a string of $n$ letters taken in a four-letter alphabet (A,C,G,T).
+
+The gene expression level is a real number. We thus must build a map from $n$-letter strings to the reals. We may want to infer this map from $N$ examples $(s_i,r_i)$ (for $i=1,\ldots,N$), where $s_i$ is an $n$-letter string (a DNA sample) and $r_i$ a real number (a gene expression level). This is a regression task. Here we propose a kernel ridge regression to solve it.
+
+Given two strings $s$, $s'$ of length $n$ on the A,C,G,T alphabet, and an integer $\ell < n$ let us consider $k_{\ell}(s,s')$ as the number of $\ell$-letter strings present (at least once) in both $s$ and $s'$. For instance if $s=ACACACGT$ and $s'=ACGTCACA$, and $\ell=3$, we find $k_3(s,s')=4$, because $ACA$, $CAC$, $ACG$ and $CGT$ appear (at least once) in both $s$ and $s'$. 
+
+\begin{itemize}
+	\item  Build a map $s \mapsto \phi(s) \in \mathbb{R}^d$ into a feature space $\mathbb{R}^d$ so that  $k_{\ell}(s,s')= \langle \phi(s) , \phi(s')  \rangle$. Express $d$  as a function of $\ell$ and $n$. Here $ \langle .,. \rangle$ is the usual scalar product in $\mathbb{R}^d$. 
+	
+	\begin{solutionbox}{3cm}
+	\end{solutionbox}
+	
+	Thus $k_\ell(.,.)$ is a kernel map indeed. Call $K_\ell$ the corresponding $N$-by-$N$ kernel matrix.
+	
+	\item  Justify that the regression map found by the kernel ridge regression method (for any given choice of $\ell$) can be written as $s \mapsto \sum_{i=1}^N w_i k_\ell(s_i,s)$, for some $w_i$ to be found. You may use facts and theorems stated in the lectures (and cite them clearly). 
+	
+	\begin{solutionbox}{3cm}
+	\end{solutionbox}
+	
+	\item  Formulated in terms of  $\mathbf{w}=(w_1, \ldots, w_N)$, the kernel ridge regression problem can be written as 	
+	$$
+	\min_{\mathbf{w} \in \mathbb{R}^N} L(\mathbf{w})
+	$$
+	for some objective function. Write down the objective function $L(\mathbf{w})$. Explain briefly each term.
+	
+	\begin{solutionbox}{3cm}
+	\end{solutionbox}
+	
+	\item  What is the computational complexity (i.e., computation time) of deriving the regression map (i.e., computing the vector $w$)?  Justify briefly. Your expression should depend of $N$, $n$, $\ell$. 
+	
+	You may accept and use the following facts or assumptions: that $\ell \ll n$; that matrix $K$ is best computed entrywise (all $N^2$ entries separately); that computing $k_{\ell}(s,s')$ is done (for $\ell \ll n$) in time $\mathcal{O}(\ell n)$ (which means ``in time no larger than $c \ell n$, for some constant $c$'') for each given pair of strings $s$,$s'$; that solving an $N$-by-$N$ linear system $Ax=b$ (for some $N$-by-$N$ matrix $A$ and some vector $b$) is done in time $\mathcal{O}(N^3)$ in general.
+	
+	
+	\begin{solutionbox}{4cm}
+	\end{solutionbox}
+	
+	\item  What is the computational complexity (i.e., computation time) of computing  the regression map on a new string $s$? Justify briefly. Your expression should depend of $N$, $n$, $\ell$. Here we assume that the kernel matrix $K$ and the vector $w$ have already been computed.
+	
+	\begin{solutionbox}{4cm}
+	\end{solutionbox}
+	
+	\item {\bf Bonus} We could use a classification approach instead of regression. We can consider that the gene of interest is either ``expressed'' (if $r \geq r_0$, for some appropriate threshold $r_0$) or ``non-expressed''  (if $r < r_0$). 
+	We may now use a Kernel SVM method. Compare this approach (in terms of respective strengths or weaknesses) with the regression approach on three different aspects (e.g.  relevance for the application, computational complexity, simplicity, interpretability, etc.). This is an open question, with a range of sensible answers. 
+	
+	\begin{solutionbox}{4cm}
+	\end{solutionbox}
+	
+\end{itemize}
+
+NB: many machine-learning methods have been proposed by researchers for this important problem, involving kernels (more sophisticated than the one above), or CNN, transformers, etc. 
