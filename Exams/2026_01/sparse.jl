@@ -26,7 +26,7 @@ adj = SparseMatrixColorings.AdjacencyGraph(S)
 background_color = RGBA(0, 0, 0, 0)
 border_color = RGB(0, 0, 0)
 colorscheme = distinguishable_colors(
-    ncolors(result),
+    ncolors(star_result),
     [convert(RGB, background_color), convert(RGB, border_color)];
     dropseed=true,
 )
