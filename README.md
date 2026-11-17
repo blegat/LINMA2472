@@ -18,22 +18,22 @@ standings, matchups and games from the raw CSV snapshots in [`tournaments/`](tou
 
 ## Schedule
 
-| Week  | Monday     | Lecture Topic | Lecturer  |         Practice          |  Project   |
-|-------|------------|---------------|-----------|---------------------------|------------|
-| S1    | 14/09/2025 | Forward AD    | Legat     | ⚗️ Forward Lab            |            |
-| S2    | 21/09/2025 | Reverse AD    | Legat     | ⚗ Reverse Lab             |            |
-| S3    | 28/09/2025 | Tensor AD     | Legat     | ⚗ Reverse Lab             | 🚀 Start   |
-| S4    | 05/10/2025 | Tensor AD     | Legat     |                           |            |
-| S5    | 12/10/2025 | Second order  | Legat     |                           |            |
-| S6    | 19/10/2025 | Transformers  | Legat     | Practice Tensor AD        |            |
-|       | 26/10/2025 | 🎃            |           |                           |            |
-| S7    | 02/11/2025 | Transformers  | Legat     |                           | Q&A        |
-| S8    | 09/11/2025 | Armistice     |           |                           |            |
-| S9    | 16/11/2025 | TBA           | Blondel   |                           |            |
-| S10   | 23/11/2025 | TBA           | Blondel   |                           | 🏁 End     |
-| S11   | 30/11/2025 | TBA           | Blondel   |                           | 💬 Oral    |
-| S12   | 07/12/2025 | Implicit Diff | Legat     | Practice Implicit Diff    | 💬 Oral    |
-| S13   | 14/12/2025 | Sparse AD     | Montoison | Practice Sparse AD        | 💬 Oral    |
+| Week  | Monday     | Monday session         | With       | Wednesday session | With            |  Project   |
+|-------|------------|------------------------|------------|-------------------|-----------------|------------|
+| S1    | 14/09/2025 | ⚗️ Forward Lab         | Colson     | Forward AD        | Legat           |            |
+| S2    | 21/09/2025 | ⚗ Reverse Lab          | Lequeu     | Reverse AD        | Legat           |            |
+| S3    | 28/09/2025 | ⚗ Reverse Lab          | Colson     | Tensor AD         | Legat           | 🚀 Start   |
+| S4    | 05/10/2025 |                        |            | Tensor AD         | Legat           |            |
+| S5    | 12/10/2025 |                        |            | Second order      | Legat           |            |
+| S6    | 19/10/2025 | Practice Tensor AD     | Lequeu     | Transformers      | Legat           |            |
+|       | 26/10/2025 |                        |            | 🎃                |                 |            |
+| S7    | 02/11/2025 |                        |            | Transformers      | Legat           | Q&A        |
+| S8    | 09/11/2025 |                        |            | Armistice         |                 |            |
+| S9    | 16/11/2025 |                        |            | Regulation of AI  | Decuyper        |            |
+| S10   | 23/11/2025 |                        |            | Responsible AI    | Vande Kerckhove |            |
+| S11   | 30/11/2025 | Lecture Implicit Diff  | Legat      | AI and privacy    | de Montjoye     |            |
+| S12   | 07/12/2025 | Practice Implicit Diff | Massion    | Sparse AD         | Montoison       | 🏁 End     |
+| S13   | 14/12/2025 | Practice Sparse AD     | Massion    | Project oral      | Teaching Staff  | 💬 Oral    |
 
 ## Project Q&A
 
