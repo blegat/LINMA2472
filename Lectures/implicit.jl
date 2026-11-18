@@ -70,13 +70,15 @@ md"""
 md"""
 ## Inverse function theorem
 
+We write ``D f`` for the Jacobian and ``D_i F`` for the Jacobian with respect to the ``i``-th argument.
+
 Assume
 * ``f : \mathcal{W} \to \mathcal{W}`` is ``C^2``
-* ``\partial f(w_0)`` is **invertible**
+* ``D f(w_0)`` is **invertible**
 
 Then
 * ``f`` is bijective from a neighborhood of ``w_0`` to a neighborhood of ``f(w_0)``
-* For ``\omega`` in a neighborhood of ``f(w_0)``, ``f^{-1}`` is ``C^2`` and ``\partial f^{-1}(\omega) = (\partial f(f^{-1}(\omega)))^{-1}``
+* For ``\omega`` in a neighborhood of ``f(w_0)``, ``f^{-1}`` is ``C^2`` and ``D f^{-1}(\omega) = (D f(f^{-1}(\omega)))^{-1}``
 """
 
 # ╔═╡ 0b091706-da13-41f8-9852-4fa685a0fa95
@@ -101,14 +103,14 @@ end;
 ift(
 	"univariate",
 	md"``F: \mathbb{R} \times \mathbb{R} \to \mathbb{R}``",
-	md"``\partial_1 F(w_0, \lambda_0) \neq 0``",
+	md"``D_1 F(w_0, \lambda_0) \neq 0``",
 	md"""
 ```math
 \begin{align}
 w^\star(\lambda_0) & = w_0\\
 F(w^\star(\lambda), \lambda) & = 0,
 \qquad\qquad\qquad \forall(w^\star(\lambda),\lambda)\in \mathcal{V}\\
-\partial w^\star(\lambda) & = -\frac{\partial_2 F(w^\star(\lambda), \lambda)}{\partial_1 F(w^\star(\lambda), \lambda)}
+D w^\star(\lambda) & = -\frac{D_2 F(w^\star(\lambda), \lambda)}{D_1 F(w^\star(\lambda), \lambda)}
 \end{align}
 ```
 """,
@@ -118,14 +120,14 @@ F(w^\star(\lambda), \lambda) & = 0,
 ift(
 	"multivariate",
 	md"``F: \mathcal{W} \times \Lambda \to \mathcal{W}``",
-	md"``\partial_1 F(w_0, \lambda_0)`` is invertible",
+	md"``D_1 F(w_0, \lambda_0)`` is invertible",
 	md"""
 ```math
 \begin{align}
 w^\star(\lambda_0) & = w_0\\
 F(w^\star(\lambda), \lambda) & = 0,
 \qquad\qquad\qquad \forall(w^\star(\lambda),\lambda)\in \mathcal{V}\\
-\partial w^\star(\lambda) & = -\partial_1 F(w^\star(\lambda), \lambda)^{-1}\partial_2 F(w^\star(\lambda), \lambda)
+D w^\star(\lambda) & = -D_1 F(w^\star(\lambda), \lambda)^{-1}D_2 F(w^\star(\lambda), \lambda)
 \end{align}
 ```
 """,
@@ -142,7 +144,7 @@ How can we integrate implicit function in a chain of functions ? Say, ``s_{k-1} 
 md"""
 ## Pushforward operator (JVP)
 
-Let ``A = -\partial_1 F(w^\star(\lambda), \lambda)`` and ``B = \partial_2 F(w^\star(\lambda), \lambda)``.
+Let ``A = -D_1 F(w^\star(\lambda), \lambda)`` and ``B = D_2 F(w^\star(\lambda), \lambda)``.
 Assuming the condition of the IFT holds, we have
 ```math
 A \partial w^\star(\lambda)/\partial s_0 =
@@ -264,7 +266,7 @@ F((x, y), (A, b, c)) = (Ax - b, \text{Diag}(x)(A^\top y - c))
 We have
 ```math
 \begin{align}
-\partial_1 F & = \begin{bmatrix}
+D_1 F & = \begin{bmatrix}
 	A & 0\\
 	\text{Diag}(A^\top y - c) & \text{Diag}(x) A^\top
 \end{bmatrix}
@@ -375,11 +377,11 @@ qa(md"Can't we do something simpler using the solution of the fixed point and th
 # ╔═╡ f1f1a354-cecc-4fb2-8d1e-096f51e4cf88
 qa(md"**Proof sketch**", md"""
 The proof of bijectivity and that ``f`` is ``C^2`` in the neighborhood of ``f(w_0)`` are in Section 11.5.3 of [The Elements of Differentiable Programming book](https://diffprog.github.io/).
-The formula for ``\partial f^{-1}(\omega)`` is a direct consequence of the chain rule:
+The formula for ``D f^{-1}(\omega)`` is a direct consequence of the chain rule:
 ```math
 \begin{align}
    f \circ f^{-1}(\omega) & = \omega\\
-   \partial f(f^{-1}(\omega)) \partial f^{-1}(\omega) & = I.
+   D f(f^{-1}(\omega)) D f^{-1}(\omega) & = I.
 \end{align}
 ```
 """)
@@ -390,7 +392,7 @@ Let ``F(y, x) = x^2 + y^2 - 1``.
 Given an initial point ``(x_0, y_0)`` with ``x_0^2 + y_0^2 = 1``,
 * if ``y_0 > 0`` then IFT holds and ``y^\star(x) = y^+(x)``,
 * if ``y_0 < 0`` then IFT holds and ``y^\star(x) = y^-(x)``,
-* if ``y_0 = 0`` then ``\partial_1 F(y_0, x_0) = 2y_0 = 0`` so IFT does not hold.
+* if ``y_0 = 0`` then ``D_1 F(y_0, x_0) = 2y_0 = 0`` so IFT does not hold.
 """);
 
 # ╔═╡ d701392f-0b25-4c27-989a-a61c23c41d9c
@@ -417,30 +419,30 @@ $circle_qa
 qa(md"**Proof**", md"""
 Define ``f(\lambda, w) = (\lambda, F(w, \lambda))``. The Jacobian is
 ```math
-\partial f(\lambda, w)
+D f(\lambda, w)
 =
 \begin{bmatrix}
    I & 0\\
-   \partial_2 F(w, \lambda) & \partial_1 F(w, \lambda)
+   D_2 F(w, \lambda) & D_1 F(w, \lambda)
 \end{bmatrix}
 ```
-By assumption, ``\partial_1 F(w, \lambda)`` is invertible so ``\det(\partial f(\lambda, w)) = \det(I)\det(\partial_1 F(w, \lambda)) \neq 0``.
+By assumption, ``D_1 F(w, \lambda)`` is invertible so ``\det(D f(\lambda, w)) = \det(I)\det(D_1 F(w, \lambda)) \neq 0``.
 By the inverse function theorem, the inverse of ``f`` around ``f(\lambda_0, w_0) = (\lambda_0, 0)`` is ``C^2``.
 Let ``w^\star(\lambda)`` be the second component of ``f^{-1}(\lambda, 0)``: ``(\lambda, w^\star(\lambda)) = f^{-1}(\lambda, 0)``.
-The Jacobian ``\partial w^\star(\lambda)`` is the derivative of the second component of ``f^{-1}(\lambda, 0)`` with respect to its first input so it is the block 21 in the Jacobian
+The Jacobian ``D w^\star(\lambda)`` is the derivative of the second component of ``f^{-1}(\lambda, 0)`` with respect to its first input so it is the block 21 in the Jacobian
 ```math
-\partial f^{-1}(\lambda, 0) = \begin{bmatrix}
+D f^{-1}(\lambda, 0) = \begin{bmatrix}
    \sim & \sim\\
-   \partial w^\star(\lambda) & \sim
+   D w^\star(\lambda) & \sim
 \end{bmatrix}
 ```
 By the inverse function theorem
 ```math
-\partial f^{-1}(\lambda, 0)
-= (\partial f(\lambda, w))^{-1}
+D f^{-1}(\lambda, 0)
+= (D f(\lambda, w))^{-1}
 = \begin{bmatrix}
    I & 0\\
-   \partial_2 F(w, \lambda) & \partial_1 F(w, \lambda)
+   D_2 F(w, \lambda) & D_1 F(w, \lambda)
 \end{bmatrix}^{-1}
 ```
 We can then use the following result:
@@ -458,14 +460,14 @@ We can then use the following result:
 > ```
 > where the *Schur complement* of the block ``A``, denoted by ``M/A``, is ``M/A=D - CA^{-1}B``.
 
-In our case the Schur complement of the block ``I`` is ``\partial f(\lambda, w)/I = \partial_1 F(w, \lambda)``, this means that
+In our case the Schur complement of the block ``I`` is ``D f(\lambda, w)/I = D_1 F(w, \lambda)``, this means that
 ```math
-\partial w^\star(\lambda) = -\partial_1 F(w, \lambda)^{-1}\partial_2 F(w, \lambda).
+D w^\star(\lambda) = -D_1 F(w, \lambda)^{-1}D_2 F(w, \lambda).
 ```
 """)
 
 # ╔═╡ 528326dd-1344-4baa-9edd-5b09f63669dd
-qa(md"Can we also solve the linear system with only access to the matrix-vector product of the linear map ``\partial_1 F(w^\star(\lambda), \lambda)`` ? (aka matrix-free inversion)", md"""
+qa(md"Can we also solve the linear system with only access to the matrix-vector product of the linear map ``D_1 F(w^\star(\lambda), \lambda)`` ? (aka matrix-free inversion)", md"""
 If the matrix is positive semidefinite, we can use the [Conjugate Gradient method](https://en.wikipedia.org/wiki/Conjugate_gradient_method). Otherwise, [GMRES](https://en.wikipedia.org/wiki/Generalized_minimal_residual_method) or [BiCGSTAB](https://en.wikipedia.org/wiki/Biconjugate_gradient_stabilized_method) are options.
 """)
 

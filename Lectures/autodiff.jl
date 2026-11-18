@@ -104,6 +104,16 @@ md"# Reverse Differentiation"
 md"""
 ## Two different takes on the multivariate chain rule
 
+For ``f : \mathbb{R}^n \to \mathbb{R}^m``, we write the Jacobian as
+```math
+D f(x) \in \mathbb{R}^{m \times n}, \qquad
+(D f(x))_{ij} = \frac{\partial f_i}{\partial x_j}(x).
+```
+We define ``\nabla f(x) = (D f(x))^\top \in \mathbb{R}^{n \times m}``.
+For scalar-valued ``f`` (``m = 1``), this is the usual gradient column vector.
+The chain rule is ``D(g \circ f)(x) = D g(f(x)) D f(x)``.
+For a chain ``s_k = f_k(s_{k-1})``, we abbreviate ``D_k = D f_k(s_{k-1})``.
+
 The chain rule gives us  
 ```math
 \frac{\partial f_3}{\partial x} (f_1(x), f_2(x)) = \partial_1 f_3(s_1, s_2) \cdot \frac{\partial s_1}{\partial x} + \partial_2 f_3(s_1, s_2) \cdot \frac{\partial s_2}{\partial x}
@@ -130,7 +140,7 @@ t_3 & = \partial_1 f_3 \cdot t_1 + \partial_2 f_3 \cdot t_2\\
 	t_2
 \end{bmatrix}\\
 & =
-\partial f_3 \cdot
+D f_3 \cdot
 \begin{bmatrix}
 	t_1\\
 	t_2
@@ -147,7 +157,7 @@ t_3 & = \partial_1 f_3 \cdot t_1 + \partial_2 f_3 \cdot t_2\\
 	r_1 &
 	r_2
 \end{bmatrix}
-& \mathrel{\raise{0.19ex}{\scriptstyle+}} = r_3 \cdot \partial f_3\\
+& \mathrel{\raise{0.19ex}{\scriptstyle+}} = r_3 \cdot D f_3\\
 & \mathrel{\raise{0.19ex}{\scriptstyle+}} = r_3 \cdot
 \begin{bmatrix}
 	\partial_1 f_3 & \partial_2 f_3
@@ -168,7 +178,7 @@ t_3 & = \partial_1 f_3 \cdot t_1 + \partial_2 f_3 \cdot t_2\\
 \begin{bmatrix}
 	r_1\\
 	r_2
-\end{bmatrix} & \mathrel{\raise{0.19ex}{\scriptstyle+}} = \partial f_3^* \cdot r_3\\
+\end{bmatrix} & \mathrel{\raise{0.19ex}{\scriptstyle+}} = (D f_3)^* \cdot r_3\\
 & \mathrel{\raise{0.19ex}{\scriptstyle+}} =
 \begin{bmatrix}
 	\partial_1 f_3\\ \partial_2 f_3
@@ -196,11 +206,11 @@ md"""
 ## Reverse mode on a DAG
 
 * Forward mode: we know how to propagate ``t`` through any graph.
-* Reverse mode on a chain: we know that ``r_{k-1} = \partial f_k^* r_k``.
+* Reverse mode on a chain: we know that ``r_{k-1} = (D f_k)^* r_k``.
 * Reverse mode on a DAG: ❓
 
 Consider the simplest DAG that is not a chain: ``x`` is used by both ``f_1`` and ``f_2``.
-The reverse pass brings two contributions ``\partial f_1^* r_1`` and ``\partial f_2^* r_2`` back to the same ``x``.
+The reverse pass brings two contributions ``(D f_1)^* r_1`` and ``(D f_2)^* r_2`` back to the same ``x``.
 """
 
 # ╔═╡ 37bfd8ed-8983-4a89-9ba5-a90a35151729
@@ -214,12 +224,12 @@ Key idea: introduce ``\text{dup}(x) = (x, x)`` so that ``f = g_2 \circ g_1`` is 
 md"""
 ``f_1`` and ``f_2`` now contribute to **different** entries of the output of ``\text{dup}`` so there is nothing to combine:
 ```math
-\partial g_2^* \begin{bmatrix} r_1 \\ r_2 \end{bmatrix}
+(D g_2)^* \begin{bmatrix} r_1 \\ r_2 \end{bmatrix}
 =
-\begin{bmatrix} \partial f_1^* & 0 \\ 0 & \partial f_2^* \end{bmatrix}
+\begin{bmatrix} (D f_1)^* & 0 \\ 0 & (D f_2)^* \end{bmatrix}
 \begin{bmatrix} r_1 \\ r_2 \end{bmatrix}
 =
-\begin{bmatrix} \partial f_1^* r_1 \\ \partial f_2^* r_2 \end{bmatrix}
+\begin{bmatrix} (D f_1)^* r_1 \\ (D f_2)^* r_2 \end{bmatrix}
 ```
 What remains is the reverse pass of ``\text{dup}``... but ``\text{dup}`` is a function like any other: we can compute its Jacobian!
 """
@@ -251,8 +261,8 @@ f(x_1, x_2) = x_2 e^{x_1} \sqrt{x_1 + x_2 e^{x_2}}
 # ╔═╡ 7f75e3f3-c4e2-402d-be7b-336a4f65042a
 md"""# Comparison
 
-* Forward mode of ``f(x)`` with dual numbers `Dual.(x, v)` computes Jacobian-Vector Product (JVP) ``J_f(x) \cdot v``
-* Reverse mode of ``f(x)`` computes Vector-Jacobian Product (VJP) ``v^\top J_f(x)`` or in other words ``J_v(x)^\top v``
+* Forward mode of ``f(x)`` with dual numbers `Dual.(x, v)` computes Jacobian-Vector Product (JVP) ``D f(x) \cdot v``
+* Reverse mode of ``f(x)`` computes Vector-Jacobian Product (VJP) ``v^\top D f(x)`` or, as a column vector, ``(D f(x))^\top v = \nabla f(x) v``
 """
 
 # ╔═╡ e88ada81-d37f-4811-aa17-17eb7dd9d8a7
@@ -264,22 +274,22 @@ Consider ``f(x_1, x_2) = x_1^2 + x_2^2`` at ``s_0 = (1, 2)``. We decompose it as
 \begin{align}
 f_1(x_1, x_2) & = \begin{bmatrix} x_1^2 \\ x_2^2 \end{bmatrix} &
 s_1 & = f_1(s_0) = \begin{bmatrix} 1 \\ 4 \end{bmatrix} &
-\partial f_1(s_0) & = \begin{bmatrix} 2 & 0 \\ 0 & 4 \end{bmatrix}\\
+D f_1(s_0) & = \begin{bmatrix} 2 & 0 \\ 0 & 4 \end{bmatrix}\\
 f_2(x_1, x_2) & = x_1 + x_2 &
 s_2 & = f_2(s_1) = 5 &
-\partial f_2(s_1) & = \begin{bmatrix} 1 & 1 \end{bmatrix}
+D f_2(s_1) & = \begin{bmatrix} 1 & 1 \end{bmatrix}
 \end{align}
 ```
 
-Forward mode computes one column of the Jacobian ``\partial f(s_0)`` for each one-hot tangent ``t_0``:
+Forward mode computes one column of the Jacobian ``D f(s_0)`` for each one-hot tangent ``t_0``:
 ```math
 \begin{align}
 t_0 & = \begin{bmatrix} 1 \\ 0 \end{bmatrix} &
-t_1 & = \partial f_1(s_0) \cdot t_0 = \begin{bmatrix} 2 & 0 \\ 0 & 4 \end{bmatrix} \begin{bmatrix} 1 \\ 0 \end{bmatrix} = \begin{bmatrix} 2 \\ 0 \end{bmatrix} &
-t_2 & = \partial f_2(s_1) \cdot t_1 = \begin{bmatrix} 1 & 1 \end{bmatrix} \begin{bmatrix} 2 \\ 0 \end{bmatrix} = 2\\
+t_1 & = D f_1(s_0) \cdot t_0 = \begin{bmatrix} 2 & 0 \\ 0 & 4 \end{bmatrix} \begin{bmatrix} 1 \\ 0 \end{bmatrix} = \begin{bmatrix} 2 \\ 0 \end{bmatrix} &
+t_2 & = D f_2(s_1) \cdot t_1 = \begin{bmatrix} 1 & 1 \end{bmatrix} \begin{bmatrix} 2 \\ 0 \end{bmatrix} = 2\\
 t_0 & = \begin{bmatrix} 0 \\ 1 \end{bmatrix} &
-t_1 & = \partial f_1(s_0) \cdot t_0 = \begin{bmatrix} 2 & 0 \\ 0 & 4 \end{bmatrix} \begin{bmatrix} 0 \\ 1 \end{bmatrix} = \begin{bmatrix} 0 \\ 4 \end{bmatrix} &
-t_2 & = \partial f_2(s_1) \cdot t_1 = \begin{bmatrix} 1 & 1 \end{bmatrix} \begin{bmatrix} 0 \\ 4 \end{bmatrix} = 4
+t_1 & = D f_1(s_0) \cdot t_0 = \begin{bmatrix} 2 & 0 \\ 0 & 4 \end{bmatrix} \begin{bmatrix} 0 \\ 1 \end{bmatrix} = \begin{bmatrix} 0 \\ 4 \end{bmatrix} &
+t_2 & = D f_2(s_1) \cdot t_1 = \begin{bmatrix} 1 & 1 \end{bmatrix} \begin{bmatrix} 0 \\ 4 \end{bmatrix} = 4
 \end{align}
 ```
 """
@@ -288,10 +298,10 @@ t_2 & = \partial f_2(s_1) \cdot t_1 = \begin{bmatrix} 1 & 1 \end{bmatrix} \begin
 md"""
 ## From forward to reverse mode
 
-Concatenating the two columns gives the full Jacobian. We can then factor ``\partial f_2(s_1)`` and then ``\partial f_1(s_0)`` out of the concatenation:
+Concatenating the two columns gives the full Jacobian. We can then factor ``D f_2(s_1)`` and then ``D f_1(s_0)`` out of the concatenation:
 ```math
 \begin{align}
-\partial f(s_0) & =
+D f(s_0) & =
 \begin{bmatrix} 2 & 4 \end{bmatrix}\\
 & =
 \begin{bmatrix}
@@ -318,12 +328,12 @@ Concatenating the two columns gives the full Jacobian. We can then factor ``\par
 \end{align}
 ```
 The concatenation of the one-hot tangents is the identity so it disappears!
-We are left with ``\partial f_2(s_1) \cdot \partial f_1(s_0)`` that we can compute from left to right in a single pass: this is reverse mode!
+We are left with ``D f_2(s_1) \cdot D f_1(s_0)`` that we can compute from left to right in a single pass: this is reverse mode!
 ```math
 \begin{align}
 r_2 & = 1 &
-r_1 & = r_2 \cdot \partial f_2(s_1) = \begin{bmatrix} 1 & 1 \end{bmatrix} &
-r_0 & = r_1 \cdot \partial f_1(s_0) = \begin{bmatrix} 1 & 1 \end{bmatrix} \begin{bmatrix} 2 & 0 \\ 0 & 4 \end{bmatrix} = \begin{bmatrix} 2 & 4 \end{bmatrix}
+r_1 & = r_2 \cdot D f_2(s_1) = \begin{bmatrix} 1 & 1 \end{bmatrix} &
+r_0 & = r_1 \cdot D f_1(s_0) = \begin{bmatrix} 1 & 1 \end{bmatrix} \begin{bmatrix} 2 & 0 \\ 0 & 4 \end{bmatrix} = \begin{bmatrix} 2 & 4 \end{bmatrix}
 \end{align}
 ```
 """
@@ -484,13 +494,21 @@ md"## Spaces and scalar products"
 md"""
 Let ``(\mathcal{S}_k)_k`` be the spaces for which ``s_k, t_k, r_k \in \mathcal{S}_k`` and ``f_k : \mathcal{S}_{k-1} \to \mathcal{S}_{k}``.
 
-In the vectorized case, the Jacobian ``\partial f_k`` may be expressed more naturally as a linear map ``\partial f_k : \mathcal{S}_{k-1} \to \mathcal{S}_k`` and ``t_k = \partial f_k(t_{k-1})``. To obtain the matrix-form of the Jacobian, we need to fix a basis for ``\mathcal{S}_{k-1}`` and ``\mathcal{S}_k`` and vectorize ``t_k`` and ``t_{k-1}`` according to that basis which is often cumbersome.
+In the vectorized case, the Jacobian ``D f_k`` may be expressed more naturally as a linear map ``D f_k : \mathcal{S}_{k-1} \to \mathcal{S}_k`` and ``t_k = D f_k(t_{k-1})``. To obtain the matrix-form of the Jacobian, we need to fix a basis for ``\mathcal{S}_{k-1}`` and ``\mathcal{S}_k`` and vectorize ``t_k`` and ``t_{k-1}`` according to that basis which is often cumbersome.
 
 Instead, we choose a scalar products ``\langle \cdot, \cdot \rangle_k`` for ``\mathcal{S}_k`` and the **adjoint** of the Jacobians according to these bases in the backward pass.
 For instance, if ``\mathcal{S}_K = \mathcal{R}``, ``t_K = \langle t_K, 1 \rangle_K`` for the canonical scalar product of ``\mathcal{R}`` so we pick ``r_K = 1``. We then search for a way to obtain ``r_0(r_K)`` so that
-``\langle t_0, r_0(r_K) \rangle_0 = \langle \partial f_K(\cdots\partial f_1(t_0), r_K\rangle_K``.
+``\langle t_0, r_0(r_K) \rangle_0 = \langle D f_K(\cdots D f_1(t_0)\cdots), r_K\rangle_K``.
 Then, for instance if ``\mathcal{S}_0 = \mathbb{R}^n``, with the canonical scalar product ``\langle x, y \rangle_0 = x^\top y``, we have
 ``\partial_i f(s_0) = \langle e_i, r_0(r_K) \rangle_0 = (r_0(r_K))_i``.
+
+Thus ``r_0(1) = \nabla f(s_0)``. For a scalar-valued function of a matrix ``X``,
+the gradient has the same shape as ``X`` and satisfies
+```math
+D f(X)[T] = \langle \nabla f(X), T \rangle_F,
+\qquad \langle A, B \rangle_F = \sum_{i,j} A_{ij} B_{ij}.
+```
+
 """
 
 # ╔═╡ c1ae773e-0f2d-4c1c-bae2-25f45bb28fbb
@@ -514,12 +532,12 @@ For our Jacobians:
 \begin{align}
 \langle t_k, r_k \rangle_k
 & =
-\langle \partial f_k(t_{k-1}), r_k \rangle_k\\
+\langle D f_k(t_{k-1}), r_k \rangle_k\\
 & =
-\langle t_{k-1}, \partial f_k^*(r_k) \rangle_{k-1}
+\langle t_{k-1}, (D f_k)^*(r_k) \rangle_{k-1}
 \end{align}
 ```
-so by defining the backward pass with ``r_{k-1} = \partial f_k^*(r_k)``, we get
+so by defining the backward pass with ``r_{k-1} = (D f_k)^*(r_k)``, we get
 ```math
 \langle t_k, r_k \rangle = \langle t_{k-1}, r_{k-1} \rangle
 ```
@@ -544,9 +562,9 @@ Deriving VJP and JVP for matrix product:
 \begin{align}
 F(X) & = AX\\
 G(\text{vec}(X)) \triangleq \text{vec}(F(X)) & = (I \otimes A) \text{vec}(X)\\
-J_G & = (I \otimes A)\\
-J_G^\top \text{vec}(R) & = (I \otimes A^\top) \text{vec}(R)\\
-\partial F^*[R] = \text{mat}(J_G^\top \text{vec}(R)) & = A^\top R\\
+D G & = (I \otimes A)\\
+(D G)^\top \text{vec}(R) & = (I \otimes A^\top) \text{vec}(R)\\
+(D F)^*[R] = \text{mat}((D G)^\top \text{vec}(R)) & = A^\top R\\
 \end{align}
 ```
 """
@@ -593,11 +611,11 @@ Consider applying a scalar function ``f`` (e.g. ``\tanh`` to each entry of a mat
 \begin{align}
 (F(X))_{ij} & = f(X_{ij}) = f.(X)\\
 G(\text{vec}(X)) \triangleq \text{vec}(F(X)) & = \text{vec}(f.(X))\\
-J_G & = \text{Diag}(\text{vec}(f'.(X)))\\
-J_G \text{vec}(T) & = \text{Diag}(\text{vec}(f'.(X))) \text{vec}(T)\\
-\partial F[T] = \text{mat}(J_G \text{vec}(T)) & = f'.(X) \odot T\\
-J_G^\top \text{vec}(R) & = \text{Diag}(\text{vec}(f'.(X))) \text{vec}(R)\\
-\partial F^*[R] = \text{mat}(J_G^\top \text{vec}(R)) & = f'.(X) \odot R\\
+D G & = \text{Diag}(\text{vec}(f'.(X)))\\
+D G \text{vec}(T) & = \text{Diag}(\text{vec}(f'.(X))) \text{vec}(T)\\
+D F[T] = \text{mat}(D G \text{vec}(T)) & = f'.(X) \odot T\\
+(D G)^\top \text{vec}(R) & = \text{Diag}(\text{vec}(f'.(X))) \text{vec}(R)\\
+(D F)^*[R] = \text{mat}((D G)^\top \text{vec}(R)) & = f'.(X) \odot R\\
 \end{align}
 ```
 """
@@ -624,10 +642,10 @@ Suppose that we need to differentiate a composition of functions:
 For each function, we can compute a jacobian given the value of its input.
 So, during a forward pass, we can compute all jacobians. We now just need to take the product of these jacobians:
 ```math
-J_n J_{n-1} \cdots J_2 J_1
+D_n D_{n-1} \cdots D_2 D_1
 ```
 While the product of matrices is associative, its computational complexity depends on the order of the multiplications!
-Let ``d_i \times d_{i - 1}`` be the dimension of ``J_i``.
+Here ``D_i = D f_i(s_{i-1}) \in \mathbb{R}^{d_i \times d_{i-1}}``.
 """
 
 # ╔═╡ 906e5199-f2d2-4816-a195-6d2b1dee9403
@@ -659,8 +677,8 @@ end
 function forward_diff(W, X, y, j, k)
 	W1, W2 = W
     T_1 = onehot(j, axes(W1, 1)) * onehot(k, axes(W1, 2))'
-    J_1, J_2 = forward_pass(W, X, y)
-    only((W2 * (J_1 .* (T_1 * X))) * J_2') # only: 1x1 matrix -> scalar
+    g_1, g_2 = forward_pass(W, X, y)
+    only((W2 * (g_1 .* (T_1 * X))) * g_2') # only: 1x1 matrix -> scalar
 end
 
 # ╔═╡ 778c40ff-4c9e-42fb-92a6-1e376837f6ef
@@ -673,8 +691,8 @@ md"## Reverse mode"
 
 # ╔═╡ 35f8cf4f-3fcb-4e27-9462-244406d7800e
 function reverse_diff(W, X, y)
-    J_1, J_2 = forward_pass(W, X, y)
-    (J_1 .* (W[2]' * J_2)) * X'
+    g_1, g_2 = forward_pass(W, X, y)
+    (g_1 .* (W[2]' * g_2)) * X'
 end
 
 # ╔═╡ 17c91ea8-acb7-4bbd-b0b0-0f8193f45303
@@ -709,16 +727,16 @@ md"""
 # ╔═╡ 7d79ff81-59e0-41f0-b2fe-70b41f44591f
 md"""
 ## Notation
-* Let ``f_k : \mathbb{R}^{d_{k-1}} \to \mathbb{R}^{d_k}``. ``\partial f_k \triangleq \partial f_k(s_{k-1}) \in \mathbb{R}^{d_k \times d_{k-1}}``, ``\partial^2 f_k \triangleq \partial^2 f_k(s_{k-1}) \in \mathbb{R}^{d_k \times d_{k-1} \times d_{k-1}}`` is a 3D array/tensor.
-* Given ``v \in \mathbb{R}^{d_{k-1}}``, by the product ``(\partial^2 f_k \cdot v) \in \mathbb{R}^{d_k \times d_{k-1}}`` , we denote the contraction of the 3rd (or 2nd since the tensor is symmetric over its last 2 dimensions) dimension:
+* Let ``f_k : \mathbb{R}^{d_{k-1}} \to \mathbb{R}^{d_k}``. ``D f_k \triangleq D f_k(s_{k-1}) \in \mathbb{R}^{d_k \times d_{k-1}}``, ``D^2 f_k \triangleq D^2 f_k(s_{k-1}) \in \mathbb{R}^{d_k \times d_{k-1} \times d_{k-1}}`` is a 3D array/tensor.
+* Given ``v \in \mathbb{R}^{d_{k-1}}``, by the product ``(D^2 f_k \cdot v) \in \mathbb{R}^{d_k \times d_{k-1}}`` , we denote the contraction of the 3rd (or 2nd since the tensor is symmetric over its last 2 dimensions) dimension:
 ```math
-(\partial^2 f_k \cdot v)_{ij} = \sum_{l = 1}^{d_{k-1}} (\partial^2 f_k)_{ijl} \cdot v_l
+(D^2 f_k \cdot v)_{ij} = \sum_{l = 1}^{d_{k-1}} (D^2 f_k)_{ijl} \cdot v_l
 ```
-* Given ``u \in \mathbb{R}^{d_k}``, by the product ``(u \cdot \partial^2 f_k) \in \mathbb{R}^{d_{k-1} \times d_{k-1}}`` , we denote the contraction of the 1st dimension.
+* Given ``u \in \mathbb{R}^{d_k}``, by the product ``(u \cdot D^2 f_k) \in \mathbb{R}^{d_{k-1} \times d_{k-1}}`` , we denote the contraction of the 1st dimension.
 ```math
-(u \cdot \partial^2 f_k)_{ij} = \sum_{l = 1}^{d_k} u_l \cdot (\partial^2 f_k)_{lij}
+(u \cdot D^2 f_k)_{ij} = \sum_{l = 1}^{d_k} u_l \cdot (D^2 f_k)_{lij}
 ```
-* Both ``\partial^2 f_k \cdot v`` and ``u \cdot \partial^2 f_k`` are matrices so then we're back to matrix notations.
+* Both ``D^2 f_k \cdot v`` and ``u \cdot D^2 f_k`` are matrices so then we're back to matrix notations.
 """
 
 # ╔═╡ da5895e7-af99-46ff-9f53-36529d1ca456
@@ -731,20 +749,20 @@ md"""
 & =
 \frac{\partial}{\partial x_j} \left(\frac{\partial (f_2 \circ f_1)}{\partial x_i} \right)\\
 & =
-\frac{\partial}{\partial x_j} \left(\partial f_2 \cdot \frac{\partial f_1}{\partial x_i} \right)\\
+\frac{\partial}{\partial x_j} \left(D f_2 \cdot \frac{\partial f_1}{\partial x_i} \right)\\
 & =
-\left(\partial^2 f_2 \cdot \frac{\partial f_1}{\partial x_j} \right) \cdot \frac{\partial f_1}{\partial x_i} + 
-\partial f_2 \cdot \frac{\partial^2 f_1}{\partial x_i \partial x_j}
+\left(D^2 f_2 \cdot \frac{\partial f_1}{\partial x_j} \right) \cdot \frac{\partial f_1}{\partial x_i} +
+D f_2 \cdot \frac{\partial^2 f_1}{\partial x_i \partial x_j}
 \end{align}
 ```
 
-In terms of the matrices ``J_k = \partial f_k`` and ``H_{kj} = \frac{\partial}{\partial x_j} J_k = \partial^2 f_k \cdot \frac{\partial s_{k-1}}{\partial x_j}``, it becomes
+In terms of the matrices ``D_k = D f_k`` and ``H_{kj} = \frac{\partial}{\partial x_j} D_k = D^2 f_k \cdot \frac{\partial s_{k-1}}{\partial x_j}``, it becomes
 ```math
 \begin{align}
 \frac{\partial^2 (f_2 \circ f_1)}{\partial x_i \partial x_j}
 & =
 H_{2j} \cdot \frac{\partial f_1}{\partial x_i} + 
-J_2 \cdot \frac{\partial^2 f_1}{\partial x_i \partial x_j}
+D_2 \cdot \frac{\partial^2 f_1}{\partial x_i \partial x_j}
 \end{align}
 ```
 """
@@ -754,17 +772,17 @@ md"""
 ## Forward on forward
 
 Given ``\text{Dual}(s_1, t_1)`` with ``s_1 = \text{Dual}(f_1(x), \frac{\partial f_1}{\partial x_j})`` and ``t_1 = \text{Dual}(\frac{\partial f_1}{\partial x_i}, \frac{\partial^2 f_1}{\partial x_i \partial x_j})``
-1. Compute ``s_2 = f_2(s_1) = (f_2(f_1(x)), J_2 \cdot \frac{\partial f_1}{\partial x_j}) = ((f_2 \circ f_1)(x), \partial (f_2 \circ f_1) / \partial x_j)``
-2. Compute ``J_{f_2}(s_1)`` which gives ``\text{Dual}(J_2, H_{2j})``
+1. Compute ``s_2 = f_2(s_1) = (f_2(f_1(x)), D_2 \cdot \frac{\partial f_1}{\partial x_j}) = ((f_2 \circ f_1)(x), \partial (f_2 \circ f_1) / \partial x_j)``
+2. Compute ``D f_2(s_1)`` which gives ``\text{Dual}(D_2, H_{2j})``
 3. Compute
 ```math
 \begin{align}
-J_{f_2}(s_1) \cdot t_1
+D f_2(s_1) \cdot t_1
 & =
-\text{Dual}(J_2, H_{2j}) \cdot
+\text{Dual}(D_2, H_{2j}) \cdot
 \text{Dual}(\frac{\partial f_1}{\partial x_i}, \frac{\partial^2 f_1}{\partial x_i \partial x_j})\\
 & =
-\text{Dual}(J_2 \cdot \frac{\partial f_1}{\partial x_i}, J_2 \cdot \frac{\partial^2 f_1}{\partial x_i \partial x_j} +
+\text{Dual}(D_2 \cdot \frac{\partial f_1}{\partial x_i}, D_2 \cdot \frac{\partial^2 f_1}{\partial x_i \partial x_j} +
 H_{2j} \cdot \frac{\partial f_1}{\partial x_i})\\
 & =
 \text{Dual}(\frac{\partial (f_2 \circ f_1)}{\partial x_i}, \frac{\partial^2 (f_2 \circ f_1)}{\partial x_i \partial x_j})
@@ -778,18 +796,18 @@ md"""
 
 **Forward pass**: Given ``s_1 = \text{Dual}(f_1(x), \frac{\partial f_1}{\partial x_j})``
 1. Compute ``s_2 = f_2(s_1)`` → same as forward on forward
-2. Compute ``J_{f_2}(s_1)`` → same as forward on forward
+2. Compute ``D f_2(s_1)`` → same as forward on forward
 
 **Reverse pass**: Given ``r_2 = \text{Dual}((r_2)_1, (r_2)_2)``, compute
 ```math
 \begin{align}
-r_2 \cdot J_2
+r_2 \cdot D_2
 & =
-\text{Dual}((r_2)_1, (r_2)_2) \cdot \text{Dual}(J_2, H_{2j}) \cdot
+\text{Dual}((r_2)_1, (r_2)_2) \cdot \text{Dual}(D_2, H_{2j}) \cdot
 \\
 & = \text{Dual}(
-(r_2)_1 \cdot J_2,
-(r_2)_2 \cdot J_2 +
+(r_2)_1 \cdot D_2,
+(r_2)_2 \cdot D_2 +
 (r_2)_1 \cdot H_{2j})
 \end{align}
 ```
@@ -800,14 +818,14 @@ md"""
 ## Reverse on forward
 
 **Forward pass**: Given ``s_1 = \text{Dual}(f_1(x), \frac{\partial f_1}{\partial x_{\textcolor{red}i}})``
-1. Forward mode computes ``s_2 = f_2(s_1) = (f_2(f_1(x)), J_2 \cdot \frac{\partial f_1}{\partial x_{\textcolor{red}i}}) = ((f_2 \circ f_1)(x), \partial (f_2 \circ f_1) / \partial x_{\textcolor{red}i})``
-2. The reverse mode computes the local Jacobian of this operation : ``\partial s_2 / \partial s_1``. The local Jacobian of ``(s_1)_1 \mapsto f_2((s_1)_1)`` is ``J_2``. The local Jacobian of ``s_1 \mapsto \partial f_2((s_1)_1) (s_1)_2`` is ``(\partial^2 f_2((s_1)_1) \cdot (s_1)_2, \partial f_2((s_1)_1)) = (\partial^2 f_2(f_1(x)) \cdot \frac{\partial f_1}{\partial x_{\textcolor{red}i}}, \partial f_2(f_1(x)) = (H_{2\color{red}i}, J_2)``
+1. Forward mode computes ``s_2 = f_2(s_1) = (f_2(f_1(x)), D_2 \cdot \frac{\partial f_1}{\partial x_{\textcolor{red}i}}) = ((f_2 \circ f_1)(x), \partial (f_2 \circ f_1) / \partial x_{\textcolor{red}i})``
+2. The reverse mode computes the local Jacobian of this operation : ``\partial s_2 / \partial s_1``. The local Jacobian of ``(s_1)_1 \mapsto f_2((s_1)_1)`` is ``D_2``. The local Jacobian of ``s_1 \mapsto D f_2((s_1)_1) (s_1)_2`` is ``(D^2 f_2((s_1)_1) \cdot (s_1)_2, D f_2((s_1)_1)) = (D^2 f_2(f_1(x)) \cdot \frac{\partial f_1}{\partial x_{\textcolor{red}i}}, D f_2(f_1(x)) = (H_{2\color{red}i}, D_2)``
 
 **Reverse pass**:
 ```math
 \begin{align}
-  (r_1)_1 & = (r_2)_1 \cdot J_2 + (r_2)_2 \cdot H_{2{\color{red}i}}\\
-  (r_1)_2 & = (r_2)_2 \cdot J_2
+  (r_1)_1 & = (r_2)_1 \cdot D_2 + (r_2)_2 \cdot H_{2{\color{red}i}}\\
+  (r_1)_2 & = (r_2)_2 \cdot D_2
 \end{align}
 ```
 """
@@ -817,17 +835,17 @@ md"""
 ## Reverse on reverse
 
 **Forward pass (2nd)**:
-1. Forward pass computes ``s_2 = f_2(s_1)`` → Jacobian ``\partial s_2 / \partial s_1 = J_2``
-2. Local Jacobian ``J_2 = \partial f_2(s_1)`` → The Jacobian is the 3D array ``\partial J_2 / \partial s_1 = \partial^2 f_2``
-3. Backward pass computes ``r_1 = r_2 \cdot \partial f_2(s_1)`` → Jacobian of ``(s_1, r_2) \mapsto r_2 \cdot \partial f_2(s_1)`` is ``(r_2 \cdot \partial^2 f_2(s_1), \partial f_2(s_1)) = (r_2 \cdot \partial^2 f_2, J_2)``. Note that here ``r_2 \in \mathbb{R}^{d_k}`` is multiplying the first dimension of the tensor ``\partial^2 f_2(s_1) \in \mathbb{R}^{d_k \times d_{k-1} \times d_{k-1}}`` so the result is a symmetric matrix of dimension ``\mathbb{R}^{d_{k-1} \times d_{k-1}}``
+1. Forward pass computes ``s_2 = f_2(s_1)`` → Jacobian ``\partial s_2 / \partial s_1 = D_2``
+2. Local Jacobian ``D_2 = D f_2(s_1)`` → The Jacobian is the 3D array ``\partial D_2 / \partial s_1 = D^2 f_2``
+3. Backward pass computes ``r_1 = r_2 \cdot D f_2(s_1)`` → Jacobian of ``(s_1, r_2) \mapsto r_2 \cdot D f_2(s_1)`` is ``(r_2 \cdot D^2 f_2(s_1), D f_2(s_1)) = (r_2 \cdot D^2 f_2, D_2)``. Note that here ``r_2 \in \mathbb{R}^{d_k}`` is multiplying the first dimension of the tensor ``D^2 f_2(s_1) \in \mathbb{R}^{d_k \times d_{k-1} \times d_{k-1}}`` so the result is a symmetric matrix of dimension ``\mathbb{R}^{d_{k-1} \times d_{k-1}}``
 
 **Reverse pass (2nd)**:
 The result is ``r_0``, let ``\dot{r}_k`` be the second-order reverse tangent for ``r_k`` and ``\dot{s}_k`` be the second-order reverse tangent of ``s_k``.
 We have
 ```math
 \begin{align}
-  \dot{r}_2 & = J_2 \cdot \dot{r}_1\\
-  \dot{s}_1 & = (r_2 \cdot \partial^2 f_2(s_1)) \cdot \dot{r}_1 + \dot{s}_2 \cdot J_2
+  \dot{r}_2 & = D_2 \cdot \dot{r}_1\\
+  \dot{s}_1 & = (r_2 \cdot D^2 f_2(s_1)) \cdot \dot{r}_1 + \dot{s}_2 \cdot D_2
 \end{align}
 ```
 """
@@ -990,8 +1008,8 @@ function chain_figure(annotate; width = 640, height = 360)
             _arrow(Luxor.Point(2Δx + box_width/2, y), Luxor.Point(3Δx - box_width/2, y); rev, color)
         end
         draw_line("f", "s", -Δy, rev = false, color = colors.s, stroke_color = "#546b8c")
-        draw_line("\\partial f", "t", 0, rev = false; color = colors.t, stroke_color = "#40635c")
-        draw_line("\\partial f^*", "r", Δy, rev = true; color = colors.r, stroke_color = "#b58b63")
+        draw_line("D", "t", 0, rev = false; color = colors.t, stroke_color = "#40635c")
+        draw_line("D^*", "r", Δy, rev = true; color = colors.r, stroke_color = "#b58b63")
         ks = ["0", "1", "k-1", "k", "K-1", "K"]
         xs = [-3Δx, -2Δx + box_width/2 + dy_up, -box_width/2 - dy_up, box_width/2 + dy_up, 2Δx - box_width/2 - dy_up, 3Δx]
         annotate(_text, (; ks, xs, Δy, dy_up, colors))
@@ -1082,7 +1100,7 @@ function fanout_figure(; dup, width = 640, height = 260)
                 label("x", p.x, p.y; color = colors.s)
             end
             p = mid + 24n
-            label("\\partial f_$(i)^* r_$i", p.x, p.y; color = colors.r, fontsize = 12)
+            label("(D f_$(i))^* r_$i", p.x, p.y; color = colors.r, fontsize = 12)
             node("f_$i", Luxor.Point(x_f, y))
             _, n = arrows(Luxor.Point(x_f + box_width / 2, y), Luxor.Point(x_s - 20, y); side)
             label("s_$i", x_s, y; color = colors.s)
@@ -1474,26 +1492,26 @@ md"""
 """]))
 
 # ╔═╡ 83ef86e0-bcfb-42ee-a574-16758606423a
-qa(md"Why is ``\partial\text{dup}^*`` a sum ?", md"The Jacobian is ``\partial\text{dup} = \begin{bmatrix}
-1\\1\\1\end{bmatrix}``. In reverse mode, we multiply by the adjoint (why ? See next lecture!) of the Jacobian (here the transpose) ``\partial\text{dup}^* = \begin{bmatrix}
+qa(md"Why is ``(D\text{dup})^*`` a sum ?", md"The Jacobian is ``D\text{dup} = \begin{bmatrix}
+1\\1\\1\end{bmatrix}``. In reverse mode, we multiply by the adjoint (why ? See next lecture!) of the Jacobian (here the transpose) ``(D\text{dup})^* = \begin{bmatrix}
 1 & 1 & 1\end{bmatrix}``. Left-multiplying a vector with a row vector of ones results in its sum.")
 
 # ╔═╡ 383461cb-9f51-42b2-ab76-d9580b39409e
-qa(md"How should we combine ``\partial f_1^* r_1`` and ``\partial f_2^* r_2`` into ``r_0`` ? Sum them ? Multiply them ?", md"We don't know yet! 😱 The only way to find out is to make sure that reverse mode computes the same derivative as forward mode. But we only know how to do this for a **chain**... and this is not a chain.")
+qa(md"How should we combine ``(D f_1)^* r_1`` and ``(D f_2)^* r_2`` into ``r_0`` ? Sum them ? Multiply them ?", md"We don't know yet! 😱 The only way to find out is to make sure that reverse mode computes the same derivative as forward mode. But we only know how to do this for a **chain**... and this is not a chain.")
 
 # ╔═╡ 10e5c137-64a9-4282-b3fe-26e625625ae4
 qa(md"What is the reverse pass of ``\text{dup}`` ?", md"""
-In forward mode, ``\partial \text{dup} = \begin{bmatrix} 1 \\ 1 \end{bmatrix}`` maps ``t`` to ``(t, t)``.
-For the reverse pass to compute the same derivative, it must multiply by its adjoint ``\partial \text{dup}^* = \begin{bmatrix} 1 & 1 \end{bmatrix}``:
+In forward mode, ``D\text{dup} = \begin{bmatrix} 1 \\ 1 \end{bmatrix}`` maps ``t`` to ``(t, t)``.
+For the reverse pass to compute the same derivative, it must multiply by its adjoint ``(D\text{dup})^* = \begin{bmatrix} 1 & 1 \end{bmatrix}``:
 ```math
 r_0
 =
 \begin{bmatrix} 1 & 1 \end{bmatrix}
-\begin{bmatrix} \partial f_1^* r_1 \\ \partial f_2^* r_2 \end{bmatrix}
+\begin{bmatrix} (D f_1)^* r_1 \\ (D f_2)^* r_2 \end{bmatrix}
 =
-\partial f_1^* r_1 + \partial f_2^* r_2
+(D f_1)^* r_1 + (D f_2)^* r_2
 ```
-It's a **sum**! 🎉 So we initialize ``r_0 = 0`` and each function using ``x`` accumulates its contribution with ``r_0 \mathrel{\raise{0.19ex}{\scriptstyle+}} = \partial f_i^* r_i``.
+It's a **sum**! 🎉 So we initialize ``r_0 = 0`` and each function using ``x`` accumulates its contribution with ``r_0 \mathrel{\raise{0.19ex}{\scriptstyle+}} = (D f_i)^* r_i``.
 """)
 
 # ╔═╡ 28df733e-7db9-4e78-9121-52d8e6ca7591
@@ -1527,7 +1545,7 @@ Numerical differentiation may however need to increase its number of evaluations
 """)
 
 # ╔═╡ 11eadcc1-68bf-4ca7-9603-ef46468b4779
-qa(md"Why don't we show the local Jacobian ``\partial J_k`` in the memory usage ?", md"For a scalar AD, it is best to compute the local Jacobian ``\partial J_k`` and ``s_k`` from ``s_{k-1}`` during the forward pass at the same time because part of the computation for one can be reused for the other one. For instance, if ``f_k(x) = \sin(x)``, it is more efficient to compute ``\sin(x)`` and ``\cos(x)`` at the same time with the Julia function `sincos`. However, as we will see, for a vectorized AD, we usually don't compute a local Jacobian and just use ``s_{k-1}`` to do the backward propagation of ``r_k`` towards ``r_{k-1}``. This is why this picture, which is taken from the book which focuses on vectorized AD doesn't show a memory usage for the local Jacobian.")
+qa(md"Why don't we show the local Jacobian ``D f_k`` in the memory usage ?", md"For a scalar AD, it is best to compute the local Jacobian ``D f_k`` and ``s_k`` from ``s_{k-1}`` during the forward pass at the same time because part of the computation for one can be reused for the other one. For instance, if ``f_k(x) = \sin(x)``, it is more efficient to compute ``\sin(x)`` and ``\cos(x)`` at the same time with the Julia function `sincos`. However, as we will see, for a vectorized AD, we usually don't compute a local Jacobian and just use ``s_{k-1}`` to do the backward propagation of ``r_k`` towards ``r_{k-1}``. This is why this picture, which is taken from the book which focuses on vectorized AD doesn't show a memory usage for the local Jacobian.")
 
 # ╔═╡ 74063eb5-be06-466a-a2f1-e266c35295ea
 qa(md"Is the function ``|x|`` is differentiable at ``x = 0`` ?.", md"No, if we approach from the left (that is, ``x < 0``, the function is ``-x``), then the derivative is ``-1``.
@@ -1543,14 +1561,14 @@ Note that the notion of subgradient is not defined for nonconvex functions. So i
 # ╔═╡ 347a1500-43aa-4078-9ea3-480bc8a4c291
 qa(md"We are free to choose any scalar product ``\langle \cdot, \cdot \rangle_k``. Does this choice affect the Jacobian values as well as gradient of ``f`` ?",
    md"""
-If we change the scalar product ``\langle \cdot, \cdot \rangle_k``, it changes both the adjoint ``\partial f^*_k`` and ``\partial f^*_{k+1}``. But it does not affect the gradient of ``f`` as the changes made to both these Jacobian cancel out. The composition ``(\partial f^*_k) \circ (\partial f^*_{k+1})`` is unaffected by the choice of the scalar product ``\langle \cdot, \cdot \rangle_k``.
+If we change the scalar product ``\langle \cdot, \cdot \rangle_k``, it changes both the adjoint ``(D f_k)^*`` and ``(D f_{k+1})^*``. But it does not affect the gradient of ``f`` as the changes made to both these Jacobian cancel out. The composition ``((D f_k)^*) \circ ((D f_{k+1})^*)`` is unaffected by the choice of the scalar product ``\langle \cdot, \cdot \rangle_k``.
 
-For example, suppose ``\mathcal{S}_0 = \mathcal{S}_1 = \mathcal{S}_2 = \mathbb{R}`` and ``f_1(x) = x^2`` and ``f_2(x) = \exp(x)``. For ``s_0 = 1``, we have ``s_1 = 1``, ``s_2  = e``, ``\partial f_1(1) = 2``, ``\partial f_2(1) = e``.
-So forward math computes ``(f_2 \circ f_1)'(1) = \partial f_1(1) \cdot \partial f_2(1) = 2e``.
+For example, suppose ``\mathcal{S}_0 = \mathcal{S}_1 = \mathcal{S}_2 = \mathbb{R}`` and ``f_1(x) = x^2`` and ``f_2(x) = \exp(x)``. For ``s_0 = 1``, we have ``s_1 = 1``, ``s_2  = e``, ``D f_1(1) = 2``, ``D f_2(1) = e``.
+So forward math computes ``(f_2 \circ f_1)'(1) = D f_1(1) \cdot D f_2(1) = 2e``.
 
-For ``\langle x, y \rangle_0 = \rangle x, y \rangle_1 = \rangle x, y \rangle_2 = xy``, we have ``\partial f_1^*(1) = 2``, ``\partial f_2^*(1) = e``. So the reverse mode computes ````(f_2 \circ f_1)'(1) = \partial f_1^*(1) \cdot \partial f_2^*(1) = 2e``.
+For ``\langle x, y \rangle_0 = \rangle x, y \rangle_1 = \rangle x, y \rangle_2 = xy``, we have ``(D f_1)^*(1) = 2``, ``(D f_2)^*(1) = e``. So the reverse mode computes ````(f_2 \circ f_1)'(1) = (D f_1)^*(1) \cdot (D f_2)^*(1) = 2e``.
 
-For ``\rangle x, y \rangle_1 = 2xy``, we have ``\partial f_1^*(1) = 1``, ``\partial f_2^*(1) = 2e``. So the reverse mode computes ````(f_2 \circ f_1)'(1) = \partial f_1^*(1) \cdot \partial f_2^*(1) = 2e``. As we can see, by scaling the scalar product by 2, one jacobian gets scaled by 2 and one by 1/2. When we multiply them together, they cancel out.
+For ``\rangle x, y \rangle_1 = 2xy``, we have ``(D f_1)^*(1) = 1``, ``(D f_2)^*(1) = 2e``. So the reverse mode computes ````(f_2 \circ f_1)'(1) = (D f_1)^*(1) \cdot (D f_2)^*(1) = 2e``. As we can see, by scaling the scalar product by 2, one jacobian gets scaled by 2 and one by 1/2. When we multiply them together, they cancel out.
 """)
 
 # ╔═╡ c733ca7e-b57e-4218-9bd4-238ab5749143
@@ -1589,11 +1607,11 @@ qa(md"What is the complexity of forward mode", md"""
 If the product is computed from right to left:
 ```math
 \begin{align}
-  J_{1,2} & = J_2 J_1 && \Omega(d_2d_1d_0)\\
-  J_{1,3} & = J_3 J_{1,2} && \Omega(d_3d_2d_0)\\
-  J_{1,4} & = J_4 J_{1,3} && \Omega(d_4d_3d_0)\\
+  D_{1,2} & = D_2 D_1 && \Omega(d_2d_1d_0)\\
+  D_{1,3} & = D_3 D_{1,2} && \Omega(d_3d_2d_0)\\
+  D_{1,4} & = D_4 D_{1,3} && \Omega(d_4d_3d_0)\\
   \vdots & \quad \vdots\\
-  J_{1,n} & = J_n J_{1,(n-1)} && \Omega(d_nd_{n-1}d_0)\\
+  D_{1,n} & = D_n D_{1,(n-1)} && \Omega(d_nd_{n-1}d_0)\\
 \end{align}
 ```
 we have a complexity of
@@ -1604,19 +1622,19 @@ we have a complexity of
 qa(md"What is the complexity of reverse mode", md"""
 The adjoint trick gives
 ```math
-\langle J_n J_{n-1} \cdots J_2 J_1 \partial w, \partial y \rangle
+\langle D_n D_{n-1} \cdots D_2 D_1 \partial w, \partial y \rangle
 =
-\langle \partial w, J_1^\top J_2^\top \cdots J_{n-1}^\top J_n^\top \partial y \rangle.
+\langle \partial w, D_1^\top D_2^\top \cdots D_{n-1}^\top D_n^\top \partial y \rangle.
 ```
 So reverse differentation corresponds to multiplying the adjoint from right to left or equivalently the original matrices from left to right.
 This means computing the product in the following order:
 ```math
 \begin{align}
-  J_{(n-1),n} & = J_n J_{n-1} && \Omega(d_nd_{n-1}d_{n-2})\\
-  J_{(n-2),n} & = J_{(n-1),n} J_{n-2} && \Omega(d_nd_{n-2}d_{n-3})\\
-  J_{(n-3),n} & = J_{(n-2),n} J_{n-3} && \Omega(d_nd_{n-3}d_{n-4})\\
+  D_{(n-1),n} & = D_n D_{n-1} && \Omega(d_nd_{n-1}d_{n-2})\\
+  D_{(n-2),n} & = D_{(n-1),n} D_{n-2} && \Omega(d_nd_{n-2}d_{n-3})\\
+  D_{(n-3),n} & = D_{(n-2),n} D_{n-3} && \Omega(d_nd_{n-3}d_{n-4})\\
   \vdots & \quad \vdots\\
-  J_{1,n} & = J_{2,n} J_1 && \Omega(d_nd_1d_0)\\
+  D_{1,n} & = D_{2,n} D_1 && \Omega(d_nd_1d_0)\\
 \end{align}
 ```
 We have a complexity of
@@ -1630,32 +1648,32 @@ qa(md"What about the complexity of meeting in the middle between ``k`` and ``k+1
   md"""
 We can also write
 ```math
-\langle J_n J_{n-1} \cdots J_2 J_1 \partial w, \partial y \rangle
+\langle D_n D_{n-1} \cdots D_2 D_1 \partial w, \partial y \rangle
 =
-\langle J_k J_{k-1} \cdots J_2 J_1\partial w, J_{k+1}^\top J_{k+2}^\top \cdots J_{n-1}^\top J_n^\top \partial y \rangle.
+\langle D_k D_{k-1} \cdots D_2 D_1\partial w, D_{k+1}^\top D_{k+2}^\top \cdots D_{n-1}^\top D_n^\top \partial y \rangle.
 ```
 This corresponds to multiplying starting from some ``d_k`` where ``1 < k < n``.
 We would then first compute the left side:
 ```math
 \begin{align}
-  J_{k+1,k+2} & = J_{k+2} J_{k+1} && \Omega(d_{k+2}d_{k+1}d_{k})\\
-  J_{k+1,k+3} & = J_{k+3} J_{k+1,k+2} && \Omega(d_{k+3}d_{k+2}d_{k})\\
+  D_{k+1,k+2} & = D_{k+2} D_{k+1} && \Omega(d_{k+2}d_{k+1}d_{k})\\
+  D_{k+1,k+3} & = D_{k+3} D_{k+1,k+2} && \Omega(d_{k+3}d_{k+2}d_{k})\\
   \vdots & \quad \vdots\\
-  J_{k+1,n} & = J_{n} J_{k+1,n-1} && \Omega(d_nd_{n-1}d_k)
+  D_{k+1,n} & = D_{n} D_{k+1,n-1} && \Omega(d_nd_{n-1}d_k)
 \end{align}
 ```
 then the right side:
 ```math
 \begin{align}
-  J_{k-1,k} & = J_k J_{k-1} && \Omega(d_kd_{k-1}d_{k-2})\\
-  J_{k-2,k} & = J_{k-1,k} J_{k-2} && \Omega(d_kd_{k-2}d_{k-3})\\
+  D_{k-1,k} & = D_k D_{k-1} && \Omega(d_kd_{k-1}d_{k-2})\\
+  D_{k-2,k} & = D_{k-1,k} D_{k-2} && \Omega(d_kd_{k-2}d_{k-3})\\
   \vdots & \quad \vdots\\
-  J_{1,k} & = J_{2,k} J_1 && \Omega(d_kd_1d_0)\\
+  D_{1,k} & = D_{2,k} D_1 && \Omega(d_kd_1d_0)\\
 \end{align}
 ```
 and then combine both sides:
 ```math
-J_{1,n} = J_{k+1,n} J_{1,k} \qquad \Omega(d_nd_kd_0)
+D_{1,n} = D_{k+1,n} D_{1,k} \qquad \Omega(d_nd_kd_0)
 ```
 we have a complexity of
 ```math
@@ -1675,29 +1693,29 @@ In that case, ``d_0`` is equal to the number of entries in ``W_1`` added with th
 
 # ╔═╡ 4317bba0-723f-4cdc-9d52-67033540a8d2
 qa(md"How to deduce the backward pass for reverse mode from the forward mode ?", md"""
-`W2 * (J_1 .* (T_1 * X))) * J_2'` → The broadcasted `*` is an Hadamard product, denoted $\odot$. So forward mode is:
+`(W2 * (g_1 .* (T_1 * X))) * g_2'` where ``g_1`` contains the elementwise derivatives of ``\tanh`` and ``g_2`` is the matrix-shaped gradient of the mean squared error, as returned by `forward_pass`. The broadcasted `*` is an Hadamard product, denoted $\odot$. So forward mode is:
 ```math
-W_2 (J_1 \odot (T_1 X)) J_2^\top
+W_2 (g_1 \odot (T_1 X)) g_2^\top
 ```
 As this is scalar, it is trivially equal to its scalar product with ``1``. That is, we start with a reverse tangent ``R = 1``. We can then move everything to the right-hand side with the adjoint (here, it is the transpose):
 ```math
 \begin{align}
-\langle W_2 (J_1 \odot (\partial W_1 X)) J_2^\top, 1 \rangle
+\langle W_2 (g_1 \odot (\partial W_1 X)) g_2^\top, 1 \rangle
 & =
-\langle J_1 \odot (\partial W_1 X), W_2^\top J_2 \rangle\\
+\langle g_1 \odot (\partial W_1 X), W_2^\top g_2 \rangle\\
 & =
-\langle \partial W_1 X, J_1 \odot (W_2^\top J_2) \rangle\\
+\langle \partial W_1 X, g_1 \odot (W_2^\top g_2) \rangle\\
 & =
-\langle \partial W_1, (J_1 \odot (W_2^\top J_2))X^\top \rangle\\
+\langle \partial W_1, (g_1 \odot (W_2^\top g_2))X^\top \rangle\\
 \end{align}
 ```
 Now, for the derivative with respect to the entry $W_{i,j}$, we use $\partial W_1 = e_ie_j^\top$ and
 ```math
-\langle e_ie_j^\top, (J_1 \odot (W_2^\top J_2))X^\top \rangle
+\langle e_ie_j^\top, (g_1 \odot (W_2^\top g_2))X^\top \rangle
 =
-((J_1 \odot (W_2^\top J_2))X^\top)_{ij}
+((g_1 \odot (W_2^\top g_2))X^\top)_{ij}
 ```
-So the gradient with respect to $W_1$ is exactly the matrix $(J_1 \odot (W_2^\top J_2))X^\top$ !
+So the gradient with respect to $W_1$ is exactly the matrix $(g_1 \odot (W_2^\top g_2))X^\top$ !
 """)
 
 # ╔═╡ 6ded46e6-1c89-4875-addb-8c709e949bb1
@@ -1710,7 +1728,7 @@ The fixed cost of launching the GPU kernels is larger than the gain obtained by 
 # ╔═╡ 78d8c8c9-568d-472a-9f06-a50b1cf2384b
 qa(md"How can the Hessian of ``f`` be computed given an AD for Jacobian and gradient.", md"""
 Define the function ``g(x) = \nabla f(x)``, the Hessian of ``f`` is then the Jacobian of ``g``:
-``\nabla^2 f(x) = J_g(x)``. See the solutions of `LabAD`!
+``\nabla^2 f(x) = D g(x)``. See the solutions of `LabAD`!
 """)
 
 # ╔═╡ f23ca90f-b567-4257-ae41-ec15c57c1f3f
@@ -1720,11 +1738,11 @@ No. Given an implementation of reverse mode and forward mode, this gives 4 possi
 """)
 
 # ╔═╡ 4d76422e-711c-4f3e-87ab-0ce851bac064
-qa(md"What is the closed form expression for ``t_k`` in terms of the matrices ``J_k`` and ``H_{kj}`` ?",
+qa(md"What is the closed form expression for ``t_k`` in terms of the matrices ``D_k`` and ``H_{kj}`` ?",
 md"""
 We can prove by induction that the second part of the dual number ``t_k`` is:
 ```math
-\frac{\partial^2 f_k}{\partial x_i \partial x_j} = J_k \cdots J_2 H_{1j} e_i + J_k \cdots J_3 H_{2j} J_1 e_i + H_{kj} J_{k-1} \cdots J_1 e_i
+\frac{\partial^2 f_k}{\partial x_i \partial x_j} = D_k \cdots D_2 H_{1j} e_i + D_k \cdots D_3 H_{2j} D_1 e_i + H_{kj} D_{k-1} \cdots D_1 e_i
 ```
 """)
 
@@ -1734,11 +1752,11 @@ md"""
 We find ``r_k = \text{Dual}(\frac{\partial f}{\partial s_k}, \frac{\partial^2 f}{\partial s_k \partial x_j})`` as solution:
 ```math
 \begin{align}
-(r_1)_2 = (r_2)_2\cdot J_2+(r_2)_1\cdot H_{2j}
-& = \frac{\partial^2 f}{\partial s_2 \partial x_j} \cdot J_2 +
+(r_1)_2 = (r_2)_2\cdot D_2+(r_2)_1\cdot H_{2j}
+& = \frac{\partial^2 f}{\partial s_2 \partial x_j} \cdot D_2 +
 \frac{\partial f}{\partial s_2} \cdot H_{2j}\\
 & = \frac{\partial^2 f}{\partial s_2 \partial x_j}\frac{\partial s_2}{\partial s_1} +
-\frac{\partial f}{\partial s_2}\frac{\partial J_2}{\partial x_j}\\
+\frac{\partial f}{\partial s_2}\frac{\partial D_2}{\partial x_j}\\
 & = \frac{\partial^2 f}{\partial s_2 \partial x_j}\frac{\partial s_2}{\partial s_1} +
 \frac{\partial f}{\partial s_2}\frac{\partial^2 s_2}{\partial s_1\partial x_j}\\
 & = \frac{\partial}{\partial x_j}\left(\frac{\partial f}{\cancel{\partial s_2}}\cdot\frac{\cancel{\partial s_2}}{\partial s_1}\right)\\
@@ -1748,11 +1766,11 @@ We find ``r_k = \text{Dual}(\frac{\partial f}{\partial s_k}, \frac{\partial^2 f}
 """)
 
 # ╔═╡ 4de9baec-f444-47b8-b9e6-7f3d9e9609b1
-qa(md"What is the closed form expression for ``r_k`` in terms of the matrices ``J_k`` and ``H_{kj}`` ?",
+qa(md"What is the closed form expression for ``r_k`` in terms of the matrices ``D_k`` and ``H_{kj}`` ?",
 md"""
 We can prove by induction that the second part of the dual number ``r_k`` is:
 ```math
-\frac{\partial^2 f}{\partial s_k \partial x_j}^\top = (J_K \cdots J_{k+1} H_{kj} + J_K \cdots J_{k+2} H_{(k+1)j} J_k + H_{Kj} J_{K-1} \cdots J_k)^\top
+\frac{\partial^2 f}{\partial s_k \partial x_j}^\top = (D_K \cdots D_{k+1} H_{kj} + D_K \cdots D_{k+2} H_{(k+1)j} D_k + H_{Kj} D_{K-1} \cdots D_k)^\top
 ```
 """)
 
@@ -1768,14 +1786,14 @@ md"""
 Starting with ``\dot{s}_0 = e_i``, we have
 ```math
 \begin{align}
-r_k & = J_K \cdots J_{k+1}\\
-\dot{r}_k & = J_k \cdots J_1 e_i\\
-(r_k \cdot \partial^2 f_k) \cdot \dot{r}_{k-1}
+r_k & = D_K \cdots D_{k+1}\\
+\dot{r}_k & = D_k \cdots D_1 e_i\\
+(r_k \cdot D^2 f_k) \cdot \dot{r}_{k-1}
 & =
-r_k \cdot (\partial^2 f_k \cdot \dot{r}_{k-1})\\
+r_k \cdot (D^2 f_k \cdot \dot{r}_{k-1})\\
 & =
 r_k \cdot H_{ki}\\
-\dot{s}_k & = \sum_{k=1}^K r_k H_{ki} J_{k-1} \cdots J_1
+\dot{s}_k & = \sum_{k=1}^K r_k H_{ki} D_{k-1} \cdots D_1
 \end{align}
 ```
 So we find ``\dot{s}_k = \frac{\partial^2 f}{\partial s_k \partial x_i}, \dot{r}_k = \frac{\partial f}{\partial s_k}`` as solution.
@@ -1786,11 +1804,11 @@ qa(md"What is the difference with reverse on forward and forward on reverse ?",
 md"""
 Reverse on reverse computes the product in the order
 ```math
-((J_K \cdots J_{k-1}) \cdot \partial^2 f_k) \cdot (J_k \cdots J_1 e_i)
+((D_K \cdots D_{k-1}) \cdot D^2 f_k) \cdot (D_k \cdots D_1 e_i)
 ```
 while reverse on forward and forward on reverse compute it in the order
 ```math
-(J_K \cdots J_{k-1}) \cdot (\partial^2 f_k \cdot (J_k \cdots J_1 e_i))
+(D_K \cdots D_{k-1}) \cdot (D^2 f_k \cdot (D_k \cdots D_1 e_i))
 ```
 """)
 
