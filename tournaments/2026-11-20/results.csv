@@ -1,0 +1,27 @@
+group,name,commit,status,explanation,phase1_wins,phase1_losses,phase1_ranking,final_ranking
+4,Megatron,1db632e,allowed,"",15,3,2,1
+14,Jensen Huang,9f561b8,allowed,"",17,1,1,2
+7,Minibranch,2b8aaf8,allowed,"",10,8,4,3
+2,"",a440536,allowed,"",10,8,5,4
+5,"",a2b54b3,allowed,"",12,6,3,5
+21,group21,c1e60cf,allowed,"",7,9,7,6
+12,Les Gradients,247dcb9,allowed,"",9,8,6,7
+13,MariAnna,3a7a3d6,allowed,"",4,14,9,8
+18,Erika,264f050,allowed,"",4,13,8,9
+11,AttentionIsAllYouFlip,a12cdec,allowed,"",0,18,10,10
+1,"",eac1e41,failed,"DimensionMismatch: incompatible dimensions for matrix multiplication: tried to multiply a matrix of size (32, 3) with a matrix of size (4, 64). The second dimension of the first matrix: 3, does not match the first dimension of the second matrix: 4.",,,,
+3,"",3b89523,positional_ai,"",,,,
+6,"",448a676,positional_ai,"",,,,
+8,"",f927e9c,positional_ai,"",,,,
+9,JAGZ,668429c,positional_ai,"",,,,
+10,"",e84c1ac,positional_ai,"",,,,
+15,"",38b5f1b,positional_ai,"",,,,
+16,Bobby Flipper,17e5a11,positional_ai,"",,,,
+17,"",38b5f1b,positional_ai,"",,,,
+19,The Backpropagators,d380583,positional_ai,"",,,,
+20,"",cfbf499,positional_ai,"",,,,
+22,"",94b0f29,positional_ai,"",,,,
+23,"",38b5f1b,positional_ai,"",,,,
+24,"",38b5f1b,positional_ai,"",,,,
+25,"",f2e9f7d,positional_ai,"",,,,
+26,"",f927e9c,positional_ai,"",,,,

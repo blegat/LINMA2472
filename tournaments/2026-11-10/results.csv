@@ -1,0 +1,33 @@
+group,name,commit,status,explanation,phase1_wins,phase1_losses,phase1_ranking,final_ranking
+4,Megatron,bdf5118,allowed,"",9,1,1,1
+2,"",0241a5a,allowed,"",6,4,3,2
+13,"",66f3b56,allowed,"",7,3,2,3
+14,Group 14,d417b44,allowed,"",5,5,4,4
+7,"",794e0a3,allowed,"",3,7,5,5
+18,Erika,1a0ccfa,allowed,"",0,10,6,6
+1,"",38b5f1b,positional_ai,"",,,,
+3,"",3b89523,positional_ai,"",,,,
+5,"",cfbf499,positional_ai,"",,,,
+6,"",448a676,positional_ai,"",,,,
+8,"",f927e9c,positional_ai,"",,,,
+9,JAGZ,668429c,positional_ai,"",,,,
+10,"",f927e9c,positional_ai,"",,,,
+11,AttentionIsAllYouFlip,f22578a,positional_ai,"",,,,
+12,Les Gradients,48502cb,failed,"load_player() failed: MethodError: no method matching load_player()
+The function `load_player` exists, but no method is defined for this combination of argument types.
+
+Closest candidates are:
+  load_player(!Matched::AbstractString)
+   @ HomeworkAD ~/git/UCLouvain/LINMA2472/private/Groups2026/forks/homeworkad-group-12/src/transformer_florent.jl:466
+",,,,
+15,"",38b5f1b,positional_ai,"",,,,
+16,Bobby Flipper,17e5a11,positional_ai,"",,,,
+17,"",38b5f1b,positional_ai,"",,,,
+19,"",d6536bf,positional_ai,"",,,,
+20,"",38b5f1b,positional_ai,"",,,,
+21,"",d14effc,positional_ai,"",,,,
+22,"",a2f778a,positional_ai,"",,,,
+23,"",38b5f1b,positional_ai,"",,,,
+24,"",38b5f1b,positional_ai,"",,,,
+25,"",f927e9c,positional_ai,"",,,,
+26,"",f927e9c,positional_ai,"",,,,

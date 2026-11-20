@@ -1,0 +1,27 @@
+group,name,commit,status,explanation,phase1_wins,phase1_losses,phase1_ranking,final_ranking
+4,Megatron,d67ece3,allowed,"",3,3,2,1
+13,"",05804b6,allowed,"",3,2,1,2
+14,Group 14,0593eb7,allowed,"",3,3,3,3
+2,"",8fd68ab,allowed,"",2,3,4,4
+1,"",38b5f1b,positional_ai,"",,,,
+3,"",3b89523,positional_ai,"",,,,
+5,"",cfbf499,positional_ai,"",,,,
+6,"",448a676,positional_ai,"",,,,
+7,"",cfbf499,positional_ai,"",,,,
+8,"",f927e9c,positional_ai,"",,,,
+9,JAGZ,668429c,positional_ai,"",,,,
+10,"",f927e9c,positional_ai,"",,,,
+11,AttentionIsAllYouFlip,36e6292,positional_ai,"",,,,
+12,Les Gradients,cdcd243,positional_ai,"",,,,
+15,"",38b5f1b,positional_ai,"",,,,
+16,Bobby Flipper,cbcc766,positional_ai,"",,,,
+17,"",38b5f1b,positional_ai,"",,,,
+18,"",cfbf499,positional_ai,"",,,,
+19,"",d6536bf,positional_ai,"",,,,
+20,"",38b5f1b,positional_ai,"",,,,
+21,"",d14effc,positional_ai,"",,,,
+22,"",38b5f1b,positional_ai,"",,,,
+23,"",38b5f1b,positional_ai,"",,,,
+24,"",38b5f1b,positional_ai,"",,,,
+25,"",f927e9c,positional_ai,"",,,,
+26,"",f927e9c,positional_ai,"",,,,
