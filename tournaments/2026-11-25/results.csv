@@ -1,0 +1,27 @@
+group,name,commit,status,explanation,phase1_wins,phase1_losses,phase1_ranking,final_ranking
+14,Jensen Huang,2cd7927,allowed,"",21,1,1,1
+5,"",a2b54b3,allowed,"",14,8,3,2
+7,Minibranch,ffdb3c5,allowed,"",17,5,2,3
+12,Les Gradients,247dcb9,allowed,"",12,9,5,4
+13,MariAnna,e786aec,allowed,"",12,10,6,5
+1,"",539273f,allowed,"",14,8,4,6
+2,"",a440536,allowed,"",12,10,7,7
+21,group21,c1e60cf,allowed,"",10,10,8,8
+25,Zeta,90cfd99,allowed,"",7,14,9,9
+23,Blockheads,d833393,allowed,"",6,16,10,10
+18,Erika,deb4770,allowed,"",5,17,11,11
+11,AttentionIsAllYouFlip,7d454c8,allowed,"",0,22,12,12
+3,"",32cf715,failed,"load_player() failed: Pkg.Types.PkgError(""`GLMakie` is a direct dependency, but does not appear in the manifest. If you intend `GLMakie` to be a direct dependency, run `Pkg.resolve()` to populate the manifest. Otherwise, remove `GLMakie` with `Pkg.rm(\""GLMakie\"")`. Finally, run `Pkg.instantiate()` again."")",,,,
+4,Megatron,119f545,failed,"load_player() failed: SystemError: opening file ""/home/blegat/git/UCLouvain/LINMA2472/private/Groups2026/forks/homeworkad-group-4/src/../checkpoints/champions/seeded/Salazar_fine_tuned2/last_model.jls"": No such file or directory",,,,
+6,"",448a676,positional_ai,"",,,,
+8,"",f927e9c,positional_ai,"",,,,
+9,JAGZ,668429c,positional_ai,"",,,,
+10,"",e84c1ac,positional_ai,"",,,,
+15,"",38b5f1b,positional_ai,"",,,,
+16,Bobby Flipper,17e5a11,positional_ai,"",,,,
+17,"",38b5f1b,positional_ai,"",,,,
+19,The Backpropagators,b8c30d1,positional_ai,"",,,,
+20,"",cfbf499,positional_ai,"",,,,
+22,"",c1039a3,positional_ai,"",,,,
+24,"",38b5f1b,positional_ai,"",,,,
+26,"",f927e9c,positional_ai,"",,,,
