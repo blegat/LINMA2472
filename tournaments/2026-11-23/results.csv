@@ -1,0 +1,27 @@
+group,name,commit,status,explanation,phase1_wins,phase1_losses,phase1_ranking,final_ranking
+4,Megatron,60de101,allowed,"",20,2,2,1
+14,Jensen Huang,9f561b8,allowed,"",21,1,1,2
+2,"",a440536,allowed,"",13,9,6,3
+5,"",a2b54b3,allowed,"",15,7,3,4
+7,Minibranch,2b8aaf8,allowed,"",13,9,5,5
+21,group21,c1e60cf,allowed,"",9,11,7,6
+12,Les Gradients,247dcb9,allowed,"",13,8,4,7
+13,MariAnna,3a7a3d6,allowed,"",7,15,10,8
+23,Blockheads,d833393,allowed,"",7,15,9,9
+18,Erika,474c2ee,allowed,"",8,14,8,10
+25,Zeta,2c159a0,allowed,"",4,17,11,11
+11,AttentionIsAllYouFlip,a12cdec,allowed,"",0,22,12,12
+1,"",eac1e41,failed,"DimensionMismatch: incompatible dimensions for matrix multiplication: tried to multiply a matrix of size (32, 3) with a matrix of size (4, 64). The second dimension of the first matrix: 3, does not match the first dimension of the second matrix: 4.",,,,
+3,"",32cf715,failed,"load_player() failed: Pkg.Types.PkgError(""`GLMakie` is a direct dependency, but does not appear in the manifest. If you intend `GLMakie` to be a direct dependency, run `Pkg.resolve()` to populate the manifest. Otherwise, remove `GLMakie` with `Pkg.rm(\""GLMakie\"")`. Finally, run `Pkg.instantiate()` again."")",,,,
+6,"",448a676,positional_ai,"",,,,
+8,"",f927e9c,positional_ai,"",,,,
+9,JAGZ,668429c,positional_ai,"",,,,
+10,"",e84c1ac,positional_ai,"",,,,
+15,"",38b5f1b,positional_ai,"",,,,
+16,Bobby Flipper,17e5a11,positional_ai,"",,,,
+17,"",38b5f1b,positional_ai,"",,,,
+19,The Backpropagators,a3ac9b6,positional_ai,"",,,,
+20,"",cfbf499,positional_ai,"",,,,
+22,"",35a0652,positional_ai,"",,,,
+24,"",38b5f1b,positional_ai,"",,,,
+26,"",f927e9c,positional_ai,"",,,,

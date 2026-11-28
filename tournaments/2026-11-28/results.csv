@@ -1,0 +1,27 @@
+group,name,commit,status,explanation,phase1_wins,phase1_losses,phase1_ranking,final_ranking
+4,Megatron,e7790dc,allowed,"",25,1,2,1
+14,Jensen Huang,2cd7927,allowed,"",25,1,1,2
+12,Les Gradients,c682799,allowed,"",18,8,4,3
+5,"",a2b54b3,allowed,"",16,10,5,4
+7,Minibranch,831548f,allowed,"",19,7,3,5
+13,MariAnna,e786aec,allowed,"",11,15,8,6
+25,Zeta,db4a526,allowed,"",12,13,7,7
+1,"",539273f,allowed,"",13,13,6,8
+2,"",a440536,allowed,"",11,15,9,9
+21,group21,c1e60cf,allowed,"",9,16,10,10
+22,Noro,9b9423a,allowed,"",8,18,11,11
+23,Blockheads,d833393,allowed,"",6,19,12,12
+18,Erika,deb4770,allowed,"",6,20,13,13
+11,AttentionIsAllYouFlip,11a1dbc,allowed,"",1,24,14,14
+3,"",32cf715,failed,"load_player() failed: Pkg.Types.PkgError(""`GLMakie` is a direct dependency, but does not appear in the manifest. If you intend `GLMakie` to be a direct dependency, run `Pkg.resolve()` to populate the manifest. Otherwise, remove `GLMakie` with `Pkg.rm(\""GLMakie\"")`. Finally, run `Pkg.instantiate()` again."")",,,,
+6,"",448a676,positional_ai,"",,,,
+8,"",f927e9c,positional_ai,"",,,,
+9,JAGZ,668429c,positional_ai,"",,,,
+10,"",e84c1ac,positional_ai,"",,,,
+15,"",38b5f1b,positional_ai,"",,,,
+16,Bobby Flipper,17e5a11,positional_ai,"",,,,
+17,"",38b5f1b,positional_ai,"",,,,
+19,The Backpropagators,b8c30d1,positional_ai,"",,,,
+20,"",66a7abc,positional_ai,"",,,,
+24,"",38b5f1b,positional_ai,"",,,,
+26,"",f927e9c,positional_ai,"",,,,
